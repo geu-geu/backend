@@ -113,6 +113,13 @@ resource "aws_ecs_task_definition" "main" {
           max-buffer-size       = "1m"
         }
       }
+
+      secrets = [
+        {
+          name      = "DATABASE_URL"
+          valueFrom = "${aws_secretsmanager_secret.prod.arn}:DATABASE_URL::"
+        }
+      ]
     }
   ])
 
