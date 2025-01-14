@@ -118,6 +118,10 @@ resource "aws_ecs_task_definition" "main" {
         {
           name      = "DATABASE_URL"
           valueFrom = "${aws_secretsmanager_secret.prod.arn}:DATABASE_URL::"
+        },
+        {
+          name      = "JWT_SECRET"
+          valueFrom = "${aws_secretsmanager_secret.prod.arn}:JWT_SECRET::"
         }
       ]
     }
