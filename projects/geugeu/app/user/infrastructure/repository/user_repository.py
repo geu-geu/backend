@@ -28,9 +28,9 @@ class UserRepository(IUserRepository):
             session.commit()
 
     @override
-    def find_by_email(self, email: str) -> User:
+    def find_by_id(self, id: str) -> User:
         with Session(engine) as session:
-            _user = session.exec(select(_User).where(_User.email == email)).first()
+            _user = session.exec(select(_User).where(_User.id == id)).first()
         if not _user:
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
         return User(**_user.model_dump())
