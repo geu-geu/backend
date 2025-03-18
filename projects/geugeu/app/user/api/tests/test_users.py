@@ -35,3 +35,26 @@ def test_signup(signup):
     assert response.status_code == 201
     assert response.json()["id"] == user.id
     assert response.json()["email"] == user.email
+
+
+@patch.object(UserService, "get_user")
+def test_get_user(get_user):
+    # given
+    user_id = str(ULID())
+    get_user.return_value = User(
+        id=user_id,
+        email="user@example.com",
+        name=None,
+        password="password",
+        is_admin=False,
+        is_active=True,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+
+    # when
+    response = client.get(f"/api/users/{user_id}")
+
+    # then
+    assert response.status_code == 200
+    assert response.json()["id"] == user_id
