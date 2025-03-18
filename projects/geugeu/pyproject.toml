@@ -9,6 +9,7 @@ dependencies = [
     "fastapi>=0.115.11",
     "passlib[bcrypt]>=1.7.4",
     "pydantic-settings>=2.8.1",
+    "python-ulid>=3.0.0",
     "uvicorn[standard]>=0.34.0",
 ]
 
