@@ -6,6 +6,9 @@ from sqlmodel import SQLModel
 
 from app.config import settings
 
+# TODO: Import all infrastructure models automatically
+from app.user.infrastructure.model.user import User
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
