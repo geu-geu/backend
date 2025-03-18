@@ -1,9 +1,12 @@
+from datetime import UTC, datetime
 from typing import Any
 
 import pytest
 from pytest_mock import MockerFixture
+from ulid import ULID
 
 from app.user.application.user_service import UserService
+from app.user.domain.entity.user import User
 from app.user.domain.repository.user_repository import IUserRepository
 
 
@@ -35,3 +38,25 @@ def test_signup(user_service: UserService) -> None:
     assert new_user.is_active is True
     assert new_user.created_at is not None
     assert new_user.updated_at is not None
+
+
+def test_get_user(user_service) -> None:
+    # given
+    user_id = str(ULID())
+    user = User(
+        id=user_id,
+        email="user@example.com",
+        name=None,
+        password="password",
+        is_admin=False,
+        is_active=True,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    user_service.user_repository.find_by_id.return_value = user
+
+    # when
+    result = user_service.get_user(user_id)
+
+    # then
+    assert result == user

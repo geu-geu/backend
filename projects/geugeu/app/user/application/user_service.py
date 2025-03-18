@@ -24,3 +24,6 @@ class UserService:
         )
         self.user_repository.save(user)
         return user
+
+    def get_user(self, id: str) -> User:
+        return self.user_repository.find_by_id(id)
