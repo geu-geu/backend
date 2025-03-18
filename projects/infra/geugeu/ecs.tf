@@ -74,9 +74,9 @@ resource "aws_ecs_task_definition" "main" {
       portMappings = [
         {
           protocol      = "tcp"
-          containerPort = 3000
+          containerPort = 8000
           appProtocol   = "http"
-          hostPort      = 3000
+          hostPort      = 8000
         }
       ]
 
@@ -210,6 +210,6 @@ resource "aws_ecs_service" "main" {
   load_balancer {
     target_group_arn = aws_alb_target_group.ecs.arn
     container_name   = var.project
-    container_port   = 3000
+    container_port   = 8000
   }
 }
