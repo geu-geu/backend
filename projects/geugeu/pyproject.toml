@@ -15,5 +15,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "pytest>=8.3.5",
+    "pytest-mock>=3.14.0",
     "types-passlib>=1.7.7.20250318",
 ]
