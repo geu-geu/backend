@@ -167,7 +167,7 @@ resource "aws_alb_target_group" "ecs" {
   target_type = "ip"
 
   health_check {
-    path = "/"
+    path = "/docs"
   }
 }
 
