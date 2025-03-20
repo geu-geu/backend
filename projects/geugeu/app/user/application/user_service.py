@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from ulid import ULID
 
 from app.security import hash_password
@@ -23,7 +24,13 @@ class UserService:
             created_at=datetime.now(UTC),
             updated_at=datetime.now(UTC),
         )
-        self.user_repository.save(user)
+        try:
+            self.user_repository.save(user)
+        except IntegrityError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User already exists",
+            )
         return user
 
     def get_user(self, id: str) -> User:
