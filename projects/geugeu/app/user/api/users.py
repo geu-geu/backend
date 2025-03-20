@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status
 from pydantic import BaseModel
 
+from app.auth.dependencies import CurrentActiveUserDep
 from app.user.dependencies import UserServiceDep
 from app.user.domain.user import User
 
@@ -19,5 +20,9 @@ async def signup(body: SignupBody, user_service: UserServiceDep) -> User:
 
 
 @router.get("/{id}")
-async def get_user(id: str, user_service: UserServiceDep) -> User:
+async def get_user(
+    id: str,
+    user_service: UserServiceDep,
+    current_user: CurrentActiveUserDep,
+) -> User:
     return user_service.get_user(id=id)
