@@ -34,6 +34,7 @@ variable "ecs_task_execution_policy_arns" {
   type = list(string)
   default = [
     "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
+    "arn:aws:iam::aws:policy/SecretsManagerReadWrite",
   ]
 }
 
