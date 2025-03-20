@@ -1,6 +1,5 @@
 from typing import override
 
-from fastapi import HTTPException, status
 from sqlmodel import Session, select
 
 from app.auth.domain.user import User
@@ -11,11 +10,11 @@ from app.models import User as _User
 
 class UserRepository(IUserRepository):
     @override
-    def find_by_email(self, email: str) -> User:
+    def find_by_email(self, email: str) -> User | None:
         with Session(engine) as session:
             _user = session.exec(select(_User).where(_User.email == email)).first()
         if not _user:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return None
         return User(
             id=_user.id,
             email=_user.email,

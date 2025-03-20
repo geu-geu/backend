@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 
+from fastapi import HTTPException, status
 from ulid import ULID
 
 from app.security import hash_password
@@ -26,4 +27,7 @@ class UserService:
         return user
 
     def get_user(self, id: str) -> User:
-        return self.user_repository.find_by_id(id)
+        user = self.user_repository.find_by_id(id)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        return user
