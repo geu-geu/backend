@@ -65,7 +65,6 @@ resource "aws_ecs_task_definition" "main" {
   memory                   = 512
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
   task_role_arn            = aws_iam_role.ecs_task.arn
-
   container_definitions = jsonencode([
     {
       name      = "${var.project}"
@@ -90,6 +89,13 @@ resource "aws_ecs_task_definition" "main" {
           max-buffer-size       = "1m"
         }
       }
+
+      secrets = [
+        for key in var.secrets : {
+          name      = key
+          valueFrom = "${aws_secretsmanager_secret.main.arn}:${key}::"
+        }
+      ]
     }
   ])
 

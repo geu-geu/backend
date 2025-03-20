@@ -1,0 +1,86 @@
+name: Build and deploy GeuGeu
+
+on:
+  workflow_dispatch:
+
+env:
+  PROJECT_DIR: projects/geugeu
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./${{ env.PROJECT_DIR }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: "./${{ env.PROJECT_DIR }}/.python-version"
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Run tests
+        run: uv run pytest
+
+  deploy:
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./${{ env.PROJECT_DIR }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-northeast-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push docker image
+        id: build-and-push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.PROJECT_DIR }}
+          push: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/geugeu:${{ github.sha }}
+          cache-from: type=gha,scope=geugeu
+          cache-to: type=gha,scope=geugeu,mode=max
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition geugeu-ecs-task-definition --query taskDefinition > task-definition.json
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.PROJECT_DIR }}/task-definition.json
+          container-name: geugeu
+          image: ${{ steps.login-ecr.outputs.registry }}/geugeu:${{ github.sha }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: geugeu
+          cluster: geugeu-ecs-cluster

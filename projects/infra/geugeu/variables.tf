@@ -45,3 +45,15 @@ variable "ecs_task_policy_arns" {
 variable "domain" {
   type = string
 }
+
+variable "secrets" {
+  type = list(string)
+  default = [
+    "SECRET_KEY",
+    "POSTGRES_USER",
+    "POSTGRES_PASSWORD",
+    "POSTGRES_DB",
+    "POSTGRES_HOST",
+    "POSTGRES_PORT",
+  ]
+}
