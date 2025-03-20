@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     POSTGRES_DB: str
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    JWT_ALGORITHM: str = "HS256"
 
     @property
     def DATABASE_URL(self) -> str:

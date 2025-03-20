@@ -16,7 +16,6 @@ BEARER = "Bearer"
 class AuthService:
     def __init__(self, user_repository: IUserRepository):
         self.user_repository = user_repository
-        self.jwt_algorithm = "HS256"
 
     def login(self, email: str, password: str) -> Token:
         user = self.__authenticate_user(email=email, password=password)
@@ -54,6 +53,6 @@ class AuthService:
         encoded_jwt = jwt.encode(
             payload=to_encode,
             key=settings.SECRET_KEY,
-            algorithm=self.jwt_algorithm,
+            algorithm=settings.JWT_ALGORITHM,
         )
         return encoded_jwt
