@@ -4,6 +4,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 from ulid import ULID
 
+from app.auth.dependencies import get_current_active_user
 from app.main import app
 from app.user.application.user_service import UserService
 from app.user.domain.user import User
@@ -41,7 +42,7 @@ def test_signup(signup):
 def test_get_user(get_user):
     # given
     user_id = str(ULID())
-    get_user.return_value = User(
+    user = User(
         id=user_id,
         email="user@example.com",
         name=None,
@@ -51,6 +52,12 @@ def test_get_user(get_user):
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC),
     )
+    get_user.return_value = user
+
+    def override_get_current_active_user():
+        return user
+
+    app.dependency_overrides[get_current_active_user] = override_get_current_active_user
 
     # when
     response = client.get(f"/api/users/{user_id}")
