@@ -8,11 +8,15 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    SECRET_KEY: str
+
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_HOST: str
     POSTGRES_PORT: int
     POSTGRES_DB: str
+
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     @property
     def DATABASE_URL(self) -> str:
