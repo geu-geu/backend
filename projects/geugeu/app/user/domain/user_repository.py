@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.user.domain.entity.user import User
+from app.user.domain.user import User
 
 
 class IUserRepository(ABC):

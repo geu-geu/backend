@@ -4,9 +4,9 @@ from fastapi import HTTPException, status
 from sqlmodel import Session, select
 
 from app.database import engine
-from app.user.domain.entity.user import User
-from app.user.domain.repository.user_repository import IUserRepository
-from app.user.infrastructure.model.user import User as _User
+from app.models import User as _User
+from app.user.domain.user import User
+from app.user.domain.user_repository import IUserRepository
 
 
 @final

@@ -6,7 +6,7 @@ from ulid import ULID
 
 from app.main import app
 from app.user.application.user_service import UserService
-from app.user.domain.entity.user import User
+from app.user.domain.user import User
 
 client = TestClient(app)
 

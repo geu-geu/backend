@@ -6,8 +6,8 @@ from pytest_mock import MockerFixture
 from ulid import ULID
 
 from app.user.application.user_service import UserService
-from app.user.domain.entity.user import User
-from app.user.domain.repository.user_repository import IUserRepository
+from app.user.domain.user import User
+from app.user.domain.user_repository import IUserRepository
 
 
 @pytest.fixture()
