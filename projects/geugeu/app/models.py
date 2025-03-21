@@ -10,6 +10,8 @@ class User(SQLModel, table=True):
     password: str = Field(max_length=255, nullable=False)
     is_admin: bool = Field(default=False, nullable=False)
     is_active: bool = Field(default=True, nullable=False)
+    is_verified: bool = Field(default=False, nullable=False)
+    profile_image_url: str | None = Field(max_length=2000, nullable=True)
     created_at: datetime = Field(nullable=False)
     updated_at: datetime = Field(nullable=False)
 
