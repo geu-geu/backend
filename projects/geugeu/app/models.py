@@ -12,3 +12,35 @@ class User(SQLModel, table=True):
     is_active: bool = Field(default=True, nullable=False)
     created_at: datetime = Field(nullable=False)
     updated_at: datetime = Field(nullable=False)
+
+
+class Post(SQLModel, table=True):
+    id: str = Field(max_length=255, primary_key=True)
+    author_id: str = Field(max_length=255, nullable=False)
+    title: str = Field(max_length=255, nullable=False)
+    content: str = Field(nullable=False)
+    created_at: datetime = Field(nullable=False)
+    updated_at: datetime = Field(nullable=False)
+
+
+class PostImage(SQLModel, table=True):
+    id: str = Field(max_length=255, primary_key=True)
+    post_id: str = Field(max_length=255, nullable=False)
+    image_url: str = Field(max_length=2000, nullable=False)
+
+
+class Comment(SQLModel, table=True):
+    id: str = Field(max_length=255, primary_key=True)
+    author_id: str = Field(max_length=255, nullable=False)
+    post_id: str = Field(max_length=255, nullable=False)
+    content: str = Field(nullable=False)
+    created_at: datetime = Field(nullable=False)
+    updated_at: datetime = Field(nullable=False)
+
+
+class Like(SQLModel, table=True):
+    id: str = Field(max_length=255, primary_key=True)
+    author_id: str = Field(max_length=255, nullable=False)
+    post_id: str = Field(max_length=255, nullable=False)
+    created_at: datetime = Field(nullable=False)
+    updated_at: datetime = Field(nullable=False)
