@@ -19,10 +19,6 @@ async def signup(body: SignupBody, user_service: UserServiceDep) -> User:
     return user_service.signup(email=body.email, password=body.password, name=body.name)
 
 
-@router.get("/{id}")
-async def get_user(
-    id: str,
-    user_service: UserServiceDep,
-    current_user: CurrentActiveUserDep,
-) -> User:
-    return user_service.get_user(id=id)
+@router.get("/me")
+async def me(user_service: UserServiceDep, current_user: CurrentActiveUserDep) -> User:
+    return user_service.get_user(id=current_user.id)

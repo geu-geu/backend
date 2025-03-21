@@ -39,11 +39,10 @@ def test_signup(signup):
 
 
 @patch.object(UserService, "get_user")
-def test_get_user(get_user):
+def test_me(get_user):
     # given
-    user_id = str(ULID())
     user = User(
-        id=user_id,
+        id=str(ULID()),
         email="user@example.com",
         name=None,
         password="password",
@@ -60,8 +59,8 @@ def test_get_user(get_user):
     app.dependency_overrides[get_current_active_user] = override_get_current_active_user
 
     # when
-    response = client.get(f"/api/users/{user_id}")
+    response = client.get("/api/users/me")
 
     # then
     assert response.status_code == 200
-    assert response.json()["id"] == user_id
+    assert response.json()["id"] == user.id
