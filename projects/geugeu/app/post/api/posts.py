@@ -63,6 +63,7 @@ async def create_post(
 async def get_post(
     post_id: str,
     post_service: Annotated[PostService, Depends(post_service)],
+    user: CurrentActiveUserDep,
 ) -> PostResponse:
     post, images = post_service.get_post(post_id=post_id)
     return PostResponse(
@@ -80,6 +81,7 @@ async def update_post(
     post_id: str,
     body: UpdatePostBody,
     post_service: Annotated[PostService, Depends(post_service)],
+    user: CurrentActiveUserDep,
 ) -> PostResponse:
     post, images = post_service.update_post(
         post_id=post_id,
@@ -101,5 +103,6 @@ async def update_post(
 async def delete_post(
     post_id: str,
     post_service: Annotated[PostService, Depends(post_service)],
+    user: CurrentActiveUserDep,
 ) -> None:
     post_service.delete_post(post_id=post_id)

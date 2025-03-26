@@ -37,6 +37,7 @@ class DrawingResponse(BaseModel):
 async def get_drawings_by_post_id(
     post_id: str,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
+    user: CurrentActiveUserDep,
 ) -> list[DrawingResponse]:
     drawings_with_images = drawing_service.get_drawings_by_post_id(post_id=post_id)
     return [
@@ -83,6 +84,7 @@ async def create_drawing(
 async def get_drawing(
     drawing_id: str,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
+    user: CurrentActiveUserDep,
 ) -> DrawingResponse:
     drawing, images = drawing_service.get_drawing(drawing_id=drawing_id)
     return DrawingResponse(
@@ -100,6 +102,7 @@ async def update_drawing(
     drawing_id: str,
     body: UpdateDrawingBody,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
+    user: CurrentActiveUserDep,
 ) -> DrawingResponse:
     drawing, images = drawing_service.update_drawing(
         drawing_id=drawing_id,
@@ -120,5 +123,6 @@ async def update_drawing(
 async def delete_drawing(
     drawing_id: str,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
+    user: CurrentActiveUserDep,
 ) -> None:
     drawing_service.delete_drawing(drawing_id=drawing_id)
