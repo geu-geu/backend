@@ -46,3 +46,18 @@ class Like(SQLModel, table=True):
     post_id: str = Field(max_length=255, nullable=False)
     created_at: datetime = Field(nullable=False)
     updated_at: datetime = Field(nullable=False)
+
+
+class Drawing(SQLModel, table=True):
+    id: str = Field(max_length=255, primary_key=True)
+    post_id: str = Field(max_length=255, nullable=False)
+    author_id: str = Field(max_length=255, nullable=False)
+    content: str = Field(nullable=False)
+    created_at: datetime = Field(nullable=False)
+    updated_at: datetime = Field(nullable=False)
+
+
+class DrawingImage(SQLModel, table=True):
+    id: str = Field(max_length=255, primary_key=True)
+    drawing_id: str = Field(max_length=255, nullable=False)
+    image_url: str = Field(max_length=2000, nullable=False)
