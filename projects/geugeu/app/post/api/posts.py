@@ -28,7 +28,7 @@ class CreatePostResponse(BaseModel):
     images: list[str]
 
 
-@router.post("/")
+@router.post("/", response_model=CreatePostResponse, status_code=201)
 async def create_post(
     body: CreatePostBody,
     post_service: Annotated[PostService, Depends(post_service)],
