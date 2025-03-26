@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from ulid import ULID
 
 from app.drawing.application.drawing_service import DrawingService
-from app.drawing.domain.drawing import Drawing
+from app.drawing.domain.drawing import Drawing, DrawingStatus
 from app.drawing.domain.drawing_image import DrawingImage
 from app.main import app
 
@@ -32,6 +32,7 @@ def test_create_drawing(create_drawing):
         post_id=post_id,
         author_id=str(ULID()),
         content=content,
+        status=DrawingStatus.DRAFT,
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC),
     )
@@ -61,6 +62,7 @@ def test_create_drawing(create_drawing):
         "id": drawing.id,
         "post_id": drawing.post_id,
         "content": drawing.content,
+        "status": drawing.status,
         "images": [image.image_url for image in drawing_images],
         "created_at": format_datetime(drawing.created_at),
         "updated_at": format_datetime(drawing.updated_at),
@@ -75,6 +77,7 @@ def test_get_drawing(get_drawing):
         post_id=str(ULID()),
         author_id=str(ULID()),
         content="Test drawing content",
+        status=DrawingStatus.DRAFT,
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC),
     )
@@ -101,6 +104,7 @@ def test_get_drawing(get_drawing):
         "id": drawing.id,
         "post_id": drawing.post_id,
         "content": drawing.content,
+        "status": drawing.status,
         "images": [image.image_url for image in drawing_images],
         "created_at": format_datetime(drawing.created_at),
         "updated_at": format_datetime(drawing.updated_at),
@@ -132,6 +136,7 @@ def test_get_drawings_by_post_id(get_drawings_by_post_id):
         post_id=post_id,
         author_id=str(ULID()),
         content="Test drawing content",
+        status=DrawingStatus.DRAFT,
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC),
     )
@@ -159,6 +164,7 @@ def test_get_drawings_by_post_id(get_drawings_by_post_id):
             "id": drawing.id,
             "post_id": drawing.post_id,
             "content": drawing.content,
+            "status": drawing.status,
             "images": [image.image_url for image in drawing_images],
             "created_at": format_datetime(drawing.created_at),
             "updated_at": format_datetime(drawing.updated_at),
@@ -211,6 +217,7 @@ def test_update_drawing(update_drawing):
         post_id=str(ULID()),
         author_id=str(ULID()),
         content=content,
+        status=DrawingStatus.DRAFT,
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC),
     )
@@ -239,6 +246,7 @@ def test_update_drawing(update_drawing):
         "id": drawing.id,
         "post_id": drawing.post_id,
         "content": drawing.content,
+        "status": drawing.status,
         "images": [image.image_url for image in drawing_images],
         "created_at": format_datetime(drawing.created_at),
         "updated_at": format_datetime(drawing.updated_at),
@@ -265,3 +273,98 @@ def test_update_drawing_not_found(update_drawing):
 
     # then
     assert response.status_code == 404
+
+
+@patch.object(DrawingService, "complete_drawing")
+def test_complete_drawing(complete_drawing):
+    # given
+    drawing_id = str(ULID())
+    content = "Completed drawing content"
+    image_urls = [
+        "https://example.com/completed1.png",
+        "https://example.com/completed2.png",
+    ]
+
+    drawing = Drawing(
+        id=drawing_id,
+        post_id=str(ULID()),
+        author_id=str(ULID()),
+        content=content,
+        status=DrawingStatus.COMPLETED,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    drawing_images = [
+        DrawingImage(
+            id=str(ULID()),
+            drawing_id=drawing.id,
+            image_url=image_url,
+        )
+        for image_url in image_urls
+    ]
+    complete_drawing.return_value = (drawing, drawing_images)
+
+    # when
+    response = client.post(
+        f"/api/drawings/{drawing_id}/complete",
+        json={
+            "content": content,
+            "image_urls": image_urls,
+        },
+    )
+
+    # then
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": drawing.id,
+        "post_id": drawing.post_id,
+        "content": drawing.content,
+        "status": drawing.status,
+        "images": [image.image_url for image in drawing_images],
+        "created_at": format_datetime(drawing.created_at),
+        "updated_at": format_datetime(drawing.updated_at),
+    }
+
+
+@patch.object(DrawingService, "complete_drawing")
+def test_complete_drawing_not_found(complete_drawing):
+    # given
+    drawing_id = str(ULID())
+    complete_drawing.side_effect = HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Drawing not found",
+    )
+
+    # when
+    response = client.post(
+        f"/api/drawings/{drawing_id}/complete",
+        json={
+            "content": "Completed content",
+            "image_urls": ["https://example.com/completed.png"],
+        },
+    )
+
+    # then
+    assert response.status_code == 404
+
+
+@patch.object(DrawingService, "complete_drawing")
+def test_complete_drawing_already_completed(complete_drawing):
+    # given
+    drawing_id = str(ULID())
+    complete_drawing.side_effect = HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Drawing is already completed",
+    )
+
+    # when
+    response = client.post(
+        f"/api/drawings/{drawing_id}/complete",
+        json={
+            "content": "Completed content",
+            "image_urls": ["https://example.com/completed.png"],
+        },
+    )
+
+    # then
+    assert response.status_code == 400

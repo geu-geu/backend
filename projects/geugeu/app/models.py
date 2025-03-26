@@ -2,6 +2,8 @@ from datetime import datetime
 
 from sqlmodel import Field, SQLModel
 
+from app.drawing.domain.drawing import DrawingStatus
+
 
 class User(SQLModel, table=True):
     id: str = Field(max_length=255, primary_key=True)
@@ -53,6 +55,7 @@ class Drawing(SQLModel, table=True):
     post_id: str = Field(max_length=255, nullable=False)
     author_id: str = Field(max_length=255, nullable=False)
     content: str = Field(nullable=False)
+    status: str = Field(max_length=20, nullable=False, default=DrawingStatus.DRAFT)
     created_at: datetime = Field(nullable=False)
     updated_at: datetime = Field(nullable=False)
 

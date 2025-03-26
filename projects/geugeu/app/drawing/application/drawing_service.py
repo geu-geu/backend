@@ -1,6 +1,8 @@
+from datetime import UTC, datetime
+
 from fastapi import HTTPException, status
 
-from app.drawing.domain.drawing import Drawing
+from app.drawing.domain.drawing import Drawing, DrawingStatus
 from app.drawing.domain.drawing_image import DrawingImage
 from app.drawing.domain.drawing_image_repository import IDrawingImageRepository
 from app.drawing.domain.drawing_repository import IDrawingRepository
@@ -53,6 +55,33 @@ class DrawingService:
             )
         self.drawing_image_repository.delete_by_drawing_id(drawing_id)
         self.drawing_repository.delete(drawing_id)
+
+    def complete_drawing(
+        self, drawing_id: str, content: str, image_urls: list[str]
+    ) -> tuple[Drawing, list[DrawingImage]]:
+        drawing = self.drawing_repository.find_by_id(drawing_id)
+        if drawing is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Drawing not found",
+            )
+
+        if drawing.status == DrawingStatus.COMPLETED:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Drawing is already completed",
+            )
+
+        drawing.content = content
+        drawing.status = DrawingStatus.COMPLETED
+        drawing.updated_at = datetime.now(UTC)
+        updated_drawing = self.drawing_repository.save(drawing)
+
+        # Delete existing images and save new ones
+        self.drawing_image_repository.delete_by_drawing_id(drawing_id)
+        images = self.drawing_image_repository.save(drawing_id, image_urls)
+
+        return updated_drawing, images
 
     def update_drawing(
         self, drawing_id: str, content: str, image_urls: list[str]

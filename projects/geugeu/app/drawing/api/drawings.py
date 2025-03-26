@@ -1,25 +1,30 @@
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from ulid import ULID
 
 from app.auth.dependencies import CurrentActiveUserDep
 from app.drawing.application.drawing_service import DrawingService
 from app.drawing.dependencies import drawing_service
-from app.drawing.domain.drawing import Drawing
+from app.drawing.domain.drawing import Drawing, DrawingStatus
 
 router = APIRouter(prefix="/drawings", tags=["drawings"])
 
 
 class CreateDrawingBody(BaseModel):
     post_id: str
-    content: str
+    content: str = ""  # 초기에는 빈 내용일 수 있음
     image_urls: list[str] = Field(default_factory=list)
 
 
 class UpdateDrawingBody(BaseModel):
+    content: str
+    image_urls: list[str] = Field(default_factory=list)
+
+
+class CompleteDrawingBody(BaseModel):
     content: str
     image_urls: list[str] = Field(default_factory=list)
 
@@ -29,6 +34,7 @@ class DrawingResponse(BaseModel):
     post_id: str
     content: str
     images: list[str]
+    status: str
     created_at: datetime
     updated_at: datetime
 
@@ -46,6 +52,7 @@ async def get_drawings_by_post_id(
             post_id=drawing.post_id,
             content=drawing.content,
             images=[image.image_url for image in images],
+            status=drawing.status,
             created_at=drawing.created_at,
             updated_at=drawing.updated_at,
         )
@@ -64,6 +71,7 @@ async def create_drawing(
         post_id=body.post_id,
         author_id=user.id,
         content=body.content,
+        status=DrawingStatus.DRAFT,  # 초기 상태는 DRAFT
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC),
     )
@@ -75,6 +83,7 @@ async def create_drawing(
         post_id=drawing.post_id,
         content=drawing.content,
         images=[image.image_url for image in images],
+        status=drawing.status,
         created_at=drawing.created_at,
         updated_at=drawing.updated_at,
     )
@@ -92,6 +101,7 @@ async def get_drawing(
         post_id=drawing.post_id,
         content=drawing.content,
         images=[image.image_url for image in images],
+        status=drawing.status,
         created_at=drawing.created_at,
         updated_at=drawing.updated_at,
     )
@@ -114,6 +124,30 @@ async def update_drawing(
         post_id=drawing.post_id,
         content=drawing.content,
         images=[image.image_url for image in images],
+        status=drawing.status,
+        created_at=drawing.created_at,
+        updated_at=drawing.updated_at,
+    )
+
+
+@router.post("/{drawing_id}/complete", response_model=DrawingResponse)
+async def complete_drawing(
+    drawing_id: str,
+    body: CompleteDrawingBody,
+    drawing_service: Annotated[DrawingService, Depends(drawing_service)],
+    user: CurrentActiveUserDep,
+) -> DrawingResponse:
+    drawing, images = drawing_service.complete_drawing(
+        drawing_id=drawing_id,
+        content=body.content,
+        image_urls=body.image_urls,
+    )
+    return DrawingResponse(
+        id=drawing.id,
+        post_id=drawing.post_id,
+        content=drawing.content,
+        images=[image.image_url for image in images],
+        status=drawing.status,
         created_at=drawing.created_at,
         updated_at=drawing.updated_at,
     )
