@@ -5,31 +5,12 @@ import pytest
 from fastapi.testclient import TestClient
 from ulid import ULID
 
-from app.auth.dependencies import get_current_active_user
 from app.main import app
 from app.post.application.post_service import PostService
 from app.post.domain.post import Post
 from app.post.domain.post_image import PostImage
-from app.user.domain.user import User
 
 client = TestClient(app)
-
-
-@pytest.fixture(autouse=True)
-def override_auth_dependency():
-    def override_current_active_user_dep():
-        return User(
-            id=str(ULID()),
-            email="user@example.com",
-            name=None,
-            password="password",
-            is_admin=False,
-            is_active=True,
-            created_at=datetime.now(UTC),
-            updated_at=datetime.now(UTC),
-        )
-
-    app.dependency_overrides[get_current_active_user] = override_current_active_user_dep
 
 
 @patch.object(PostService, "create_post")
