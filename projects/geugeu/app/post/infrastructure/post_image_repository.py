@@ -1,6 +1,6 @@
 from typing import final, override
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 from ulid import ULID
 
 from app.database import engine
@@ -36,3 +36,28 @@ class PostImageRepository(IPostImageRepository):
             )
             for _post_image in _post_images
         ]
+
+    @override
+    def find_all_by_post_id(self, post_id: str) -> list[PostImage]:
+        with Session(engine) as session:
+            _post_images = session.exec(
+                select(_PostImage).where(_PostImage.post_id == post_id)
+            ).all()
+        return [
+            PostImage(
+                id=_post_image.id,
+                post_id=_post_image.post_id,
+                image_url=_post_image.image_url,
+            )
+            for _post_image in _post_images
+        ]
+
+    @override
+    def delete_by_post_id(self, post_id: str) -> None:
+        with Session(engine) as session:
+            _post_images = session.exec(
+                select(_PostImage).where(_PostImage.post_id == post_id)
+            ).all()
+            for _post_image in _post_images:
+                session.delete(_post_image)
+            session.commit()

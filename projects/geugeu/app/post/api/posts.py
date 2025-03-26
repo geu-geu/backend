@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel, Field
 from ulid import ULID
 
@@ -19,21 +19,27 @@ class CreatePostBody(BaseModel):
     image_urls: list[str] = Field(default_factory=list)
 
 
-class CreatePostResponse(BaseModel):
+class UpdatePostBody(BaseModel):
+    title: str
+    content: str
+    image_urls: list[str] = Field(default_factory=list)
+
+
+class PostResponse(BaseModel):
     id: str
     title: str
     content: str
+    images: list[str]
     created_at: datetime
     updated_at: datetime
-    images: list[str]
 
 
-@router.post("/", response_model=CreatePostResponse, status_code=201)
+@router.post("/", response_model=PostResponse, status_code=status.HTTP_201_CREATED)
 async def create_post(
     body: CreatePostBody,
     post_service: Annotated[PostService, Depends(post_service)],
     user: CurrentActiveUserDep,
-):
+) -> PostResponse:
     post = Post(
         id=str(ULID()),
         author_id=user.id,
@@ -43,7 +49,7 @@ async def create_post(
         updated_at=datetime.now(UTC),
     )
     post, images = post_service.create_post(post=post, image_urls=body.image_urls)
-    return CreatePostResponse(
+    return PostResponse(
         id=post.id,
         title=post.title,
         content=post.content,
@@ -51,3 +57,49 @@ async def create_post(
         created_at=post.created_at,
         updated_at=post.updated_at,
     )
+
+
+@router.get("/{post_id}", response_model=PostResponse)
+async def get_post(
+    post_id: str,
+    post_service: Annotated[PostService, Depends(post_service)],
+) -> PostResponse:
+    post, images = post_service.get_post(post_id=post_id)
+    return PostResponse(
+        id=post.id,
+        title=post.title,
+        content=post.content,
+        images=[image.image_url for image in images],
+        created_at=post.created_at,
+        updated_at=post.updated_at,
+    )
+
+
+@router.put("/{post_id}", response_model=PostResponse)
+async def update_post(
+    post_id: str,
+    body: UpdatePostBody,
+    post_service: Annotated[PostService, Depends(post_service)],
+) -> PostResponse:
+    post, images = post_service.update_post(
+        post_id=post_id,
+        title=body.title,
+        content=body.content,
+        image_urls=body.image_urls,
+    )
+    return PostResponse(
+        id=post.id,
+        title=post.title,
+        content=post.content,
+        images=[image.image_url for image in images],
+        created_at=post.created_at,
+        updated_at=post.updated_at,
+    )
+
+
+@router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_post(
+    post_id: str,
+    post_service: Annotated[PostService, Depends(post_service)],
+) -> None:
+    post_service.delete_post(post_id=post_id)

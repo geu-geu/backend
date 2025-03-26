@@ -33,3 +33,30 @@ class PostRepository(IPostRepository):
         if not _post:
             return None
         return Post(**_post.model_dump())
+
+    @override
+    def update(self, post: Post) -> Post:
+        with Session(engine) as session:
+            _post = session.exec(select(_Post).where(_Post.id == post.id)).first()
+            if not _post:
+                raise ValueError(f"Post with id {post.id} not found")
+
+            _post.title = post.title
+            _post.content = post.content
+            _post.updated_at = post.updated_at
+
+            session.add(_post)
+            session.commit()
+            session.refresh(_post)
+
+        return Post(**_post.model_dump())
+
+    @override
+    def delete(self, id: str) -> None:
+        with Session(engine) as session:
+            _post = session.exec(select(_Post).where(_Post.id == id)).first()
+            if not _post:
+                raise ValueError(f"Post with id {id} not found")
+
+            session.delete(_post)
+            session.commit()

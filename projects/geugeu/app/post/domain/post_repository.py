@@ -11,3 +11,11 @@ class IPostRepository(ABC):
     @abstractmethod
     def find_by_id(self, id: str) -> Post | None:
         raise NotImplementedError
+
+    @abstractmethod
+    def update(self, post: Post) -> Post:
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete(self, id: str) -> None:
+        raise NotImplementedError
