@@ -1,9 +1,7 @@
-from collections.abc import Generator
 from datetime import UTC, datetime
 
 import pytest
-from sqlalchemy import create_engine
-from sqlmodel import Session, SQLModel
+from sqlmodel import Session
 from ulid import ULID
 
 from app.security import hash_password
@@ -21,15 +19,6 @@ def user_repository() -> IUserRepository:
 @pytest.fixture()
 def user_service(user_repository: IUserRepository) -> UserService:
     return UserService(user_repository=user_repository)
-
-
-@pytest.fixture()
-def session() -> Generator[Session, None, None]:
-    _engine = create_engine("sqlite:///sqlite3.db")
-    SQLModel.metadata.create_all(_engine)
-    with Session(_engine) as session:
-        yield session
-    SQLModel.metadata.drop_all(_engine)
 
 
 def test_signup(user_service: UserService, session: Session) -> None:

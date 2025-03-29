@@ -2,11 +2,22 @@ from typing import Generator
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlmodel import Session, SQLModel
 from ulid import ULID
 
 from app.auth.dependencies import get_current_active_user
 from app.auth.domain.user import User
 from app.main import app
+
+
+@pytest.fixture()
+def session() -> Generator[Session, None, None]:
+    _engine = create_engine("sqlite:///sqlite3.db")
+    SQLModel.metadata.create_all(_engine)
+    with Session(_engine) as session:
+        yield session
+    SQLModel.metadata.drop_all(_engine)
 
 
 @pytest.fixture()
