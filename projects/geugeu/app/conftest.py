@@ -1,3 +1,4 @@
+import os
 from typing import Generator
 
 import pytest
@@ -12,21 +13,32 @@ from app.database import get_db
 from app.main import app
 
 
-@pytest.fixture(autouse=True)
-def session() -> Generator[Session, None, None]:
-    _engine = create_engine("sqlite:///sqlite3.db")
-    SQLModel.metadata.create_all(_engine)
-    with Session(_engine) as session:
-        yield session
-    SQLModel.metadata.drop_all(_engine)
+@pytest.fixture(scope="session")
+def test_db():
+    engine = create_engine("sqlite:///sqlite3.db")
+    SQLModel.metadata.create_all(engine)
+    yield engine
+    SQLModel.metadata.drop_all(engine)
+    os.remove("sqlite3.db")
+
+
+@pytest.fixture()
+def session(test_db) -> Generator[Session, None, None]:
+    connection = test_db.connect()
+    transaction = connection.begin()
+    session = Session(bind=connection)
+    yield session
+    session.close()
+    transaction.rollback()
+    connection.close()
 
 
 @pytest.fixture(autouse=True)
 def override_get_db(session: Session):
-    def override_get_db():
+    def _get_db():
         yield session
 
-    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_db] = _get_db
     yield
     app.dependency_overrides.clear()
 
@@ -49,8 +61,8 @@ def user() -> User:
 
 
 @pytest.fixture(autouse=True)
-def override_auth_dependency():
-    def override_current_active_user_dep():
+def override_get_current_active_user():
+    def _get_current_active_user():
         return User(
             id=str(ULID()),
             email="user@example.com",
@@ -59,6 +71,6 @@ def override_auth_dependency():
             is_active=True,
         )
 
-    app.dependency_overrides[get_current_active_user] = override_current_active_user_dep
+    app.dependency_overrides[get_current_active_user] = _get_current_active_user
     yield
     app.dependency_overrides.clear()
