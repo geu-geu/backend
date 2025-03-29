@@ -4,15 +4,13 @@ from sqlmodel import Session, select
 
 from app.auth.domain.user import User
 from app.auth.domain.user_repository import IUserRepository
-from app.database import engine
 from app.models import User as _User
 
 
 class UserRepository(IUserRepository):
     @override
-    def find_by_email(self, email: str) -> User | None:
-        with Session(engine) as session:
-            _user = session.exec(select(_User).where(_User.email == email)).first()
+    def find_by_email(self, session: Session, email: str) -> User | None:
+        _user = session.exec(select(_User).where(_User.email == email)).first()
         if not _user:
             return None
         return User(

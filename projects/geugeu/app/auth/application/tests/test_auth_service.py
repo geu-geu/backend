@@ -2,6 +2,7 @@ from typing import Any
 
 import pytest
 from pytest_mock import MockerFixture
+from sqlmodel import Session
 from ulid import ULID
 
 from app.auth.application.auth_service import AuthService
@@ -20,7 +21,7 @@ def auth_service(user_repository: IUserRepository) -> AuthService:
     return AuthService(user_repository=user_repository)
 
 
-def test_login(auth_service: AuthService) -> None:
+def test_login(auth_service: AuthService, session: Session) -> None:
     # given
     email = "user@example.com"
     password = "P@ssw0rd"
@@ -33,7 +34,7 @@ def test_login(auth_service: AuthService) -> None:
     )
 
     # when
-    token = auth_service.login(email=email, password=password)
+    token = auth_service.login(session, email=email, password=password)
 
     # then
     assert token.access_token is not None
