@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from ulid import ULID
 
 from app.auth.dependencies import CurrentActiveUserDep
+from app.database import SessionDep
 from app.drawing.application.drawing_service import DrawingService
 from app.drawing.dependencies import drawing_service
 from app.drawing.domain.drawing import Drawing, DrawingStatus
@@ -43,9 +44,12 @@ class DrawingResponse(BaseModel):
 async def get_drawings_by_post_id(
     post_id: str,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
+    session: SessionDep,
     user: CurrentActiveUserDep,
 ) -> list[DrawingResponse]:
-    drawings_with_images = drawing_service.get_drawings_by_post_id(post_id=post_id)
+    drawings_with_images = drawing_service.get_drawings_by_post_id(
+        session, post_id=post_id
+    )
     return [
         DrawingResponse(
             id=drawing.id,
@@ -64,6 +68,7 @@ async def get_drawings_by_post_id(
 async def create_drawing(
     body: CreateDrawingBody,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
+    session: SessionDep,
     user: CurrentActiveUserDep,
 ) -> DrawingResponse:
     drawing = Drawing(
@@ -76,7 +81,7 @@ async def create_drawing(
         updated_at=datetime.now(UTC),
     )
     drawing, images = drawing_service.create_drawing(
-        drawing=drawing, image_urls=body.image_urls
+        session, drawing=drawing, image_urls=body.image_urls
     )
     return DrawingResponse(
         id=drawing.id,
@@ -93,9 +98,10 @@ async def create_drawing(
 async def get_drawing(
     drawing_id: str,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
+    session: SessionDep,
     user: CurrentActiveUserDep,
 ) -> DrawingResponse:
-    drawing, images = drawing_service.get_drawing(drawing_id=drawing_id)
+    drawing, images = drawing_service.get_drawing(session, drawing_id=drawing_id)
     return DrawingResponse(
         id=drawing.id,
         post_id=drawing.post_id,
@@ -112,9 +118,11 @@ async def update_drawing(
     drawing_id: str,
     body: UpdateDrawingBody,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
+    session: SessionDep,
     user: CurrentActiveUserDep,
 ) -> DrawingResponse:
     drawing, images = drawing_service.update_drawing(
+        session,
         drawing_id=drawing_id,
         content=body.content,
         image_urls=body.image_urls,
@@ -135,9 +143,11 @@ async def complete_drawing(
     drawing_id: str,
     body: CompleteDrawingBody,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
+    session: SessionDep,
     user: CurrentActiveUserDep,
 ) -> DrawingResponse:
     drawing, images = drawing_service.complete_drawing(
+        session,
         drawing_id=drawing_id,
         content=body.content,
         image_urls=body.image_urls,
@@ -157,6 +167,7 @@ async def complete_drawing(
 async def delete_drawing(
     drawing_id: str,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
+    session: SessionDep,
     user: CurrentActiveUserDep,
 ) -> None:
-    drawing_service.delete_drawing(drawing_id=drawing_id)
+    drawing_service.delete_drawing(session, drawing_id=drawing_id)
