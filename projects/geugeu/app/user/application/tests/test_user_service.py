@@ -1,18 +1,21 @@
+from collections.abc import Generator
 from datetime import UTC, datetime
-from typing import Any
 
 import pytest
-from pytest_mock import MockerFixture
+from sqlalchemy import create_engine
+from sqlmodel import Session, SQLModel
 from ulid import ULID
 
+from app.security import hash_password
 from app.user.application.user_service import UserService
 from app.user.domain.user import User
 from app.user.domain.user_repository import IUserRepository
+from app.user.infrastructure.user_repository import UserRepository
 
 
 @pytest.fixture()
-def user_repository(mocker: MockerFixture) -> Any:
-    return mocker.Mock(spec=IUserRepository)
+def user_repository() -> IUserRepository:
+    return UserRepository()
 
 
 @pytest.fixture()
@@ -20,13 +23,22 @@ def user_service(user_repository: IUserRepository) -> UserService:
     return UserService(user_repository=user_repository)
 
 
-def test_signup(user_service: UserService) -> None:
+@pytest.fixture()
+def session() -> Generator[Session, None, None]:
+    _engine = create_engine("sqlite:///sqlite3.db")
+    SQLModel.metadata.create_all(_engine)
+    with Session(_engine) as session:
+        yield session
+    SQLModel.metadata.drop_all(_engine)
+
+
+def test_signup(user_service: UserService, session: Session) -> None:
     # given
     email = "user@example.com"
     password = "P@ssw0rd"
 
     # when
-    new_user = user_service.signup(email=email, password=password)
+    new_user = user_service.signup(session=session, email=email, password=password)
 
     # then
     assert len(new_user.id) == 26
@@ -40,14 +52,16 @@ def test_signup(user_service: UserService) -> None:
     assert new_user.updated_at is not None
 
 
-def test_get_user(user_service) -> None:
+def test_get_user(
+    user_service: UserService, user_repository: IUserRepository, session: Session
+) -> None:
     # given
     user_id = str(ULID())
     user = User(
         id=user_id,
         email="user@example.com",
         name=None,
-        password="password",
+        password=hash_password("password"),
         is_admin=False,
         is_active=True,
         is_verified=False,
@@ -55,10 +69,10 @@ def test_get_user(user_service) -> None:
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC),
     )
-    user_service.user_repository.find_by_id.return_value = user
+    user_repository.save(session, user)
 
     # when
-    result = user_service.get_user(user_id)
+    result = user_service.get_user(session, user_id)
 
     # then
     assert result == user

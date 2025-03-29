@@ -14,3 +14,8 @@ class User:
     profile_image_url: str | None
     created_at: datetime
     updated_at: datetime
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, User):
+            return False
+        return self.id == other.id
