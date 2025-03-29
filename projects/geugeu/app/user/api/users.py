@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 from pydantic import BaseModel
-from sqlmodel import Session
 
 from app.auth.dependencies import CurrentActiveUserDep
-from app.database import get_db
+from app.database import SessionDep
 from app.user.dependencies import UserServiceDep
 from app.user.domain.user import User
 
@@ -20,7 +19,7 @@ class SignupBody(BaseModel):
 async def signup(
     body: SignupBody,
     user_service: UserServiceDep,
-    session: Session = Depends(get_db),
+    session: SessionDep,
 ) -> User:
     return user_service.signup(
         session, email=body.email, password=body.password, name=body.name
@@ -31,6 +30,6 @@ async def signup(
 async def me(
     user_service: UserServiceDep,
     current_user: CurrentActiveUserDep,
-    session: Session = Depends(get_db),
+    session: SessionDep,
 ) -> User:
     return user_service.get_user(session, current_user.id)
