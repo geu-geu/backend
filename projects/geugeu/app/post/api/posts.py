@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from ulid import ULID
 
 from app.auth.dependencies import CurrentActiveUserDep
+from app.database import SessionDep
 from app.post.application.post_service import PostService
 from app.post.dependencies import post_service
 from app.post.domain.post import Post
@@ -38,6 +39,7 @@ class PostResponse(BaseModel):
 async def create_post(
     body: CreatePostBody,
     post_service: Annotated[PostService, Depends(post_service)],
+    session: SessionDep,
     user: CurrentActiveUserDep,
 ) -> PostResponse:
     post = Post(
@@ -48,7 +50,9 @@ async def create_post(
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC),
     )
-    post, images = post_service.create_post(post=post, image_urls=body.image_urls)
+    post, images = post_service.create_post(
+        session, post=post, image_urls=body.image_urls
+    )
     return PostResponse(
         id=post.id,
         title=post.title,
@@ -63,9 +67,10 @@ async def create_post(
 async def get_post(
     post_id: str,
     post_service: Annotated[PostService, Depends(post_service)],
+    session: SessionDep,
     user: CurrentActiveUserDep,
 ) -> PostResponse:
-    post, images = post_service.get_post(post_id=post_id)
+    post, images = post_service.get_post(session, post_id=post_id)
     return PostResponse(
         id=post.id,
         title=post.title,
@@ -81,9 +86,11 @@ async def update_post(
     post_id: str,
     body: UpdatePostBody,
     post_service: Annotated[PostService, Depends(post_service)],
+    session: SessionDep,
     user: CurrentActiveUserDep,
 ) -> PostResponse:
     post, images = post_service.update_post(
+        session,
         post_id=post_id,
         title=body.title,
         content=body.content,
@@ -103,6 +110,7 @@ async def update_post(
 async def delete_post(
     post_id: str,
     post_service: Annotated[PostService, Depends(post_service)],
+    session: SessionDep,
     user: CurrentActiveUserDep,
 ) -> None:
-    post_service.delete_post(post_id=post_id)
+    post_service.delete_post(session, post_id=post_id)

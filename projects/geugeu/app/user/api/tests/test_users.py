@@ -6,23 +6,12 @@ from sqlmodel import Session
 from ulid import ULID
 
 from app.auth.dependencies import get_current_active_user
-from app.database import get_db
 from app.main import app
 from app.user.domain.user import User
 from app.user.domain.user_repository import IUserRepository
 from app.user.infrastructure.user_repository import UserRepository
 
 client = TestClient(app)
-
-
-@pytest.fixture(autouse=True)
-def mock_session(session: Session):
-    def override_get_db():
-        yield session
-
-    app.dependency_overrides[get_db] = override_get_db
-    yield
-    app.dependency_overrides.clear()
 
 
 @pytest.fixture()

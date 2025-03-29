@@ -8,16 +8,27 @@ from ulid import ULID
 
 from app.auth.dependencies import get_current_active_user
 from app.auth.domain.user import User
+from app.database import get_db
 from app.main import app
 
 
-@pytest.fixture()
+@pytest.fixture(autouse=True)
 def session() -> Generator[Session, None, None]:
     _engine = create_engine("sqlite:///sqlite3.db")
     SQLModel.metadata.create_all(_engine)
     with Session(_engine) as session:
         yield session
     SQLModel.metadata.drop_all(_engine)
+
+
+@pytest.fixture(autouse=True)
+def override_get_db(session: Session):
+    def override_get_db():
+        yield session
+
+    app.dependency_overrides[get_db] = override_get_db
+    yield
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture()
