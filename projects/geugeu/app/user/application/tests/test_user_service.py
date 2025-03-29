@@ -50,6 +50,8 @@ def test_get_user(user_service) -> None:
         password="password",
         is_admin=False,
         is_active=True,
+        is_verified=False,
+        profile_image_url=None,
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC),
     )

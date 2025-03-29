@@ -21,6 +21,8 @@ class UserService:
             name=name,
             is_admin=False,
             is_active=True,
+            is_verified=False,
+            profile_image_url=None,
             created_at=datetime.now(UTC),
             updated_at=datetime.now(UTC),
         )

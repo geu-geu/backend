@@ -10,5 +10,7 @@ class User:
     password: str
     is_admin: bool
     is_active: bool
+    is_verified: bool
+    profile_image_url: str | None
     created_at: datetime
     updated_at: datetime
