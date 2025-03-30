@@ -180,3 +180,42 @@ async def get_post_comments(
         )
         for post_comment in post_comments
     ]
+
+
+class UpdatePostCommentBody(BaseModel):
+    content: str
+
+
+@router.put("/{post_id}/comments/{comment_id}", response_model=PostCommentResponse)
+async def update_post_comment(
+    post_id: str,
+    comment_id: str,
+    body: UpdatePostCommentBody,
+    post_service: Annotated[PostService, Depends(post_service)],
+    session: SessionDep,
+    user: CurrentActiveUserDep,
+) -> PostCommentResponse:
+    post_comment = post_service.update_post_comment(
+        session, post_id=post_id, comment_id=comment_id, content=body.content
+    )
+    return PostCommentResponse(
+        id=post_comment.id,
+        author_id=post_comment.author_id,
+        post_id=post_comment.post_id,
+        content=post_comment.content,
+        created_at=post_comment.created_at,
+        updated_at=post_comment.updated_at,
+    )
+
+
+@router.delete(
+    "/{post_id}/comments/{comment_id}", status_code=status.HTTP_204_NO_CONTENT
+)
+async def delete_post_comment(
+    post_id: str,
+    comment_id: str,
+    post_service: Annotated[PostService, Depends(post_service)],
+    session: SessionDep,
+    user: CurrentActiveUserDep,
+) -> None:
+    post_service.delete_post_comment(session, post_id=post_id, comment_id=comment_id)
