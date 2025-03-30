@@ -159,3 +159,24 @@ async def create_post_comment(
         created_at=post_comment.created_at,
         updated_at=post_comment.updated_at,
     )
+
+
+@router.get("/{post_id}/comments", response_model=list[PostCommentResponse])
+async def get_post_comments(
+    post_id: str,
+    post_service: Annotated[PostService, Depends(post_service)],
+    session: SessionDep,
+    user: CurrentActiveUserDep,
+) -> list[PostCommentResponse]:
+    post_comments = post_service.get_post_comments(session, post_id=post_id)
+    return [
+        PostCommentResponse(
+            id=post_comment.id,
+            author_id=post_comment.author_id,
+            post_id=post_comment.post_id,
+            content=post_comment.content,
+            created_at=post_comment.created_at,
+            updated_at=post_comment.updated_at,
+        )
+        for post_comment in post_comments
+    ]

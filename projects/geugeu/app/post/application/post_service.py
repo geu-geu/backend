@@ -85,3 +85,6 @@ class PostService:
     ) -> PostComment:
         post_comment = self.post_comment_repository.save(session, post_comment)
         return post_comment
+
+    def get_post_comments(self, session: Session, post_id: str) -> list[PostComment]:
+        return self.post_comment_repository.find_all_by_post_id(session, post_id)

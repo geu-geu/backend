@@ -9,3 +9,7 @@ class IPostCommentRepository(ABC):
     @abstractmethod
     def save(self, session: Session, post_comment: PostComment) -> PostComment:
         raise NotImplementedError
+
+    @abstractmethod
+    def find_all_by_post_id(self, session: Session, post_id: str) -> list[PostComment]:
+        raise NotImplementedError
