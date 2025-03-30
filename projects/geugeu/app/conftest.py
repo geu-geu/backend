@@ -49,28 +49,19 @@ def client() -> Generator[TestClient, None, None]:
         yield client
 
 
-@pytest.fixture()
-def user() -> User:
-    return User(
+@pytest.fixture(autouse=True)
+def user():
+    user = User(
         id=str(ULID()),
-        email="test@example.com",
+        email="user@example.com",
         password="password",
-        is_active=True,
         is_admin=False,
+        is_active=True,
     )
 
-
-@pytest.fixture(autouse=True)
-def override_get_current_active_user():
     def _get_current_active_user():
-        return User(
-            id=str(ULID()),
-            email="user@example.com",
-            password="password",
-            is_admin=False,
-            is_active=True,
-        )
+        return user
 
     app.dependency_overrides[get_current_active_user] = _get_current_active_user
-    yield
+    yield user
     app.dependency_overrides.clear()
