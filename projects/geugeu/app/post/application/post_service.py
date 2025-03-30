@@ -4,6 +4,8 @@ from fastapi import HTTPException, status
 from sqlmodel import Session
 
 from app.post.domain.post import Post
+from app.post.domain.post_comment import PostComment
+from app.post.domain.post_comment_repository import IPostCommentRepository
 from app.post.domain.post_image import PostImage
 from app.post.domain.post_image_repository import IPostImageRepository
 from app.post.domain.post_repository import IPostRepository
@@ -14,9 +16,11 @@ class PostService:
         self,
         post_repository: IPostRepository,
         post_image_repository: IPostImageRepository,
+        post_comment_repository: IPostCommentRepository,
     ):
         self.post_repository = post_repository
         self.post_image_repository = post_image_repository
+        self.post_comment_repository = post_comment_repository
 
     def create_post(
         self, session: Session, post: Post, image_urls: list[str]
@@ -75,3 +79,9 @@ class PostService:
 
         self.post_image_repository.delete_by_post_id(session, post_id)
         self.post_repository.delete(session, post_id)
+
+    def create_post_comment(
+        self, session: Session, post_comment: PostComment
+    ) -> PostComment:
+        post_comment = self.post_comment_repository.save(session, post_comment)
+        return post_comment

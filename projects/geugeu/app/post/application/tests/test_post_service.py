@@ -6,6 +6,7 @@ from ulid import ULID
 
 from app.post.application.post_service import PostService
 from app.post.domain.post import Post
+from app.post.domain.post_comment_repository import IPostCommentRepository
 from app.post.domain.post_image import PostImage
 from app.post.domain.post_image_repository import IPostImageRepository
 from app.post.domain.post_repository import IPostRepository
@@ -15,10 +16,12 @@ from app.post.domain.post_repository import IPostRepository
 def post_service(
     post_repository: IPostRepository,
     post_image_repository: IPostImageRepository,
+    post_comment_repository: IPostCommentRepository,
 ) -> PostService:
     return PostService(
         post_repository=post_repository,
         post_image_repository=post_image_repository,
+        post_comment_repository=post_comment_repository,
     )
 
 

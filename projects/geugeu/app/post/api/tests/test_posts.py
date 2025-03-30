@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 from ulid import ULID
 
+from app.auth.domain.user import User
 from app.main import app
 from app.post.domain.post import Post
 from app.post.domain.post_repository import IPostRepository
@@ -111,3 +112,33 @@ def test_delete_post(session: Session, post_repository: IPostRepository):
     # then
     assert response.status_code == 204
     assert post_repository.find_by_id(session, post.id) is None
+
+
+def test_create_post_comment(
+    session: Session,
+    post_repository: IPostRepository,
+    user: User,
+):
+    # given
+    post = Post(
+        id=str(ULID()),
+        author_id=str(ULID()),
+        title="title",
+        content="content",
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    post_repository.save(session, post)
+
+    # when
+    response = client.post(
+        f"/api/posts/{post.id}/comments",
+        json={"content": "comment"},
+    )
+
+    # then
+    assert response.status_code == 201
+    assert response.json()["id"] is not None
+    assert response.json()["author_id"] == user.id
+    assert response.json()["post_id"] == post.id
+    assert response.json()["content"] == "comment"
