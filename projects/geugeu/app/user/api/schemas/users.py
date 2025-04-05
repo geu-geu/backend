@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class SignupBody(BaseModel):
-    email: str
+    email: EmailStr
     password: str
     name: str | None = None
