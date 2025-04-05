@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from typing import Annotated
 
 import jwt
@@ -47,6 +48,11 @@ async def get_current_user(
         )
         email = payload.get("sub")
         if email is None:
+            raise credentials_exception
+        exp = payload.get("exp")
+        if exp is None:
+            raise credentials_exception
+        if exp < datetime.now(UTC).timestamp():
             raise credentials_exception
     except InvalidTokenError:
         raise credentials_exception
