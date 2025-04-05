@@ -64,7 +64,9 @@ async def create_drawing(
         updated_at=datetime.now(UTC),
     )
     drawing, images = drawing_service.create_drawing(
-        session, drawing=drawing, image_urls=body.image_urls
+        session,
+        drawing=drawing,
+        image_urls=[str(url) for url in body.image_urls],
     )
     return DrawingResponse(
         id=drawing.id,

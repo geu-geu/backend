@@ -1,12 +1,12 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class CreateDrawingBody(BaseModel):
     post_id: str
     content: str = ""  # 초기에는 빈 내용일 수 있음
-    image_urls: list[str] = Field(default_factory=list)
+    image_urls: list[HttpUrl] = Field(min_length=1)
 
 
 class UpdateDrawingBody(BaseModel):
