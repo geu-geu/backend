@@ -6,6 +6,7 @@ from sqlmodel import Session
 from ulid import ULID
 
 from app.security import hash_password
+from app.user.api.schemas.users import SignupBody
 from app.user.domain.user import User
 from app.user.repositories.user_repository import IUserRepository
 
@@ -14,14 +15,12 @@ class UserService:
     def __init__(self, user_repository: IUserRepository) -> None:
         self.user_repository = user_repository
 
-    def signup(
-        self, session: Session, email: str, password: str, name: str | None = None
-    ) -> User:
+    def signup(self, session: Session, body: SignupBody) -> User:
         user = User(
             id=str(ULID()),
-            email=email,
-            password=hash_password(password),
-            name=name,
+            email=body.email,
+            password=hash_password(body.password),
+            name=body.name,
             is_admin=False,
             is_active=True,
             is_verified=False,

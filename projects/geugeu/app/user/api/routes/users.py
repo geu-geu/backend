@@ -15,9 +15,7 @@ async def signup(
     user_service: UserServiceDep,
     session: SessionDep,
 ) -> User:
-    return user_service.signup(
-        session, email=body.email, password=body.password, name=body.name
-    )
+    return user_service.signup(session, body)
 
 
 @router.get("/me")

@@ -5,6 +5,7 @@ from sqlmodel import Session
 from ulid import ULID
 
 from app.security import hash_password
+from app.user.api.schemas.users import SignupBody
 from app.user.domain.user import User
 from app.user.repositories.user_repository import IUserRepository
 from app.user.repositories.user_repository_impl import UserRepositoryImpl
@@ -23,16 +24,15 @@ def user_service(user_repository: IUserRepository) -> UserService:
 
 def test_signup(user_service: UserService, session: Session) -> None:
     # given
-    email = "user@example.com"
-    password = "P@ssw0rd"
+    signup_body = SignupBody(email="user@example.com", password="P@ssw0rd")
 
     # when
-    new_user = user_service.signup(session=session, email=email, password=password)
+    new_user = user_service.signup(session, signup_body)
 
     # then
     assert len(new_user.id) == 26
-    assert new_user.email == email
-    assert new_user.password != password
+    assert new_user.email == signup_body.email
+    assert new_user.password != signup_body.password
     assert len(new_user.password) == 60
     assert new_user.name is None
     assert new_user.is_admin is False
