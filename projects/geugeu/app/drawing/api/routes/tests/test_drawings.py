@@ -3,7 +3,12 @@ from datetime import UTC, datetime
 from sqlmodel import Session
 from ulid import ULID
 
+from app.auth.domain.user import User
 from app.drawing.domain.drawing import Drawing, DrawingStatus
+from app.drawing.domain.drawing_comment import DrawingComment
+from app.drawing.repositories.drawing_comment_repository import (
+    IDrawingCommentRepository,
+)
 from app.drawing.repositories.drawing_repository import IDrawingRepository
 
 
@@ -281,3 +286,239 @@ def test_complete_drawing_already_completed(
     # then
     assert response.status_code == 400
     assert response.json()["detail"] == "Drawing is already completed"
+
+
+def test_create_drawing_comment(
+    client,
+    session: Session,
+    drawing_repository: IDrawingRepository,
+    user: User,
+):
+    # given
+    drawing = Drawing(
+        id=str(ULID()),
+        author_id=str(ULID()),
+        post_id=str(ULID()),
+        content="content",
+        status=DrawingStatus.DRAFT,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    drawing_repository.save(session, drawing)
+
+    # when
+    response = client.post(
+        f"/api/drawings/{drawing.id}/comments",
+        json={"content": "comment"},
+    )
+
+    # then
+    assert response.status_code == 201
+    assert response.json()["id"] is not None
+    assert response.json()["author_id"] == user.id
+    assert response.json()["drawing_id"] == drawing.id
+    assert response.json()["content"] == "comment"
+
+
+def test_get_drawing_comments(
+    client,
+    session: Session,
+    drawing_repository: IDrawingRepository,
+    drawing_comment_repository: IDrawingCommentRepository,
+    user: User,
+):
+    # given
+    drawing = Drawing(
+        id=str(ULID()),
+        author_id=str(ULID()),
+        post_id=str(ULID()),
+        content="content",
+        status=DrawingStatus.DRAFT,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    drawing_repository.save(session, drawing)
+
+    drawing_comment = DrawingComment(
+        id=str(ULID()),
+        author_id=str(ULID()),
+        drawing_id=drawing.id,
+        content="comment",
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    drawing_comment_repository.save(session, drawing_comment)
+
+    # when
+    response = client.get(f"/api/drawings/{drawing.id}/comments")
+
+    # then
+    assert response.status_code == 200
+    assert response.json()[0]["id"] == drawing_comment.id
+    assert response.json()[0]["author_id"] == drawing_comment.author_id
+    assert response.json()[0]["drawing_id"] == drawing_comment.drawing_id
+    assert response.json()[0]["content"] == drawing_comment.content
+
+
+def test_update_drawing_comment(
+    client,
+    session: Session,
+    drawing_repository: IDrawingRepository,
+    drawing_comment_repository: IDrawingCommentRepository,
+    user: User,
+):
+    # given
+    drawing = Drawing(
+        id=str(ULID()),
+        author_id=str(ULID()),
+        post_id=str(ULID()),
+        content="content",
+        status=DrawingStatus.DRAFT,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    drawing_repository.save(session, drawing)
+
+    drawing_comment = DrawingComment(
+        id=str(ULID()),
+        author_id=user.id,
+        drawing_id=drawing.id,
+        content="original comment",
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    drawing_comment_repository.save(session, drawing_comment)
+
+    # when
+    response = client.put(
+        f"/api/drawings/{drawing.id}/comments/{drawing_comment.id}",
+        json={"content": "updated comment"},
+    )
+
+    # then
+    assert response.status_code == 200
+    assert response.json()["id"] == drawing_comment.id
+    assert response.json()["author_id"] == drawing_comment.author_id
+    assert response.json()["drawing_id"] == drawing_comment.drawing_id
+    assert response.json()["content"] == "updated comment"
+
+
+def test_update_drawing_comment_with_unauthorized_user(
+    client,
+    session: Session,
+    drawing_repository: IDrawingRepository,
+    drawing_comment_repository: IDrawingCommentRepository,
+    user: User,
+):
+    # given
+    drawing = Drawing(
+        id=str(ULID()),
+        author_id=str(ULID()),
+        post_id=str(ULID()),
+        content="content",
+        status=DrawingStatus.DRAFT,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    drawing_repository.save(session, drawing)
+
+    drawing_comment = DrawingComment(
+        id=str(ULID()),
+        author_id=str(ULID()),  # different user
+        drawing_id=drawing.id,
+        content="comment",
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    drawing_comment_repository.save(session, drawing_comment)
+
+    # when
+    response = client.put(
+        f"/api/drawings/{drawing.id}/comments/{drawing_comment.id}",
+        json={"content": "updated comment"},
+    )
+
+    # then
+    assert response.status_code == 403
+    assert response.json()["detail"] == "You are not the author of this comment"
+
+
+def test_delete_drawing_comment(
+    client,
+    session: Session,
+    drawing_repository: IDrawingRepository,
+    drawing_comment_repository: IDrawingCommentRepository,
+    user: User,
+):
+    # given
+    drawing = Drawing(
+        id=str(ULID()),
+        author_id=str(ULID()),
+        post_id=str(ULID()),
+        content="content",
+        status=DrawingStatus.DRAFT,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    drawing_repository.save(session, drawing)
+
+    drawing_comment = DrawingComment(
+        id=str(ULID()),
+        author_id=user.id,
+        drawing_id=drawing.id,
+        content="comment",
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    drawing_comment_repository.save(session, drawing_comment)
+    assert (
+        drawing_comment_repository.find_by_id(session, drawing_comment.id) is not None
+    )
+
+    # when
+    response = client.delete(
+        f"/api/drawings/{drawing.id}/comments/{drawing_comment.id}"
+    )
+
+    # then
+    assert response.status_code == 204
+    assert drawing_comment_repository.find_by_id(session, drawing_comment.id) is None
+
+
+def test_delete_drawing_comment_with_unauthorized_user(
+    client,
+    session: Session,
+    drawing_repository: IDrawingRepository,
+    drawing_comment_repository: IDrawingCommentRepository,
+    user: User,
+):
+    # given
+    drawing = Drawing(
+        id=str(ULID()),
+        author_id=str(ULID()),
+        post_id=str(ULID()),
+        content="content",
+        status=DrawingStatus.DRAFT,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    drawing_repository.save(session, drawing)
+
+    drawing_comment = DrawingComment(
+        id=str(ULID()),
+        author_id=str(ULID()),  # different user
+        drawing_id=drawing.id,
+        content="comment",
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    drawing_comment_repository.save(session, drawing_comment)
+
+    # when
+    response = client.delete(
+        f"/api/drawings/{drawing.id}/comments/{drawing_comment.id}"
+    )
+
+    # then
+    assert response.status_code == 403
+    assert response.json()["detail"] == "You are not the author of this comment"

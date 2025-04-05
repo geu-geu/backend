@@ -1,5 +1,11 @@
 import pytest
 
+from app.drawing.repositories.drawing_comment_repository import (
+    IDrawingCommentRepository,
+)
+from app.drawing.repositories.drawing_comment_repository_impl import (
+    DrawingCommentRepositoryImpl,
+)
 from app.drawing.repositories.drawing_image_repository import IDrawingImageRepository
 from app.drawing.repositories.drawing_image_repository_impl import (
     DrawingImageRepositoryImpl,
@@ -20,11 +26,18 @@ def drawing_image_repository() -> IDrawingImageRepository:
 
 
 @pytest.fixture()
+def drawing_comment_repository() -> IDrawingCommentRepository:
+    return DrawingCommentRepositoryImpl()
+
+
+@pytest.fixture()
 def drawing_service(
     drawing_repository: IDrawingRepository,
     drawing_image_repository: IDrawingImageRepository,
+    drawing_comment_repository: IDrawingCommentRepository,
 ) -> DrawingService:
     return DrawingService(
         drawing_repository=drawing_repository,
         drawing_image_repository=drawing_image_repository,
+        drawing_comment_repository=drawing_comment_repository,
     )

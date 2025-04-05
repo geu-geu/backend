@@ -27,3 +27,20 @@ class DrawingResponse(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
+
+
+class UpdateDrawingCommentBody(BaseModel):
+    content: str
+
+
+class CreateDrawingCommentBody(BaseModel):
+    content: str
+
+
+class DrawingCommentResponse(BaseModel):
+    id: str
+    author_id: str
+    drawing_id: str
+    content: str
+    created_at: datetime
+    updated_at: datetime
