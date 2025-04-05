@@ -176,6 +176,7 @@ dev = [
     { name = "pytest-mock" },
     { name = "ruff" },
     { name = "types-passlib" },
+    { name = "types-pyjwt" },
 ]
 
 [package.metadata]
@@ -198,6 +199,7 @@ dev = [
     { name = "pytest-mock", specifier = ">=3.14.0" },
     { name = "ruff", specifier = ">=0.11.2" },
     { name = "types-passlib", specifier = ">=1.7.7.20250318" },
+    { name = "types-pyjwt", specifier = ">=1.7.1" },
 ]
 
 [[package]]
@@ -760,12 +762,33 @@ wheels = [
 ]
 
 [[package]]
+name = "types-cryptography"
+version = "3.3.23.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/18/05/a57fe8bbed10fe4b739fac6e16c4e80c5199ce2f74ae67fa7d7f6e3750da/types-cryptography-3.3.23.2.tar.gz", hash = "sha256:09cc53f273dd4d8c29fa7ad11fefd9b734126d467960162397bc5e3e604dea75", size = 15461 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b6/36/92dfe7e5056694e78caefd05b383140c74c7fcbfc63d26ee514c77f2d8a2/types_cryptography-3.3.23.2-py3-none-any.whl", hash = "sha256:b965d548f148f8e87f353ccf2b7bd92719fdf6c845ff7cedf2abb393a0643e4f", size = 30223 },
+]
+
+[[package]]
 name = "types-passlib"
 version = "1.7.7.20250318"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/4e/79/8369b2af312e102e6c48e1b899669b8a7354d3b12d6cdb712748e65fcd82/types_passlib-1.7.7.20250318.tar.gz", hash = "sha256:038c9f982ef5fb70c1954458d26cc5cbf0d76c77bf6e16d99d32a6be7600080b", size = 23327 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/eb/be/e880dffa563509ade37a48fb77238b297afc7f0a17235cc15266bae7bff8/types_passlib-1.7.7.20250318-py3-none-any.whl", hash = "sha256:a5d618acd79dbb6b84252b4aaee9e39eb4909e204f09b0f81be5aa42214117f3", size = 38077 },
+]
+
+[[package]]
+name = "types-pyjwt"
+version = "1.7.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "types-cryptography" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/45/92/f2b9e0a047aa22daf364556a61904e98fd164c07524b18487d4bf01bd858/types-PyJWT-1.7.1.tar.gz", hash = "sha256:99c1a0d94d370951f9c6e57b1c369be280b2cbfab72c0f9c0998707490f015c9", size = 3452 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5a/65/41dc35b71cbd44dbc40583ab1d7b919e7b5c269ec36b9cee8e26c5d665a0/types_PyJWT-1.7.1-py2.py3-none-any.whl", hash = "sha256:810112a84b6c060bb5bc1959a1d229830465eccffa91d8a68eeaac28fb7713ac", size = 4694 },
 ]
 
 [[package]]

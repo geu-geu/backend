@@ -23,6 +23,7 @@ dev = [
     "pytest-mock>=3.14.0",
     "ruff>=0.11.2",
     "types-passlib>=1.7.7.20250318",
+    "types-pyjwt>=1.7.1",
 ]
 
 [tool.ruff]

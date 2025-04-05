@@ -3,7 +3,7 @@ from typing import Annotated
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError
+from jwt import InvalidTokenError
 
 from app.auth.domain.user import User
 from app.auth.repositories.user_repository_impl import (
