@@ -83,31 +83,81 @@ class PostService:
     def create_post_comment(
         self, session: Session, post_comment: PostComment
     ) -> PostComment:
+        # Check if post exists
+        post = self.post_repository.find_by_id(session, post_comment.post_id)
+        if post is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Post not found",
+            )
+        
         post_comment = self.post_comment_repository.save(session, post_comment)
         return post_comment
 
     def get_post_comments(self, session: Session, post_id: str) -> list[PostComment]:
+        # Check if post exists
+        post = self.post_repository.find_by_id(session, post_id)
+        if post is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Post not found",
+            )
+        
         return self.post_comment_repository.find_all_by_post_id(session, post_id)
 
     def update_post_comment(
-        self, session: Session, post_id: str, comment_id: str, content: str
+        self, session: Session, post_id: str, comment_id: str, content: str, author_id: str
     ) -> PostComment:
+        # Check if post exists
+        post = self.post_repository.find_by_id(session, post_id)
+        if post is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Post not found",
+            )
+
         post_comment = self.post_comment_repository.find_by_id(session, comment_id)
         if post_comment is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Post comment not found"
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail="Post comment not found"
+            )
+
+        # Check if the user is the author of the comment
+        if post_comment.author_id != author_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not the author of this comment",
             )
 
         post_comment.content = content
+        post_comment.updated_at = datetime.now(UTC)
         post_comment = self.post_comment_repository.update(session, post_comment)
         return post_comment
 
     def delete_post_comment(
-        self, session: Session, post_id: str, comment_id: str
+        self, session: Session, post_id: str, comment_id: str, author_id: str
     ) -> None:
+        # Check if post exists
+        post = self.post_repository.find_by_id(session, post_id)
+        if post is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Post not found",
+            )
+
         post_comment = self.post_comment_repository.find_by_id(session, comment_id)
         if post_comment is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Post comment not found"
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail="Post comment not found"
             )
+
+        # Check if the user is the author of the comment
+        if post_comment.author_id != author_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not the author of this comment",
+            )
+
         self.post_comment_repository.delete(session, comment_id)
