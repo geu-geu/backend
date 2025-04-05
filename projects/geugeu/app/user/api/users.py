@@ -1,9 +1,9 @@
 from fastapi import APIRouter, status
 from pydantic import BaseModel
 
-from app.auth.dependencies import CurrentActiveUserDep
+from app.auth.deps import CurrentActiveUserDep
 from app.database import SessionDep
-from app.user.dependencies import UserServiceDep
+from app.user.deps import UserServiceDep
 from app.user.domain.user import User
 
 router = APIRouter(prefix="/users", tags=["users"])

@@ -7,7 +7,7 @@ from sqlmodel import Session
 
 from app.auth.domain.token import Token
 from app.auth.domain.user import User
-from app.auth.domain.user_repository import IUserRepository
+from app.auth.repositories.user_repository import IUserRepository
 from app.config import settings
 from app.security import verify_password
 

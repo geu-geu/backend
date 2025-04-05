@@ -5,15 +5,18 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 
-from app.auth.application.auth_service import AuthService
 from app.auth.domain.user import User
-from app.auth.domain.user_repository import IUserRepository
-from app.auth.infrastructure.user_repository import UserRepository
+from app.auth.repositories.user_repository_impl import (
+    IUserRepository,
+    UserRepositoryImpl,
+)
+from app.auth.services.auth_service import AuthService
 from app.config import settings
+from app.database import SessionDep
 
 
 def user_repository():
-    return UserRepository()
+    return UserRepositoryImpl()
 
 
 UserRepositoryDep = Annotated[IUserRepository, Depends(user_repository)]
@@ -29,6 +32,7 @@ AuthServiceDep = Annotated[AuthService, Depends(auth_service)]
 async def get_current_user(
     token: Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="/api/auth/login"))],
     user_repository: UserRepositoryDep,
+    session: SessionDep,
 ) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -46,7 +50,7 @@ async def get_current_user(
             raise credentials_exception
     except InvalidTokenError:
         raise credentials_exception
-    user = user_repository.find_by_email(email=email)
+    user = user_repository.find_by_email(session, email=email)
     if not user:
         raise credentials_exception
     return user

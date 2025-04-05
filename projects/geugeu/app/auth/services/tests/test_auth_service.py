@@ -5,9 +5,9 @@ from pytest_mock import MockerFixture
 from sqlmodel import Session
 from ulid import ULID
 
-from app.auth.application.auth_service import AuthService
 from app.auth.domain.user import User
-from app.auth.domain.user_repository import IUserRepository
+from app.auth.repositories.user_repository_impl import IUserRepository
+from app.auth.services.auth_service import AuthService
 from app.security import hash_password
 
 

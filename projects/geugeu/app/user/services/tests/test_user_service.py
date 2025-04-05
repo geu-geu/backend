@@ -5,15 +5,15 @@ from sqlmodel import Session
 from ulid import ULID
 
 from app.security import hash_password
-from app.user.application.user_service import UserService
 from app.user.domain.user import User
-from app.user.domain.user_repository import IUserRepository
-from app.user.infrastructure.user_repository import UserRepository
+from app.user.repositories.user_repository import IUserRepository
+from app.user.repositories.user_repository_impl import UserRepositoryImpl
+from app.user.services.user_service import UserService
 
 
 @pytest.fixture()
 def user_repository() -> IUserRepository:
-    return UserRepository()
+    return UserRepositoryImpl()
 
 
 @pytest.fixture()

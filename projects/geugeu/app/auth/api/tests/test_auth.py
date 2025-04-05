@@ -2,8 +2,8 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-from app.auth.application.auth_service import AuthService
 from app.auth.domain.token import Token
+from app.auth.services.auth_service import AuthService
 from app.main import app
 
 client = TestClient(app)

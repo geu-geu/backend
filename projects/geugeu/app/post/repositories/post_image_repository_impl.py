@@ -5,11 +5,11 @@ from ulid import ULID
 
 from app.models import PostImage as _PostImage
 from app.post.domain.post_image import PostImage
-from app.post.domain.post_image_repository import IPostImageRepository
+from app.post.repositories.post_image_repository import IPostImageRepository
 
 
 @final
-class PostImageRepository(IPostImageRepository):
+class PostImageRepositoryImpl(IPostImageRepository):
     @override
     def save(
         self, session: Session, post_id: str, image_urls: list[str]

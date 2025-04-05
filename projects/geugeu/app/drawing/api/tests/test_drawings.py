@@ -4,7 +4,7 @@ from sqlmodel import Session
 from ulid import ULID
 
 from app.drawing.domain.drawing import Drawing, DrawingStatus
-from app.drawing.domain.drawing_repository import IDrawingRepository
+from app.drawing.repositories.drawing_repository import IDrawingRepository
 
 
 def test_create_drawing(client):

@@ -5,8 +5,8 @@ from sqlmodel import Session
 
 from app.drawing.domain.drawing import Drawing, DrawingStatus
 from app.drawing.domain.drawing_image import DrawingImage
-from app.drawing.domain.drawing_image_repository import IDrawingImageRepository
-from app.drawing.domain.drawing_repository import IDrawingRepository
+from app.drawing.repositories.drawing_image_repository import IDrawingImageRepository
+from app.drawing.repositories.drawing_repository import IDrawingRepository
 
 
 class DrawingService:

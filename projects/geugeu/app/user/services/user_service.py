@@ -7,7 +7,7 @@ from ulid import ULID
 
 from app.security import hash_password
 from app.user.domain.user import User
-from app.user.domain.user_repository import IUserRepository
+from app.user.repositories.user_repository import IUserRepository
 
 
 class UserService:

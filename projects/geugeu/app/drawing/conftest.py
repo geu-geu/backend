@@ -1,20 +1,22 @@
 import pytest
 
-from app.drawing.application.drawing_service import DrawingService
-from app.drawing.domain.drawing_image_repository import IDrawingImageRepository
-from app.drawing.domain.drawing_repository import IDrawingRepository
-from app.drawing.infrastructure.drawing_image_repository import DrawingImageRepository
-from app.drawing.infrastructure.drawing_repository import DrawingRepository
+from app.drawing.repositories.drawing_image_repository import IDrawingImageRepository
+from app.drawing.repositories.drawing_image_repository_impl import (
+    DrawingImageRepositoryImpl,
+)
+from app.drawing.repositories.drawing_repository import IDrawingRepository
+from app.drawing.repositories.drawing_repository_impl import DrawingRepositoryImpl
+from app.drawing.services.drawing_service import DrawingService
 
 
 @pytest.fixture()
 def drawing_repository() -> IDrawingRepository:
-    return DrawingRepository()
+    return DrawingRepositoryImpl()
 
 
 @pytest.fixture()
 def drawing_image_repository() -> IDrawingImageRepository:
-    return DrawingImageRepository()
+    return DrawingImageRepositoryImpl()
 
 
 @pytest.fixture()

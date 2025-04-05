@@ -8,8 +8,8 @@ from app.auth.domain.user import User
 from app.main import app
 from app.post.domain.post import Post
 from app.post.domain.post_comment import PostComment
-from app.post.domain.post_comment_repository import IPostCommentRepository
-from app.post.domain.post_repository import IPostRepository
+from app.post.repositories.post_comment_repository import IPostCommentRepository
+from app.post.repositories.post_repository import IPostRepository
 
 client = TestClient(app)
 

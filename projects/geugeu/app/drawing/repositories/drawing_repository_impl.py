@@ -4,12 +4,12 @@ from typing import final, override
 from sqlmodel import Session, select
 
 from app.drawing.domain.drawing import Drawing, DrawingStatus
-from app.drawing.domain.drawing_repository import IDrawingRepository
+from app.drawing.repositories.drawing_repository import IDrawingRepository
 from app.models import Drawing as _Drawing
 
 
 @final
-class DrawingRepository(IDrawingRepository):
+class DrawingRepositoryImpl(IDrawingRepository):
     @override
     def save(self, session: Session, drawing: Drawing) -> Drawing:
         _drawing = _Drawing(

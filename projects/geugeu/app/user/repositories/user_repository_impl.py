@@ -4,11 +4,11 @@ from sqlmodel import Session, select
 
 from app.models import User as _User
 from app.user.domain.user import User
-from app.user.domain.user_repository import IUserRepository
+from app.user.repositories.user_repository import IUserRepository
 
 
 @final
-class UserRepository(IUserRepository):
+class UserRepositoryImpl(IUserRepository):
     @override
     def save(self, session: Session, user: User) -> None:
         _user = _User(

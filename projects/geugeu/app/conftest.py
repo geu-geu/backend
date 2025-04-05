@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlmodel import Session, SQLModel
 from ulid import ULID
 
-from app.auth.dependencies import get_current_active_user
+from app.auth.deps import get_current_active_user
 from app.auth.domain.user import User
 from app.database import get_db
 from app.main import app

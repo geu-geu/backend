@@ -4,12 +4,12 @@ import pytest
 from sqlmodel import Session
 from ulid import ULID
 
-from app.post.application.post_service import PostService
 from app.post.domain.post import Post
-from app.post.domain.post_comment_repository import IPostCommentRepository
 from app.post.domain.post_image import PostImage
-from app.post.domain.post_image_repository import IPostImageRepository
-from app.post.domain.post_repository import IPostRepository
+from app.post.repositories.post_comment_repository import IPostCommentRepository
+from app.post.repositories.post_image_repository import IPostImageRepository
+from app.post.repositories.post_repository import IPostRepository
+from app.post.services.post_service import PostService
 
 
 @pytest.fixture()

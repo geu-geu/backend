@@ -5,11 +5,11 @@ from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel, Field
 from ulid import ULID
 
-from app.auth.dependencies import CurrentActiveUserDep
+from app.auth.deps import CurrentActiveUserDep
 from app.database import SessionDep
-from app.drawing.application.drawing_service import DrawingService
-from app.drawing.dependencies import drawing_service
+from app.drawing.deps import drawing_service
 from app.drawing.domain.drawing import Drawing, DrawingStatus
+from app.drawing.services.drawing_service import DrawingService
 
 router = APIRouter(prefix="/drawings", tags=["drawings"])
 

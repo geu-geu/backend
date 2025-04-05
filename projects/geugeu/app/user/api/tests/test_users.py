@@ -5,18 +5,18 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 from ulid import ULID
 
-from app.auth.dependencies import get_current_active_user
+from app.auth.deps import get_current_active_user
 from app.main import app
 from app.user.domain.user import User
-from app.user.domain.user_repository import IUserRepository
-from app.user.infrastructure.user_repository import UserRepository
+from app.user.repositories.user_repository import IUserRepository
+from app.user.repositories.user_repository_impl import UserRepositoryImpl
 
 client = TestClient(app)
 
 
 @pytest.fixture()
 def user_repository():
-    return UserRepository()
+    return UserRepositoryImpl()
 
 
 @pytest.fixture()

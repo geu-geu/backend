@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.auth.application.auth_service import AuthService
-from app.auth.dependencies import auth_service
+from app.auth.deps import auth_service
+from app.auth.services.auth_service import AuthService
 from app.database import SessionDep
 
 router = APIRouter(prefix="/auth", tags=["auth"])

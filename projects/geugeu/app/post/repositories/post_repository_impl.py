@@ -4,11 +4,11 @@ from sqlmodel import Session, select
 
 from app.models import Post as _Post
 from app.post.domain.post import Post
-from app.post.domain.post_repository import IPostRepository
+from app.post.repositories.post_repository import IPostRepository
 
 
 @final
-class PostRepository(IPostRepository):
+class PostRepositoryImpl(IPostRepository):
     @override
     def save(self, session: Session, post: Post) -> Post:
         _post = _Post(

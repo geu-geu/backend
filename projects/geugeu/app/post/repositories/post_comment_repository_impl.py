@@ -4,11 +4,11 @@ from sqlmodel import Session, select
 
 from app.models import PostComment as _PostComment
 from app.post.domain.post_comment import PostComment
-from app.post.domain.post_comment_repository import IPostCommentRepository
+from app.post.repositories.post_comment_repository import IPostCommentRepository
 
 
 @final
-class PostCommentRepository(IPostCommentRepository):
+class PostCommentRepositoryImpl(IPostCommentRepository):
     @override
     def save(self, session: Session, post_comment: PostComment) -> PostComment:
         _post_comment = _PostComment(

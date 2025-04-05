@@ -2,13 +2,13 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from app.user.application.user_service import UserService
-from app.user.domain.user_repository import IUserRepository
-from app.user.infrastructure.user_repository import UserRepository
+from app.user.repositories.user_repository import IUserRepository
+from app.user.repositories.user_repository_impl import UserRepositoryImpl
+from app.user.services.user_service import UserService
 
 
 def user_repository():
-    return UserRepository()
+    return UserRepositoryImpl()
 
 
 UserRepositoryDep = Annotated[IUserRepository, Depends(user_repository)]

@@ -3,11 +3,11 @@ from typing import override
 from sqlmodel import Session, select
 
 from app.auth.domain.user import User
-from app.auth.domain.user_repository import IUserRepository
+from app.auth.repositories.user_repository import IUserRepository
 from app.models import User as _User
 
 
-class UserRepository(IUserRepository):
+class UserRepositoryImpl(IUserRepository):
     @override
     def find_by_email(self, session: Session, email: str) -> User | None:
         _user = session.exec(select(_User).where(_User.email == email)).first()

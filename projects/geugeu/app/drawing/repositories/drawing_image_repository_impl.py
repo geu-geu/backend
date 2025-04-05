@@ -4,12 +4,12 @@ from sqlmodel import Session, select
 from ulid import ULID
 
 from app.drawing.domain.drawing_image import DrawingImage
-from app.drawing.domain.drawing_image_repository import IDrawingImageRepository
+from app.drawing.repositories.drawing_image_repository import IDrawingImageRepository
 from app.models import DrawingImage as _DrawingImage
 
 
 @final
-class DrawingImageRepository(IDrawingImageRepository):
+class DrawingImageRepositoryImpl(IDrawingImageRepository):
     @override
     def save(
         self, session: Session, drawing_id: str, image_urls: list[str]

@@ -5,12 +5,12 @@ from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel, Field
 from ulid import ULID
 
-from app.auth.dependencies import CurrentActiveUserDep
+from app.auth.deps import CurrentActiveUserDep
 from app.database import SessionDep
-from app.post.application.post_service import PostService
-from app.post.dependencies import post_service
+from app.post.deps import post_service
 from app.post.domain.post import Post
 from app.post.domain.post_comment import PostComment
+from app.post.services.post_service import PostService
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
