@@ -4,7 +4,11 @@ from fastapi import HTTPException, status
 from sqlmodel import Session
 
 from app.drawing.domain.drawing import Drawing, DrawingStatus
+from app.drawing.domain.drawing_comment import DrawingComment
 from app.drawing.domain.drawing_image import DrawingImage
+from app.drawing.repositories.drawing_comment_repository import (
+    IDrawingCommentRepository,
+)
 from app.drawing.repositories.drawing_image_repository import IDrawingImageRepository
 from app.drawing.repositories.drawing_repository import IDrawingRepository
 
@@ -14,9 +18,11 @@ class DrawingService:
         self,
         drawing_repository: IDrawingRepository,
         drawing_image_repository: IDrawingImageRepository,
+        drawing_comment_repository: IDrawingCommentRepository,
     ):
         self.drawing_repository = drawing_repository
         self.drawing_image_repository = drawing_image_repository
+        self.drawing_comment_repository = drawing_comment_repository
 
     def create_drawing(
         self, session: Session, drawing: Drawing, image_urls: list[str]
@@ -108,3 +114,102 @@ class DrawingService:
         images = self.drawing_image_repository.save(session, drawing_id, image_urls)
 
         return updated_drawing, images
+
+    def create_drawing_comment(
+        self, session: Session, drawing_comment: DrawingComment
+    ) -> DrawingComment:
+        # Check if drawing exists
+        drawing = self.drawing_repository.find_by_id(
+            session, drawing_comment.drawing_id
+        )
+        if drawing is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Drawing not found",
+            )
+
+        drawing_comment = self.drawing_comment_repository.save(session, drawing_comment)
+        return drawing_comment
+
+    def get_drawing_comments(
+        self, session: Session, drawing_id: str
+    ) -> list[DrawingComment]:
+        # Check if drawing exists
+        drawing = self.drawing_repository.find_by_id(session, drawing_id)
+        if drawing is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Drawing not found",
+            )
+
+        return self.drawing_comment_repository.find_all_by_drawing_id(
+            session, drawing_id
+        )
+
+    def update_drawing_comment(
+        self,
+        session: Session,
+        drawing_id: str,
+        comment_id: str,
+        content: str,
+        author_id: str,
+    ) -> DrawingComment:
+        # Check if drawing exists
+        drawing = self.drawing_repository.find_by_id(session, drawing_id)
+        if drawing is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Drawing not found",
+            )
+
+        drawing_comment = self.drawing_comment_repository.find_by_id(
+            session, comment_id
+        )
+        if drawing_comment is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Drawing comment not found",
+            )
+
+        # Check if the user is the author of the comment
+        if drawing_comment.author_id != author_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not the author of this comment",
+            )
+
+        drawing_comment.content = content
+        drawing_comment.updated_at = datetime.now(UTC)
+        drawing_comment = self.drawing_comment_repository.update(
+            session, drawing_comment
+        )
+        return drawing_comment
+
+    def delete_drawing_comment(
+        self, session: Session, drawing_id: str, comment_id: str, author_id: str
+    ) -> None:
+        # Check if drawing exists
+        drawing = self.drawing_repository.find_by_id(session, drawing_id)
+        if drawing is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Drawing not found",
+            )
+
+        drawing_comment = self.drawing_comment_repository.find_by_id(
+            session, comment_id
+        )
+        if drawing_comment is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Drawing comment not found",
+            )
+
+        # Check if the user is the author of the comment
+        if drawing_comment.author_id != author_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not the author of this comment",
+            )
+
+        self.drawing_comment_repository.delete(session, comment_id)
