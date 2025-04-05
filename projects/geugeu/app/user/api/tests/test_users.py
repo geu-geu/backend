@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 from ulid import ULID
 
-from app.auth.deps import get_current_active_user
+from app.auth.deps import get_current_user
 from app.main import app
 from app.user.domain.user import User
 from app.user.repositories.user_repository import IUserRepository
@@ -20,7 +20,7 @@ def user_repository():
 
 
 @pytest.fixture()
-def current_active_user():
+def current_user():
     user = User(
         id=str(ULID()),
         email="user@example.com",
@@ -34,10 +34,10 @@ def current_active_user():
         updated_at=datetime.now(UTC),
     )
 
-    def override_get_current_active_user():
+    def override_get_current_user():
         return user
 
-    app.dependency_overrides[get_current_active_user] = override_get_current_active_user
+    app.dependency_overrides[get_current_user] = override_get_current_user
     yield user
     app.dependency_overrides.clear()
 
@@ -54,11 +54,9 @@ def test_signup():
     assert response.json()["email"] == payload["email"]
 
 
-def test_me(
-    session: Session, user_repository: IUserRepository, current_active_user: User
-):
+def test_me(session: Session, user_repository: IUserRepository, current_user: User):
     # given
-    user_repository.save(session, current_active_user)
+    user_repository.save(session, current_user)
 
     # when
     response = client.get("/api/users/me")

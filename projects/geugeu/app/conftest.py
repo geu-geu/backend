@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlmodel import Session, SQLModel
 from ulid import ULID
 
-from app.auth.deps import get_current_active_user
+from app.auth.deps import get_current_user
 from app.auth.domain.user import User
 from app.database import get_db
 from app.main import app
@@ -59,9 +59,9 @@ def user():
         is_active=True,
     )
 
-    def _get_current_active_user():
+    def _get_current_user():
         return user
 
-    app.dependency_overrides[get_current_active_user] = _get_current_active_user
+    app.dependency_overrides[get_current_user] = _get_current_user
     yield user
     app.dependency_overrides.clear()

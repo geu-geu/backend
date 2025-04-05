@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel, Field
 from ulid import ULID
 
-from app.auth.deps import CurrentActiveUserDep
+from app.auth.deps import CurrentUserDep
 from app.database import SessionDep
 from app.post.deps import post_service
 from app.post.domain.post import Post
@@ -41,7 +41,7 @@ async def create_post(
     body: CreatePostBody,
     post_service: Annotated[PostService, Depends(post_service)],
     session: SessionDep,
-    user: CurrentActiveUserDep,
+    user: CurrentUserDep,
 ) -> PostResponse:
     post = Post(
         id=str(ULID()),
@@ -69,7 +69,7 @@ async def get_post(
     post_id: str,
     post_service: Annotated[PostService, Depends(post_service)],
     session: SessionDep,
-    user: CurrentActiveUserDep,
+    user: CurrentUserDep,
 ) -> PostResponse:
     post, images = post_service.get_post(session, post_id=post_id)
     return PostResponse(
@@ -88,7 +88,7 @@ async def update_post(
     body: UpdatePostBody,
     post_service: Annotated[PostService, Depends(post_service)],
     session: SessionDep,
-    user: CurrentActiveUserDep,
+    user: CurrentUserDep,
 ) -> PostResponse:
     post, images = post_service.update_post(
         session,
@@ -112,7 +112,7 @@ async def delete_post(
     post_id: str,
     post_service: Annotated[PostService, Depends(post_service)],
     session: SessionDep,
-    user: CurrentActiveUserDep,
+    user: CurrentUserDep,
 ) -> None:
     post_service.delete_post(session, post_id=post_id)
 
@@ -140,7 +140,7 @@ async def create_post_comment(
     body: CreatePostCommentBody,
     post_service: Annotated[PostService, Depends(post_service)],
     session: SessionDep,
-    user: CurrentActiveUserDep,
+    user: CurrentUserDep,
 ) -> PostCommentResponse:
     post_comment = PostComment(
         id=str(ULID()),
@@ -166,7 +166,7 @@ async def get_post_comments(
     post_id: str,
     post_service: Annotated[PostService, Depends(post_service)],
     session: SessionDep,
-    user: CurrentActiveUserDep,
+    user: CurrentUserDep,
 ) -> list[PostCommentResponse]:
     post_comments = post_service.get_post_comments(session, post_id=post_id)
     return [
@@ -193,7 +193,7 @@ async def update_post_comment(
     body: UpdatePostCommentBody,
     post_service: Annotated[PostService, Depends(post_service)],
     session: SessionDep,
-    user: CurrentActiveUserDep,
+    user: CurrentUserDep,
 ) -> PostCommentResponse:
     post_comment = post_service.update_post_comment(
         session, post_id=post_id, comment_id=comment_id, content=body.content
@@ -216,6 +216,6 @@ async def delete_post_comment(
     comment_id: str,
     post_service: Annotated[PostService, Depends(post_service)],
     session: SessionDep,
-    user: CurrentActiveUserDep,
+    user: CurrentUserDep,
 ) -> None:
     post_service.delete_post_comment(session, post_id=post_id, comment_id=comment_id)

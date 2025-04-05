@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel, Field
 from ulid import ULID
 
-from app.auth.deps import CurrentActiveUserDep
+from app.auth.deps import CurrentUserDep
 from app.database import SessionDep
 from app.drawing.deps import drawing_service
 from app.drawing.domain.drawing import Drawing, DrawingStatus
@@ -45,7 +45,7 @@ async def get_drawings_by_post_id(
     post_id: str,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
     session: SessionDep,
-    user: CurrentActiveUserDep,
+    user: CurrentUserDep,
 ) -> list[DrawingResponse]:
     drawings_with_images = drawing_service.get_drawings_by_post_id(
         session, post_id=post_id
@@ -69,7 +69,7 @@ async def create_drawing(
     body: CreateDrawingBody,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
     session: SessionDep,
-    user: CurrentActiveUserDep,
+    user: CurrentUserDep,
 ) -> DrawingResponse:
     drawing = Drawing(
         id=str(ULID()),
@@ -99,7 +99,7 @@ async def get_drawing(
     drawing_id: str,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
     session: SessionDep,
-    user: CurrentActiveUserDep,
+    user: CurrentUserDep,
 ) -> DrawingResponse:
     drawing, images = drawing_service.get_drawing(session, drawing_id=drawing_id)
     return DrawingResponse(
@@ -119,7 +119,7 @@ async def update_drawing(
     body: UpdateDrawingBody,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
     session: SessionDep,
-    user: CurrentActiveUserDep,
+    user: CurrentUserDep,
 ) -> DrawingResponse:
     drawing, images = drawing_service.update_drawing(
         session,
@@ -144,7 +144,7 @@ async def complete_drawing(
     body: CompleteDrawingBody,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
     session: SessionDep,
-    user: CurrentActiveUserDep,
+    user: CurrentUserDep,
 ) -> DrawingResponse:
     drawing, images = drawing_service.complete_drawing(
         session,
@@ -168,6 +168,6 @@ async def delete_drawing(
     drawing_id: str,
     drawing_service: Annotated[DrawingService, Depends(drawing_service)],
     session: SessionDep,
-    user: CurrentActiveUserDep,
+    user: CurrentUserDep,
 ) -> None:
     drawing_service.delete_drawing(session, drawing_id=drawing_id)
