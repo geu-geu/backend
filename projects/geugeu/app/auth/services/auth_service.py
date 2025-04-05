@@ -3,6 +3,7 @@ from typing import Any
 
 import jwt
 from fastapi import HTTPException, status
+from jwt import InvalidTokenError
 from sqlmodel import Session
 
 from app.auth.domain.token import Token
@@ -52,10 +53,44 @@ class AuthService:
             expire = datetime.now(UTC) + expires_delta
         else:
             expire = datetime.now(UTC) + timedelta(minutes=15)
-        to_encode.update({"exp": expire})
+        to_encode.update({"exp": expire.timestamp()})
         encoded_jwt = jwt.encode(
-            payload=to_encode,
-            key=settings.SECRET_KEY,
-            algorithm=settings.JWT_ALGORITHM,
+            to_encode, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM
         )
-        return encoded_jwt
+        return str(encoded_jwt)
+
+    def get_current_user(
+        self,
+        token: str,
+        session: Session,
+    ) -> User:
+        credentials_exception = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": BEARER},
+        )
+        try:
+            payload = jwt.decode(
+                token,
+                settings.SECRET_KEY,
+                algorithms=[settings.JWT_ALGORITHM],
+            )
+            email = payload.get("sub")
+            if email is None:
+                raise credentials_exception
+            exp = payload.get("exp")
+            if exp is None:
+                raise credentials_exception
+            if exp < datetime.now(UTC).timestamp():
+                raise credentials_exception
+        except InvalidTokenError:
+            raise credentials_exception
+        user = self.user_repository.find_by_email(session, email=email)
+        if not user:
+            raise credentials_exception
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Inactive user",
+            )
+        return user

@@ -1,10 +1,7 @@
-from datetime import UTC, datetime
 from typing import Annotated
 
-import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
-from jwt import InvalidTokenError
 
 from app.auth.domain.user import User
 from app.auth.repositories.user_repository_impl import (
@@ -12,7 +9,6 @@ from app.auth.repositories.user_repository_impl import (
     UserRepositoryImpl,
 )
 from app.auth.services.auth_service import AuthService
-from app.config import settings
 from app.database import SessionDep
 
 
@@ -32,39 +28,10 @@ AuthServiceDep = Annotated[AuthService, Depends(auth_service)]
 
 async def get_current_user(
     token: Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="/api/auth/login"))],
-    user_repository: UserRepositoryDep,
+    auth_service: AuthServiceDep,
     session: SessionDep,
 ) -> User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(
-            token,
-            settings.SECRET_KEY,
-            algorithms=[settings.JWT_ALGORITHM],
-        )
-        email = payload.get("sub")
-        if email is None:
-            raise credentials_exception
-        exp = payload.get("exp")
-        if exp is None:
-            raise credentials_exception
-        if exp < datetime.now(UTC).timestamp():
-            raise credentials_exception
-    except InvalidTokenError:
-        raise credentials_exception
-    user = user_repository.find_by_email(session, email=email)
-    if not user:
-        raise credentials_exception
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Inactive user",
-        )
-    return user
+    return auth_service.get_current_user(token, session)
 
 
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
