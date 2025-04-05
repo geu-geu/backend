@@ -2,42 +2,21 @@ from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
-from pydantic import BaseModel, Field
 from ulid import ULID
 
 from app.auth.deps import CurrentUserDep
 from app.database import SessionDep
+from app.drawing.api.schemas.drawings import (
+    CompleteDrawingBody,
+    CreateDrawingBody,
+    DrawingResponse,
+    UpdateDrawingBody,
+)
 from app.drawing.deps import drawing_service
 from app.drawing.domain.drawing import Drawing, DrawingStatus
 from app.drawing.services.drawing_service import DrawingService
 
 router = APIRouter(prefix="/drawings", tags=["drawings"])
-
-
-class CreateDrawingBody(BaseModel):
-    post_id: str
-    content: str = ""  # 초기에는 빈 내용일 수 있음
-    image_urls: list[str] = Field(default_factory=list)
-
-
-class UpdateDrawingBody(BaseModel):
-    content: str
-    image_urls: list[str] = Field(default_factory=list)
-
-
-class CompleteDrawingBody(BaseModel):
-    content: str
-    image_urls: list[str] = Field(default_factory=list)
-
-
-class DrawingResponse(BaseModel):
-    id: str
-    post_id: str
-    content: str
-    images: list[str]
-    status: str
-    created_at: datetime
-    updated_at: datetime
 
 
 @router.get("/by-post/{post_id}", response_model=list[DrawingResponse])

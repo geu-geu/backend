@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.auth.api.auth import router as auth_router
-from app.drawing.api.drawings import router as drawings_router
-from app.post.api.posts import router as posts_router
-from app.user.api.users import router as users_router
+from app.auth.api.routes.auth import router as auth_router
+from app.drawing.api.routes.drawings import router as drawings_router
+from app.post.api.routes.posts import router as posts_router
+from app.user.api.routes.users import router as users_router
 
 app = FastAPI()
 

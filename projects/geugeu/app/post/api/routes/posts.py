@@ -2,38 +2,24 @@ from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
-from pydantic import BaseModel, Field
 from ulid import ULID
 
 from app.auth.deps import CurrentUserDep
 from app.database import SessionDep
+from app.post.api.schemas.posts import (
+    CreatePostBody,
+    CreatePostCommentBody,
+    PostCommentResponse,
+    PostResponse,
+    UpdatePostBody,
+    UpdatePostCommentBody,
+)
 from app.post.deps import post_service
 from app.post.domain.post import Post
 from app.post.domain.post_comment import PostComment
 from app.post.services.post_service import PostService
 
 router = APIRouter(prefix="/posts", tags=["posts"])
-
-
-class CreatePostBody(BaseModel):
-    title: str
-    content: str
-    image_urls: list[str] = Field(default_factory=list)
-
-
-class UpdatePostBody(BaseModel):
-    title: str
-    content: str
-    image_urls: list[str] = Field(default_factory=list)
-
-
-class PostResponse(BaseModel):
-    id: str
-    title: str
-    content: str
-    images: list[str]
-    created_at: datetime
-    updated_at: datetime
 
 
 @router.post("/", response_model=PostResponse, status_code=status.HTTP_201_CREATED)
@@ -117,19 +103,6 @@ async def delete_post(
     post_service.delete_post(session, post_id=post_id)
 
 
-class CreatePostCommentBody(BaseModel):
-    content: str
-
-
-class PostCommentResponse(BaseModel):
-    id: str
-    author_id: str
-    post_id: str
-    content: str
-    created_at: datetime
-    updated_at: datetime
-
-
 @router.post(
     "/{post_id}/comments",
     response_model=PostCommentResponse,
@@ -180,10 +153,6 @@ async def get_post_comments(
         )
         for post_comment in post_comments
     ]
-
-
-class UpdatePostCommentBody(BaseModel):
-    content: str
 
 
 @router.put("/{post_id}/comments/{comment_id}", response_model=PostCommentResponse)

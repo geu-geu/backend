@@ -1,18 +1,12 @@
 from fastapi import APIRouter, status
-from pydantic import BaseModel
 
 from app.auth.deps import CurrentUserDep
 from app.database import SessionDep
+from app.user.api.schemas.users import SignupBody
 from app.user.deps import UserServiceDep
 from app.user.domain.user import User
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-
-class SignupBody(BaseModel):
-    email: str
-    password: str
-    name: str | None = None
 
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
