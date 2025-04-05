@@ -90,7 +90,7 @@ class PostService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Post not found",
             )
-        
+
         post_comment = self.post_comment_repository.save(session, post_comment)
         return post_comment
 
@@ -102,11 +102,16 @@ class PostService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Post not found",
             )
-        
+
         return self.post_comment_repository.find_all_by_post_id(session, post_id)
 
     def update_post_comment(
-        self, session: Session, post_id: str, comment_id: str, content: str, author_id: str
+        self,
+        session: Session,
+        post_id: str,
+        comment_id: str,
+        content: str,
+        author_id: str,
     ) -> PostComment:
         # Check if post exists
         post = self.post_repository.find_by_id(session, post_id)
@@ -119,8 +124,7 @@ class PostService:
         post_comment = self.post_comment_repository.find_by_id(session, comment_id)
         if post_comment is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, 
-                detail="Post comment not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Post comment not found"
             )
 
         # Check if the user is the author of the comment
@@ -149,8 +153,7 @@ class PostService:
         post_comment = self.post_comment_repository.find_by_id(session, comment_id)
         if post_comment is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, 
-                detail="Post comment not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Post comment not found"
             )
 
         # Check if the user is the author of the comment

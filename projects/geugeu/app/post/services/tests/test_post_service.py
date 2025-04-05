@@ -422,9 +422,7 @@ def test_delete_post_comment_with_nonexistent_post(
 ) -> None:
     # when & then
     with pytest.raises(HTTPException) as exc_info:
-        post_service.delete_post_comment(
-            session, str(ULID()), str(ULID()), str(ULID())
-        )
+        post_service.delete_post_comment(session, str(ULID()), str(ULID()), str(ULID()))
     assert exc_info.value.status_code == 404
     assert exc_info.value.detail == "Post not found"
 
@@ -447,9 +445,7 @@ def test_delete_post_comment_with_nonexistent_comment(
 
     # when & then
     with pytest.raises(HTTPException) as exc_info:
-        post_service.delete_post_comment(
-            session, post.id, str(ULID()), str(ULID())
-        )
+        post_service.delete_post_comment(session, post.id, str(ULID()), str(ULID()))
     assert exc_info.value.status_code == 404
     assert exc_info.value.detail == "Post comment not found"
 
@@ -483,8 +479,6 @@ def test_delete_post_comment_with_unauthorized_user(
 
     # when & then
     with pytest.raises(HTTPException) as exc_info:
-        post_service.delete_post_comment(
-            session, post.id, post_comment.id, str(ULID())
-        )
+        post_service.delete_post_comment(session, post.id, post_comment.id, str(ULID()))
     assert exc_info.value.status_code == 403
     assert exc_info.value.detail == "You are not the author of this comment"

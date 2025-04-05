@@ -76,14 +76,14 @@ class PostCommentRepositoryImpl(IPostCommentRepository):
         _post_comment = session.get(_PostComment, post_comment.id)
         if _post_comment is None:
             raise ValueError(f"Post comment with id {post_comment.id} not found")
-        
+
         _post_comment.content = post_comment.content
         _post_comment.updated_at = post_comment.updated_at
-        
+
         session.add(_post_comment)
         session.commit()
         session.refresh(_post_comment)
-        
+
         return PostComment(
             id=_post_comment.id,
             author_id=_post_comment.author_id,
@@ -98,6 +98,6 @@ class PostCommentRepositoryImpl(IPostCommentRepository):
         _post_comment = session.get(_PostComment, comment_id)
         if _post_comment is None:
             raise ValueError(f"Post comment with id {comment_id} not found")
-        
+
         session.delete(_post_comment)
         session.commit()

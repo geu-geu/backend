@@ -165,11 +165,11 @@ async def update_post_comment(
     user: CurrentUserDep,
 ) -> PostCommentResponse:
     post_comment = post_service.update_post_comment(
-        session, 
-        post_id=post_id, 
-        comment_id=comment_id, 
+        session,
+        post_id=post_id,
+        comment_id=comment_id,
         content=body.content,
-        author_id=user.id
+        author_id=user.id,
     )
     return PostCommentResponse(
         id=post_comment.id,
@@ -192,8 +192,5 @@ async def delete_post_comment(
     user: CurrentUserDep,
 ) -> None:
     post_service.delete_post_comment(
-        session, 
-        post_id=post_id, 
-        comment_id=comment_id,
-        author_id=user.id
+        session, post_id=post_id, comment_id=comment_id, author_id=user.id
     )
