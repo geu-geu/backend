@@ -11,6 +11,7 @@ from app.drawing.repositories.drawing_comment_repository import (
 )
 from app.drawing.repositories.drawing_image_repository import IDrawingImageRepository
 from app.drawing.repositories.drawing_repository import IDrawingRepository
+from app.drawing.repositories.post_repository import IPostRepository
 
 
 class DrawingService:
@@ -19,14 +20,22 @@ class DrawingService:
         drawing_repository: IDrawingRepository,
         drawing_image_repository: IDrawingImageRepository,
         drawing_comment_repository: IDrawingCommentRepository,
+        post_repository: IPostRepository,
     ):
         self.drawing_repository = drawing_repository
         self.drawing_image_repository = drawing_image_repository
         self.drawing_comment_repository = drawing_comment_repository
+        self.post_repository = post_repository
 
     def create_drawing(
         self, session: Session, drawing: Drawing, image_urls: list[str]
     ) -> tuple[Drawing, list[DrawingImage]]:
+        post = self.post_repository.find_by_id(session, drawing.post_id)
+        if post is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Post not found",
+            )
         drawing = self.drawing_repository.save(session, drawing)
         images = self.drawing_image_repository.save(session, drawing.id, image_urls)
         return drawing, images

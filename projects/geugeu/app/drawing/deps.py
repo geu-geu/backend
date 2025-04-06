@@ -12,6 +12,8 @@ from app.drawing.repositories.drawing_image_repository_impl import (
 )
 from app.drawing.repositories.drawing_repository import IDrawingRepository
 from app.drawing.repositories.drawing_repository_impl import DrawingRepositoryImpl
+from app.drawing.repositories.post_repository import IPostRepository
+from app.drawing.repositories.post_repository_impl import PostRepositoryImpl
 from app.drawing.services.drawing_service import DrawingService
 
 
@@ -27,6 +29,10 @@ def drawing_comment_repository() -> IDrawingCommentRepository:
     return DrawingCommentRepositoryImpl()
 
 
+def post_repository() -> IPostRepository:
+    return PostRepositoryImpl()
+
+
 def drawing_service(
     drawing_repository: IDrawingRepository = Depends(drawing_repository),
     drawing_image_repository: IDrawingImageRepository = Depends(
@@ -35,9 +41,11 @@ def drawing_service(
     drawing_comment_repository: IDrawingCommentRepository = Depends(
         drawing_comment_repository
     ),
+    post_repository: IPostRepository = Depends(post_repository),
 ) -> DrawingService:
     return DrawingService(
         drawing_repository=drawing_repository,
         drawing_image_repository=drawing_image_repository,
         drawing_comment_repository=drawing_comment_repository,
+        post_repository=post_repository,
     )

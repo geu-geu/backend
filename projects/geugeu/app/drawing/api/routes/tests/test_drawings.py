@@ -1,18 +1,36 @@
 from datetime import UTC, datetime
+from unittest.mock import Mock
 
+import pytest
 from sqlmodel import Session
 from ulid import ULID
 
 from app.auth.domain.user import User
+from app.drawing.deps import post_repository
 from app.drawing.domain.drawing import Drawing, DrawingStatus
 from app.drawing.domain.drawing_comment import DrawingComment
+from app.drawing.domain.post import Post
 from app.drawing.repositories.drawing_comment_repository import (
     IDrawingCommentRepository,
 )
 from app.drawing.repositories.drawing_repository import IDrawingRepository
+from app.drawing.repositories.post_repository import IPostRepository
+from app.main import app
 
 
-def test_create_drawing(client):
+@pytest.fixture()
+def override_post_repository():
+    def _post_repository():
+        mock = Mock(spec=IPostRepository)
+        mock.find_by_id.side_effect = lambda session, id: Post(id=id)
+        return mock
+
+    app.dependency_overrides[post_repository] = _post_repository
+    yield
+    app.dependency_overrides.clear()
+
+
+def test_create_drawing(client, override_post_repository):
     # given
     post_id = str(ULID())
     content = "Test drawing content"
