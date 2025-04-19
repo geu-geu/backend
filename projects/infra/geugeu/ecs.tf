@@ -30,8 +30,8 @@ resource "aws_iam_role" "ecs_task_execution" {
 
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy_attachment" {
   role       = aws_iam_role.ecs_task_execution.name
-  count      = length(var.ecs_task_execution_policy_arns)
-  policy_arn = var.ecs_task_execution_policy_arns[count.index]
+  count      = length(local.ecs_task_execution_policy_arns)
+  policy_arn = local.ecs_task_execution_policy_arns[count.index]
 }
 
 resource "aws_iam_role" "ecs_task" {

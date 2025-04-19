@@ -30,14 +30,6 @@ variable "cidr_private" {
   }
 }
 
-variable "ecs_task_execution_policy_arns" {
-  type = list(string)
-  default = [
-    "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
-    "arn:aws:iam::aws:policy/SecretsManagerReadWrite",
-  ]
-}
-
 variable "ecs_task_policy_arns" {
   type    = list(string)
   default = []
