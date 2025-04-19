@@ -48,5 +48,6 @@ variable "secrets" {
     "POSTGRES_DB",
     "POSTGRES_HOST",
     "POSTGRES_PORT",
+    "S3_BUCKET_NAME",
   ]
 }
