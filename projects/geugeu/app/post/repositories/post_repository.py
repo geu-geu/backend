@@ -11,6 +11,10 @@ class IPostRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def find_all_by_author_id(self, session: Session, author_id: str) -> list[Post]:
+        raise NotImplementedError
+
+    @abstractmethod
     def find_by_id(self, session: Session, id: str) -> Post | None:
         raise NotImplementedError
 

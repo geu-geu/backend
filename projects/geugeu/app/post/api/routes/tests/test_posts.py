@@ -36,6 +36,41 @@ def test_create_post():
     assert response.json()["images"] == image_urls
 
 
+def test_get_posts(post_repository: IPostRepository, session: Session, user: User):
+    # given
+    posts = [
+        Post(
+            id=str(ULID()),
+            author_id=user.id,
+            title=f"title_{i}",
+            content=f"content_{i}",
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
+        )
+        for i in range(3)
+    ]
+    for post in posts:
+        post_repository.save(session, post)
+
+    other = str(ULID())
+    other_post = Post(
+        id=str(ULID()),
+        author_id=other,
+        title="title",
+        content="content",
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    post_repository.save(session, other_post)
+
+    # when
+    response = client.get("/api/posts")
+
+    # then
+    assert response.status_code == 200
+    assert len(response.json()["items"]) == 3
+
+
 def test_get_post(post_repository: IPostRepository, session: Session):
     # given
     post = Post(

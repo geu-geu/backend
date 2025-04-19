@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 from sqlmodel import Session
 
+from app.post.api.schemas.posts import PostListResponse, PostResponse
 from app.post.domain.post import Post
 from app.post.domain.post_comment import PostComment
 from app.post.domain.post_image import PostImage
@@ -28,6 +29,22 @@ class PostService:
         post = self.post_repository.save(session, post)
         images = self.post_image_repository.save(session, post.id, image_urls)
         return post, images
+
+    def get_posts(self, session: Session, author_id: str) -> PostListResponse:
+        posts = self.post_repository.find_all_by_author_id(session, author_id)
+        items = []
+        for post in posts:
+            images = self.post_image_repository.find_all_by_post_id(session, post.id)
+            item = PostResponse(
+                id=post.id,
+                title=post.title,
+                content=post.content,
+                images=[image.image_url for image in images],
+                created_at=post.created_at,
+                updated_at=post.updated_at,
+            )
+            items.append(item)
+        return PostListResponse(items=items)
 
     def get_post(self, session: Session, post_id: str) -> tuple[Post, list[PostImage]]:
         post = self.post_repository.find_by_id(session, post_id)

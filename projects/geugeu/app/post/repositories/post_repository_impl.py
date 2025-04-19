@@ -25,6 +25,21 @@ class PostRepositoryImpl(IPostRepository):
         return Post(**_post.model_dump())
 
     @override
+    def find_all_by_author_id(self, session: Session, author_id: str) -> list[Post]:
+        _posts = session.exec(select(_Post).where(_Post.author_id == author_id)).all()
+        return [
+            Post(
+                id=p.id,
+                author_id=p.author_id,
+                title=p.title,
+                content=p.content,
+                created_at=p.created_at,
+                updated_at=p.updated_at,
+            )
+            for p in _posts
+        ]
+
+    @override
     def find_by_id(self, session: Session, id: str) -> Post | None:
         _post = session.exec(select(_Post).where(_Post.id == id)).first()
         if not _post:

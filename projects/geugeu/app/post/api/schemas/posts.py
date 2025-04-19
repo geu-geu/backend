@@ -24,6 +24,10 @@ class PostResponse(BaseModel):
     updated_at: datetime
 
 
+class PostListResponse(BaseModel):
+    items: list[PostResponse]
+
+
 class UpdatePostCommentBody(BaseModel):
     content: str
 

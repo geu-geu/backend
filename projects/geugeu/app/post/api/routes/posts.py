@@ -10,6 +10,7 @@ from app.post.api.schemas.posts import (
     CreatePostBody,
     CreatePostCommentBody,
     PostCommentResponse,
+    PostListResponse,
     PostResponse,
     UpdatePostBody,
     UpdatePostCommentBody,
@@ -48,6 +49,15 @@ async def create_post(
         created_at=post.created_at,
         updated_at=post.updated_at,
     )
+
+
+@router.get("")
+async def get_posts(
+    post_service: Annotated[PostService, Depends(post_service)],
+    session: SessionDep,
+    user: CurrentUserDep,
+) -> PostListResponse:
+    return post_service.get_posts(session, user.id)
 
 
 @router.get("/{post_id}", response_model=PostResponse)
