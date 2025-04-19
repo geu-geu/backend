@@ -13,3 +13,7 @@ class IUserRepository(ABC):
     @abstractmethod
     def find_by_id(self, session: Session, id: str) -> User | None:
         raise NotImplementedError
+
+    @abstractmethod
+    def update(self, session: Session, user: User) -> User:
+        raise NotImplementedError

@@ -42,3 +42,13 @@ class UserService:
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
         return user
+
+    def update_profile_image(
+        self, session: Session, id: str, profile_image_url: str
+    ) -> User:
+        user = self.user_repository.find_by_id(session, id)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        user.profile_image_url = profile_image_url
+        user.updated_at = datetime.now(UTC)
+        return self.user_repository.update(session, user)

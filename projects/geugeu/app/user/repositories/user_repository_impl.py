@@ -30,3 +30,21 @@ class UserRepositoryImpl(IUserRepository):
         if not _user:
             return None
         return User(**_user.model_dump())
+
+    @override
+    def update(self, session: Session, user: User) -> User:
+        _user = session.exec(select(_User).where(_User.id == user.id)).first()
+        if not _user:
+            raise ValueError(f"User with id {user.id} not found")
+        _user.email = user.email
+        _user.name = user.name
+        _user.password = user.password
+        _user.is_admin = user.is_admin
+        _user.is_active = user.is_active
+        _user.is_verified = user.is_verified
+        _user.profile_image_url = user.profile_image_url
+        _user.updated_at = user.updated_at
+        session.add(_user)
+        session.commit()
+        session.refresh(_user)
+        return User(**_user.model_dump())

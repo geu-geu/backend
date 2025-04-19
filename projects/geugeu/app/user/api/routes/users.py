@@ -4,7 +4,11 @@ from fastapi import APIRouter, status
 
 from app.auth.deps import CurrentUserDep
 from app.database import SessionDep
-from app.user.api.schemas.users import CreateProfileImageUploadURLBody, SignupBody
+from app.user.api.schemas.users import (
+    CreateProfileImageUploadURLBody,
+    SignupBody,
+    UpdateProfileImageBody,
+)
 from app.user.deps import UserServiceDep
 from app.user.domain.user import User
 from app.utils import create_presigned_url
@@ -28,6 +32,20 @@ async def me(
     session: SessionDep,
 ) -> User:
     return user_service.get_user(session, current_user.id)
+
+
+@router.put("/me/profile-image")
+async def update_profile_image(
+    user_service: UserServiceDep,
+    current_user: CurrentUserDep,
+    session: SessionDep,
+    body: UpdateProfileImageBody,
+) -> User:
+    return user_service.update_profile_image(
+        session,
+        current_user.id,
+        body.profile_image_url,
+    )
 
 
 @router.post("/me/profile-image/upload-url")

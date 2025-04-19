@@ -9,5 +9,9 @@ class SignupBody(BaseModel):
     name: str | None = None
 
 
+class UpdateProfileImageBody(BaseModel):
+    profile_image_url: str
+
+
 class CreateProfileImageUploadURLBody(BaseModel):
     file_extension: Literal[".png", ".jpeg", ".jpg", ".webp"]

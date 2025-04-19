@@ -63,3 +63,21 @@ def test_me(session: Session, user_repository: IUserRepository, current_user: Us
 
     # then
     assert response.status_code == 200
+
+
+def test_update_profile_image(
+    session: Session, user_repository: IUserRepository, current_user: User
+):
+    # given
+    user_repository.save(session, current_user)
+    new_profile_image_url = "https://example.com/profile-image.png"
+
+    # when
+    response = client.put(
+        "/api/users/me/profile-image",
+        json={"profile_image_url": new_profile_image_url},
+    )
+
+    # then
+    assert response.status_code == 200
+    assert response.json()["profile_image_url"] == new_profile_image_url
