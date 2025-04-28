@@ -11,3 +11,6 @@ dependencies = [
     "pydantic-settings>=2.9.1",
     "sqlmodel>=0.0.24",
 ]
+
+[tool.ruff]
+exclude = ["migrations"]
