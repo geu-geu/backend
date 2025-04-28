@@ -30,6 +30,13 @@ def create_user(session: Session, schema: SignupSchema):
     return user
 
 
+def get_user(session: Session, code: str):
+    user = session.exec(select(User).where(User.code == code, User.is_active)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
 def update_user(session: Session, user: User, schema: UserUpdateSchema):
     user.name = schema.name
     session.add(user)

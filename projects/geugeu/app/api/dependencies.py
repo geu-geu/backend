@@ -5,11 +5,12 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from app.core.config import settings
 from app.core.db import get_db
 from app.core.security import ALGORITHM
+from app.crud.users import get_user
 from app.models import User
 from app.schemas.users import TokenPayload
 
@@ -28,7 +29,7 @@ def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    user = session.exec(select(User).where(User.code == token_data.sub)).first()
+    user = get_user(session, token_data.sub) if token_data.sub else None
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if not user.is_active:
