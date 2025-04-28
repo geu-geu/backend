@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from fastapi import HTTPException
 from sqlmodel import Session, select
 
+from app.core.security import get_password_hash
 from app.models import User
 from app.schemas.users import SignupSchema
 from app.utils import generate_code
@@ -16,7 +17,7 @@ def create_user(session: Session, schema: SignupSchema):
         code=generate_code(),
         email=schema.email,
         name=schema.name,
-        password=schema.password,
+        password=get_password_hash(schema.password),
         is_admin=False,
         is_active=True,
         profile_image_url=None,
