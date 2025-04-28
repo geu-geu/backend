@@ -18,5 +18,9 @@ class UserSchema(BaseModel):
     updated_at: datetime
 
 
+class UserUpdateSchema(BaseModel):
+    name: str | None = None
+
+
 class TokenPayload(BaseModel):
     sub: str | None = None

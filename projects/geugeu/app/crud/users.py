@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 
 from app.core.security import get_password_hash
 from app.models import User
-from app.schemas.users import SignupSchema
+from app.schemas.users import SignupSchema, UserUpdateSchema
 from app.utils import generate_code
 
 
@@ -24,6 +24,14 @@ def create_user(session: Session, schema: SignupSchema):
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC),
     )
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+def update_user(session: Session, user: User, schema: UserUpdateSchema):
+    user.name = schema.name
     session.add(user)
     session.commit()
     session.refresh(user)

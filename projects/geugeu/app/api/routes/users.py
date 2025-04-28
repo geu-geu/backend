@@ -5,9 +5,9 @@ from sqlmodel import Session
 
 from app.api.dependencies import get_current_user
 from app.core.db import get_db
-from app.crud.users import create_user
+from app.crud.users import create_user, update_user
 from app.models import User
-from app.schemas.users import SignupSchema, UserSchema
+from app.schemas.users import SignupSchema, UserSchema, UserUpdateSchema
 
 router = APIRouter()
 
@@ -25,9 +25,13 @@ async def get_me(current_user: Annotated[User, Depends(get_current_user)]):
     return current_user
 
 
-@router.put("/me")
-async def update_me():
-    raise NotImplementedError
+@router.put("/me", response_model=UserSchema)
+async def update_me(
+    schema: UserUpdateSchema,
+    session: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    return update_user(session, current_user, schema)
 
 
 @router.delete("/me")
