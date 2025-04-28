@@ -9,6 +9,8 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    SECRET_KEY: str
+
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_HOST: str
