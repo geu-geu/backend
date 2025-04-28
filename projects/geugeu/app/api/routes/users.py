@@ -5,7 +5,7 @@ from sqlmodel import Session
 
 from app.api.dependencies import get_current_user
 from app.core.db import get_db
-from app.crud.users import create_user, update_user
+from app.crud.users import create_user, delete_user, update_user
 from app.models import User
 from app.schemas.users import SignupSchema, UserSchema, UserUpdateSchema
 
@@ -34,6 +34,9 @@ async def update_me(
     return update_user(session, current_user, schema)
 
 
-@router.delete("/me")
-async def delete_me():
-    raise NotImplementedError
+@router.delete("/me", status_code=204)
+async def delete_me(
+    session: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    return delete_user(session, current_user)

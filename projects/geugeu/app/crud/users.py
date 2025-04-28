@@ -43,3 +43,9 @@ def update_user(session: Session, user: User, schema: UserUpdateSchema):
     session.commit()
     session.refresh(user)
     return user
+
+
+def delete_user(session: Session, user: User):
+    user.is_active = False
+    session.add(user)
+    session.commit()
