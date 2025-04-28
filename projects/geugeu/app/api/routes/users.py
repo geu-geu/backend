@@ -3,8 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
+from app.api.dependencies import get_current_user
 from app.core.db import get_db
 from app.crud.users import create_user
+from app.models import User
 from app.schemas.users import SignupSchema, UserSchema
 
 router = APIRouter()
@@ -18,9 +20,9 @@ async def sign_up(
     return create_user(session, schema)
 
 
-@router.get("/me")
-async def get_me():
-    raise NotImplementedError
+@router.get("/me", response_model=UserSchema)
+async def get_me(current_user: Annotated[User, Depends(get_current_user)]):
+    return current_user
 
 
 @router.put("/me")

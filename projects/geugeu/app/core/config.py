@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int
     POSTGRES_DB: str
 
+    TOKEN_URL: str = "/api/auth/login"
+
     @property
     def POSTGRES_DATABASE_URL(self) -> str:
         return MultiHostUrl.build(
