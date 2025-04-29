@@ -90,6 +90,13 @@ resource "aws_ecs_task_definition" "main" {
           max-buffer-size       = "1m"
         }
       }
+
+      secrets = [
+        for key in local.secrets : {
+          name      = key
+          valueFrom = "${aws_secretsmanager_secret.main.arn}:${key}::"
+        }
+      ]
     }
   ])
 

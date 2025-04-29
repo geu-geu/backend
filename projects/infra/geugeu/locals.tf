@@ -18,4 +18,12 @@ locals {
     "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
   ]
   ecs_task_policy_arns = []
+  secrets = [
+    "SECRET_KEY",
+    "POSTGRES_USER",
+    "POSTGRES_PASSWORD",
+    "POSTGRES_DB",
+    "POSTGRES_HOST",
+    "POSTGRES_PORT",
+  ]
 }
