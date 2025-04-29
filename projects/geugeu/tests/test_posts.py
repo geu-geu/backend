@@ -85,3 +85,25 @@ def test_update_post(client, session, authorized_user):
     # then
     assert response.status_code == 200
     assert response.json()["title"] == new_title
+
+
+def test_delete_post(client, session, authorized_user):
+    # given
+    post = Post(
+        id=1,
+        code="abcd123",
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    session.add(post)
+
+    # when
+    response = client.delete(f"/api/posts/{post.code}")
+
+    # then
+    assert response.status_code == 204
+    session.refresh(post)
+    assert post.is_deleted

@@ -104,3 +104,9 @@ def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSc
         created_at=post.created_at,
         updated_at=post.updated_at,
     )
+
+
+def delete_post(session: Session, code: str) -> None:
+    post = session.exec(select(Post).where(Post.code == code)).one()
+    post.is_deleted = True
+    session.commit()

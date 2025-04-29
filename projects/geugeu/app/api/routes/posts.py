@@ -48,6 +48,10 @@ async def update_post(
     return crud.update_post(session, post_code, schema)
 
 
-@router.delete("/{post_code}")
-async def delete_post(post_code: str):
-    raise NotImplementedError
+@router.delete("/{post_code}", status_code=204)
+async def delete_post(
+    post_code: str,
+    session: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    crud.delete_post(session, post_code)
