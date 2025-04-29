@@ -62,3 +62,26 @@ def test_get_post(client, session, authorized_user):
     assert response.status_code == 200
     assert response.json()["title"] == post.title
     assert response.json()["content"] == post.content
+
+
+def test_update_post(client, session, authorized_user):
+    # given
+    post = Post(
+        id=1,
+        code="abcd123",
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    session.add(post)
+
+    new_title = "new title"
+
+    # when
+    response = client.put(f"/api/posts/{post.code}", json={"title": new_title})
+
+    # then
+    assert response.status_code == 200
+    assert response.json()["title"] == new_title

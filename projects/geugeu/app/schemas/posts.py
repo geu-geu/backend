@@ -27,3 +27,8 @@ class PostSchema(BaseModel):
 class PostListSchema(BaseModel):
     count: int
     items: list[PostSchema]
+
+
+class UpdatePostSchema(BaseModel):
+    title: str
+    content: str = ""

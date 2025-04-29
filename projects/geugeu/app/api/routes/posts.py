@@ -7,7 +7,7 @@ from app.api.dependencies import get_current_user
 from app.core.db import get_db
 from app.crud import posts as crud
 from app.models import User
-from app.schemas.posts import CreatePostSchema
+from app.schemas.posts import CreatePostSchema, UpdatePostSchema
 
 router = APIRouter()
 
@@ -39,8 +39,13 @@ async def get_post(
 
 
 @router.put("/{post_code}")
-async def update_post(post_code: str):
-    raise NotImplementedError
+async def update_post(
+    post_code: str,
+    schema: UpdatePostSchema,
+    session: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    return crud.update_post(session, post_code, schema)
 
 
 @router.delete("/{post_code}")

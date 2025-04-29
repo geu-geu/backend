@@ -3,7 +3,13 @@ from datetime import datetime
 from sqlmodel import Session, select
 
 from app.models import Post, User
-from app.schemas.posts import CreatePostSchema, PostListSchema, PostSchema, UserSchema
+from app.schemas.posts import (
+    CreatePostSchema,
+    PostListSchema,
+    PostSchema,
+    UpdatePostSchema,
+    UserSchema,
+)
 from app.utils import generate_code
 
 
@@ -62,6 +68,29 @@ def get_posts(session: Session) -> PostListSchema:
 def get_post(session: Session, code: str) -> PostSchema:
     post = session.exec(select(Post).where(Post.code == code)).one()
     author = session.exec(select(User).where(User.id == post.author_id)).one()
+    return PostSchema(
+        code=post.code,
+        author=UserSchema(
+            code=author.code,
+            email=author.email,
+            nickname=author.nickname,
+            profile_image_url=author.profile_image_url,
+        ),
+        title=post.title,
+        content=post.content,
+        created_at=post.created_at,
+        updated_at=post.updated_at,
+    )
+
+
+def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSchema:
+    post = session.exec(select(Post).where(Post.code == code)).one()
+    author = session.exec(select(User).where(User.id == post.author_id)).one()
+    post.title = schema.title
+    post.content = schema.content
+    session.commit()
+    session.refresh(post)
+
     return PostSchema(
         code=post.code,
         author=UserSchema(
