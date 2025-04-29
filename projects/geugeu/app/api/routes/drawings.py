@@ -22,8 +22,11 @@ async def create_drawing(
 
 
 @router.get("")
-async def get_drawings():
-    raise NotImplementedError
+async def get_drawings(
+    session: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    return crud.get_drawings(session)
 
 
 @router.get("/{drawing_code}")

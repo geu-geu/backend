@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from app.models import Post
+from app.models import Drawing, Post
 
 
 def test_create_drawing(client, session, authorized_user):
@@ -38,3 +38,39 @@ def test_create_drawing(client, session, authorized_user):
     assert response.json()["author"]["code"] == authorized_user.code
     assert response.json()["content"] == content
     assert response.json()["image_urls"] == image_urls
+
+
+def test_get_drawings(client, session, authorized_user):
+    # given
+    post = Post(
+        id=1,
+        code="abcd123",
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    session.add(post)
+
+    drawings = [
+        Drawing(
+            id=i,
+            code=f"abcd{i}",
+            post_id=post.id,
+            author_id=authorized_user.id,
+            content="test content",
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
+        )
+        for i in range(1, 4)
+    ]
+    session.add_all(drawings)
+
+    # when
+    response = client.get("/api/drawings")
+
+    # then
+    assert response.status_code == 200
+    assert response.json()["count"] == 3
+    assert len(response.json()["items"]) == 3

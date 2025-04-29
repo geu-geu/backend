@@ -28,3 +28,8 @@ class DrawingSchema(BaseModel):
     image_urls: list[str]
     created_at: datetime
     updated_at: datetime
+
+
+class DrawingListSchema(BaseModel):
+    count: int
+    items: list[DrawingSchema]

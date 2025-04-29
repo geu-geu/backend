@@ -5,6 +5,7 @@ from sqlmodel import Session, select
 from app.models import Drawing, DrawingImage, Post, User
 from app.schemas.drawings import (
     CreateDrawingSchema,
+    DrawingListSchema,
     DrawingSchema,
     PostSchema,
     UserSchema,
@@ -49,4 +50,34 @@ def create_drawing(
         image_urls=[drawing_image.image_url for drawing_image in drawing_images],
         created_at=drawing.created_at,
         updated_at=drawing.updated_at,
+    )
+
+
+def get_drawings(session: Session) -> DrawingListSchema:
+    drawings = session.exec(select(Drawing).order_by(Drawing.id.desc())).all()
+    results = []
+    for drawing in drawings:
+        post = session.exec(select(Post).where(Post.id == drawing.post_id)).one()
+        author = session.exec(select(User).where(User.id == drawing.author_id)).one()
+        images = session.exec(
+            select(DrawingImage).where(DrawingImage.drawing_id == drawing.id)
+        ).all()
+        result = DrawingSchema(
+            code=drawing.code,
+            post=PostSchema(code=post.code),
+            author=UserSchema(
+                code=author.code,
+                email=author.email,
+                nickname=author.nickname,
+                profile_image_url=author.profile_image_url,
+            ),
+            content=drawing.content,
+            image_urls=[drawing_image.image_url for drawing_image in images],
+            created_at=drawing.created_at,
+            updated_at=drawing.updated_at,
+        )
+        results.append(result)
+    return DrawingListSchema(
+        count=len(drawings),
+        items=results,
     )
