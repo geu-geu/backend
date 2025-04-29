@@ -7,12 +7,12 @@ from app.api.dependencies import get_current_user
 from app.core.db import get_db
 from app.crud import drawings as crud
 from app.models import User
-from app.schemas.drawings import CreateDrawingSchema, DrawingSchema
+from app.schemas.drawings import CreateDrawingSchema
 
 router = APIRouter()
 
 
-@router.post("", response_model=DrawingSchema)
+@router.post("", status_code=201)
 async def create_drawing(
     schema: CreateDrawingSchema,
     session: Annotated[Session, Depends(get_db)],
