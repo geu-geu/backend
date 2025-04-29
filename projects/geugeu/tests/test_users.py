@@ -41,11 +41,30 @@ def test_get_me(client, session):
     )
 
 
-def create_user(session: Session, email: str, password: str) -> User:
+def test_update_me(client, session):
+    # given
+    old_nickname = "old"
+    new_nickname = "new"
+
+    user = create_user(session, "user@example.com", "P@ssw0rd1234", old_nickname)
+    app.dependency_overrides[get_current_user] = lambda: user
+
+    # when
+    response = client.put("/api/users/me", json={"nickname": new_nickname})
+
+    # then
+    assert response.status_code == 200
+    assert response.json()["nickname"] == new_nickname
+
+
+def create_user(
+    session: Session, email: str, password: str, nickname: str | None = None
+) -> User:
     user = User(
         code="abcd123",
         email=email,
         password=password,
+        nickname=nickname,
         is_active=True,
         is_admin=False,
         profile_image_url=None,
