@@ -30,8 +30,12 @@ async def get_posts(
 
 
 @router.get("/{post_code}")
-async def get_post(post_code: str):
-    raise NotImplementedError
+async def get_post(
+    post_code: str,
+    session: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    return crud.get_post(session, post_code)
 
 
 @router.put("/{post_code}")

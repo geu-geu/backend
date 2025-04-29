@@ -57,3 +57,21 @@ def get_posts(session: Session) -> PostListSchema:
         count=len(posts),
         items=results,
     )
+
+
+def get_post(session: Session, code: str) -> PostSchema:
+    post = session.exec(select(Post).where(Post.code == code)).one()
+    author = session.exec(select(User).where(User.id == post.author_id)).one()
+    return PostSchema(
+        code=post.code,
+        author=UserSchema(
+            code=author.code,
+            email=author.email,
+            nickname=author.nickname,
+            profile_image_url=author.profile_image_url,
+        ),
+        title=post.title,
+        content=post.content,
+        created_at=post.created_at,
+        updated_at=post.updated_at,
+    )

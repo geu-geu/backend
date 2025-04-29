@@ -40,3 +40,25 @@ def test_get_posts(client, session, authorized_user):
     assert response.status_code == 200
     assert response.json()["count"] == 3
     assert len(response.json()["items"]) == 3
+
+
+def test_get_post(client, session, authorized_user):
+    # given
+    post = Post(
+        id=1,
+        code="abcd123",
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    session.add(post)
+
+    # when
+    response = client.get(f"/api/posts/{post.code}")
+
+    # then
+    assert response.status_code == 200
+    assert response.json()["title"] == post.title
+    assert response.json()["content"] == post.content
