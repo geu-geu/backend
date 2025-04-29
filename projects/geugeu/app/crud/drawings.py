@@ -81,3 +81,26 @@ def get_drawings(session: Session) -> DrawingListSchema:
         count=len(drawings),
         items=results,
     )
+
+
+def get_drawing(session: Session, code: str) -> DrawingSchema:
+    drawing = session.exec(select(Drawing).where(Drawing.code == code)).one()
+    post = session.exec(select(Post).where(Post.id == drawing.post_id)).one()
+    author = session.exec(select(User).where(User.id == drawing.author_id)).one()
+    images = session.exec(
+        select(DrawingImage).where(DrawingImage.drawing_id == drawing.id)
+    ).all()
+    return DrawingSchema(
+        code=drawing.code,
+        post=PostSchema(code=post.code),
+        author=UserSchema(
+            code=author.code,
+            email=author.email,
+            nickname=author.nickname,
+            profile_image_url=author.profile_image_url,
+        ),
+        content=drawing.content,
+        image_urls=[drawing_image.image_url for drawing_image in images],
+        created_at=drawing.created_at,
+        updated_at=drawing.updated_at,
+    )
