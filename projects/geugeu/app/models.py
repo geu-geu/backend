@@ -22,6 +22,7 @@ class Post(SQLModel, table=True):
     author_id: int = Field(nullable=False)
     title: str = Field(max_length=255, nullable=False)
     content: str = Field(nullable=False)
+    is_deleted: bool = Field(default=False, nullable=False)
     created_at: datetime = Field(nullable=False)
     updated_at: datetime = Field(nullable=False)
 
