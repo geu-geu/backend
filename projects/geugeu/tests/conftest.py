@@ -51,6 +51,7 @@ def client():
 @pytest.fixture()
 def user(session):
     user = User(
+        id=1,
         code="abcd123",
         email="user@example.com",
         password="$2b$12$g6AeAJXUJmaOcyYwUFVqgeeDL4UOnPVPuAXjSgqmgw/ZuTztFwAe.",

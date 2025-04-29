@@ -1,0 +1,42 @@
+from datetime import UTC, datetime
+
+from app.models import Post
+
+
+def test_create_post(client, authorized_user):
+    # given
+    title = "test title"
+    content = "test content"
+
+    # when
+    response = client.post("/api/posts", json={"title": title, "content": content})
+
+    # then
+    assert response.status_code == 201
+    assert response.json()["title"] == title
+    assert response.json()["content"] == content
+
+
+def test_get_posts(client, session, authorized_user):
+    # given
+    posts = [
+        Post(
+            id=i,
+            code=f"abcd{i}",
+            author_id=authorized_user.id,
+            title="test title",
+            content="test content",
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
+        )
+        for i in range(1, 4)
+    ]
+    session.add_all(posts)
+
+    # when
+    response = client.get("/api/posts")
+
+    # then
+    assert response.status_code == 200
+    assert response.json()["count"] == 3
+    assert len(response.json()["items"]) == 3

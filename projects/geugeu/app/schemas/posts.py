@@ -22,3 +22,8 @@ class PostSchema(BaseModel):
     content: str
     created_at: datetime
     updated_at: datetime
+
+
+class PostListSchema(BaseModel):
+    count: int
+    items: list[PostSchema]

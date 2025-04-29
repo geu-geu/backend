@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlmodel import Session, select
 
 from app.models import Post, User
-from app.schemas.posts import CreatePostSchema, PostSchema, UserSchema
+from app.schemas.posts import CreatePostSchema, PostListSchema, PostSchema, UserSchema
 from app.utils import generate_code
 
 
@@ -34,7 +34,7 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
     )
 
 
-def get_posts(session: Session) -> list[PostSchema]:
+def get_posts(session: Session) -> PostListSchema:
     posts = session.exec(select(Post).order_by(Post.id.desc())).all()
     results = []
     for post in posts:
@@ -53,4 +53,7 @@ def get_posts(session: Session) -> list[PostSchema]:
             updated_at=post.updated_at,
         )
         results.append(result)
-    return results
+    return PostListSchema(
+        count=len(posts),
+        items=results,
+    )
