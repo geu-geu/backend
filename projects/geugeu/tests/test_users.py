@@ -57,6 +57,21 @@ def test_update_me(client, session):
     assert response.json()["nickname"] == new_nickname
 
 
+def test_delete_me(client, session):
+    # given
+    user = create_user(session, "user@example.com", "P@ssw0rd1234")
+    assert user.is_active is True
+    app.dependency_overrides[get_current_user] = lambda: user
+
+    # when
+    response = client.delete("/api/users/me")
+
+    # then
+    assert response.status_code == 204
+    session.refresh(user)
+    assert user.is_active is False
+
+
 def create_user(
     session: Session, email: str, password: str, nickname: str | None = None
 ) -> User:
