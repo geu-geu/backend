@@ -1,11 +1,14 @@
 from collections.abc import Generator
+from datetime import UTC, datetime
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 
+from app.api.dependencies import get_current_user
 from app.core.db import get_db
 from app.main import app
+from app.models import User
 
 
 @pytest.fixture(scope="session")
@@ -43,3 +46,27 @@ def override_get_db(session: Session):
 @pytest.fixture()
 def client():
     return TestClient(app)
+
+
+@pytest.fixture()
+def user(session):
+    user = User(
+        code="abcd123",
+        email="user@example.com",
+        password="$2b$12$g6AeAJXUJmaOcyYwUFVqgeeDL4UOnPVPuAXjSgqmgw/ZuTztFwAe.",
+        nickname="user",
+        is_admin=False,
+        is_active=True,
+        profile_image_url=None,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    session.add(user)
+    return user
+
+
+@pytest.fixture()
+def authorized_user(user):
+    app.dependency_overrides[get_current_user] = lambda: user
+    yield user
+    app.dependency_overrides.clear()
