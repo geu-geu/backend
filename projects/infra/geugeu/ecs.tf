@@ -1,5 +1,5 @@
 resource "aws_ecs_cluster" "main" {
-  name = "${var.project}-ecs-cluster"
+  name = "${local.project}-ecs-cluster"
 
   setting {
     name  = "containerInsights"
@@ -8,11 +8,11 @@ resource "aws_ecs_cluster" "main" {
 }
 
 resource "aws_cloudwatch_log_group" "ecs" {
-  name = "/ecs/${var.project}"
+  name = "/ecs/${local.project}"
 }
 
 resource "aws_iam_role" "ecs_task_execution" {
-  name = "${var.project}-ecs-task-execution"
+  name = "${local.project}-ecs-task-execution"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -30,12 +30,12 @@ resource "aws_iam_role" "ecs_task_execution" {
 
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy_attachment" {
   role       = aws_iam_role.ecs_task_execution.name
-  count      = length(var.ecs_task_execution_policy_arns)
-  policy_arn = var.ecs_task_execution_policy_arns[count.index]
+  count      = length(local.ecs_task_execution_policy_arns)
+  policy_arn = local.ecs_task_execution_policy_arns[count.index]
 }
 
 resource "aws_iam_role" "ecs_task" {
-  name = "${var.project}-ecs-task"
+  name = "${local.project}-ecs-task"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -53,12 +53,12 @@ resource "aws_iam_role" "ecs_task" {
 
 resource "aws_iam_role_policy_attachment" "ecs_task_policy_attachment" {
   role       = aws_iam_role.ecs_task.name
-  count      = length(var.ecs_task_policy_arns)
-  policy_arn = var.ecs_task_policy_arns[count.index]
+  count      = length(local.ecs_task_policy_arns)
+  policy_arn = local.ecs_task_policy_arns[count.index]
 }
 
 resource "aws_ecs_task_definition" "main" {
-  family                   = "${var.project}-ecs-task-definition"
+  family                   = "${local.project}-ecs-task-definition"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = 256
@@ -68,7 +68,7 @@ resource "aws_ecs_task_definition" "main" {
 
   container_definitions = jsonencode([
     {
-      name      = "${var.project}"
+      name      = "${local.project}"
       image     = "${aws_ecr_repository.main.repository_url}:latest"
       essential = true
       portMappings = [
@@ -84,7 +84,7 @@ resource "aws_ecs_task_definition" "main" {
         logDriver = "awslogs"
         options = {
           awslogs-group         = "${aws_cloudwatch_log_group.ecs.name}"
-          awslogs-region        = "${var.default_region}"
+          awslogs-region        = "${local.default_region}"
           awslogs-stream-prefix = "ecs"
           mode                  = "non-blocking"
           max-buffer-size       = "1m"
@@ -99,7 +99,7 @@ resource "aws_ecs_task_definition" "main" {
 }
 
 resource "aws_security_group" "ecs" {
-  name   = "${var.project}-ecs"
+  name   = "${local.project}-ecs"
   vpc_id = aws_vpc.main.id
 
   // FIXME: RULE IS TOO FREE!
@@ -119,12 +119,12 @@ resource "aws_security_group" "ecs" {
   }
 
   tags = {
-    Name = "${var.project}-ecs"
+    Name = "${local.project}-ecs"
   }
 }
 
 resource "aws_security_group" "alb" {
-  name   = "${var.project}-alb"
+  name   = "${local.project}-alb"
   vpc_id = aws_vpc.main.id
 
   ingress {
@@ -142,26 +142,26 @@ resource "aws_security_group" "alb" {
   }
 
   tags = {
-    Name = "${var.project}-alb"
+    Name = "${local.project}-alb"
   }
 }
 
 resource "aws_alb" "ecs" {
-  name               = "${var.project}-ecs"
+  name               = "${local.project}-ecs"
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
   subnets            = [for subnet in aws_subnet.public : subnet.id]
 }
 
 resource "aws_alb_target_group" "ecs" {
-  name        = "${var.project}-ecs-target-group"
+  name        = "${local.project}-ecs-target-group"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "ip"
 
   health_check {
-    path = "/"
+    path = "/docs"
   }
 }
 
@@ -194,7 +194,7 @@ resource "aws_alb_listener" "https" {
 }
 
 resource "aws_ecs_service" "main" {
-  name            = var.project
+  name            = local.project
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.main.arn
   launch_type     = "FARGATE"
@@ -209,7 +209,7 @@ resource "aws_ecs_service" "main" {
 
   load_balancer {
     target_group_arn = aws_alb_target_group.ecs.arn
-    container_name   = var.project
+    container_name   = local.project
     container_port   = 8000
   }
 }

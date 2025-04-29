@@ -1,13 +1,13 @@
 resource "aws_db_subnet_group" "postgres" {
-  name       = "${var.project}-postgres"
+  name       = "${local.project}-postgres"
   subnet_ids = [for subnet in aws_subnet.public : subnet.id]
 }
 
 resource "aws_db_instance" "postgres" {
-  availability_zone               = element(var.availability_zones, 0)
+  availability_zone               = element(local.availability_zones, 0)
   engine                          = "postgres"
   engine_version                  = "16.3"
-  identifier                      = "${var.project}-postgres"
+  identifier                      = "${local.project}-postgres"
   username                        = "postgres"
   password                        = "gabPab-fudger-catza1"
   instance_class                  = "db.t4g.micro"
@@ -17,7 +17,7 @@ resource "aws_db_instance" "postgres" {
   db_subnet_group_name            = aws_db_subnet_group.postgres.name
   ca_cert_identifier              = "rds-ca-rsa2048-g1"
   port                            = 5432
-  db_name                         = var.project
+  db_name                         = local.project
   performance_insights_enabled    = false
   parameter_group_name            = "default.postgres16"
   backup_retention_period         = 0

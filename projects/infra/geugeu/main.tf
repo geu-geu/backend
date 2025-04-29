@@ -1,9 +1,9 @@
 provider "aws" {
-  region = var.default_region
+  region = local.default_region
 
   default_tags {
     tags = {
-      "Project"              = var.project
+      "Project"              = local.project
       "Managed by Terraform" = true
     }
   }
