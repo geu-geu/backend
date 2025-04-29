@@ -1,0 +1,33 @@
+import pytest
+from fastapi.testclient import TestClient
+from sqlmodel import Session, SQLModel, create_engine
+
+from app.core.db import get_db
+from app.main import app
+
+
+@pytest.fixture(scope="session")
+def test_db():
+    engine = create_engine(
+        "sqlite:///sqlite3.db",
+        connect_args={"check_same_thread": False},
+    )
+    SQLModel.metadata.create_all(engine)
+    yield engine
+    SQLModel.metadata.drop_all(engine)
+
+
+@pytest.fixture(autouse=True)
+def override_get_db(test_db):
+    def get_test_db():
+        with Session(test_db) as session:
+            yield session
+
+    app.dependency_overrides[get_db] = get_test_db
+    yield
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture()
+def client():
+    return TestClient(app)
