@@ -7,7 +7,7 @@ class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     code: str = Field(max_length=255, unique=True, nullable=False)
     email: str = Field(max_length=255, unique=True, nullable=False)
-    name: str | None = Field(max_length=255, nullable=True)
+    nickname: str | None = Field(max_length=255, nullable=True)
     password: str = Field(max_length=255, nullable=False)
     is_admin: bool = Field(default=False, nullable=False)
     is_active: bool = Field(default=True, nullable=False)

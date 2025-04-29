@@ -11,7 +11,7 @@ class CreatePostSchema(BaseModel):
 class UserSchema(BaseModel):
     code: str
     email: EmailStr
-    name: str | None = None
+    nickname: str | None = None
     profile_image_url: str | None = None
 
 

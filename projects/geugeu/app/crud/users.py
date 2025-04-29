@@ -16,7 +16,7 @@ def create_user(session: Session, schema: SignupSchema):
     user = User(
         code=generate_code(),
         email=schema.email,
-        name=schema.name,
+        nickname=schema.nickname,
         password=get_password_hash(schema.password),
         is_admin=False,
         is_active=True,
@@ -38,7 +38,7 @@ def get_user(session: Session, code: str):
 
 
 def update_user(session: Session, user: User, schema: UserUpdateSchema):
-    user.name = schema.name
+    user.nickname = schema.nickname
     session.add(user)
     session.commit()
     session.refresh(user)

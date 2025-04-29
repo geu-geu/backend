@@ -24,7 +24,7 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
         author=UserSchema(
             code=user.code,
             email=user.email,
-            name=user.name,
+            nickname=user.nickname,
             profile_image_url=user.profile_image_url,
         ),
         title=post.title,
@@ -44,7 +44,7 @@ def get_posts(session: Session) -> list[PostSchema]:
             author=UserSchema(
                 code=author.code,
                 email=author.email,
-                name=author.name,
+                nickname=author.nickname,
                 profile_image_url=author.profile_image_url,
             ),
             title=post.title,
