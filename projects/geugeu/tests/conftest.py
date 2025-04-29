@@ -1,3 +1,5 @@
+from collections.abc import Generator
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
@@ -17,11 +19,21 @@ def test_db():
     SQLModel.metadata.drop_all(engine)
 
 
+@pytest.fixture()
+def session(test_db) -> Generator[Session, None, None]:
+    connection = test_db.connect()
+    transaction = connection.begin()
+    session = Session(bind=connection)
+    yield session
+    session.close()
+    transaction.rollback()
+    connection.close()
+
+
 @pytest.fixture(autouse=True)
-def override_get_db(test_db):
+def override_get_db(session: Session):
     def get_test_db():
-        with Session(test_db) as session:
-            yield session
+        yield session
 
     app.dependency_overrides[get_db] = get_test_db
     yield
