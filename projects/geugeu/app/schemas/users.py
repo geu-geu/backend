@@ -6,14 +6,14 @@ from pydantic import BaseModel, EmailStr
 class SignupSchema(BaseModel):
     email: EmailStr
     password: str
-    nickname: str | None = None
+    nickname: str = ""
 
 
 class UserSchema(BaseModel):
     code: str
     email: EmailStr
-    nickname: str | None = None
-    profile_image_url: str | None = None
+    nickname: str = ""
+    profile_image_url: str = ""
     created_at: datetime
     updated_at: datetime
 
