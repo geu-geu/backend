@@ -55,6 +55,19 @@ def test_get_post(client, session, authorized_user):
     )
     session.add(post)
 
+    post_images = [
+        PostImage(
+            id=i,
+            code=f"abcd{i}",
+            post_id=post.id,
+            image_url=f"https://example.com/image{i}.jpg",
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
+        )
+        for i in range(1, 4)
+    ]
+    session.add_all(post_images)
+
     # when
     response = client.get(f"/api/posts/{post.code}")
 
@@ -62,6 +75,7 @@ def test_get_post(client, session, authorized_user):
     assert response.status_code == 200
     assert response.json()["title"] == post.title
     assert response.json()["content"] == post.content
+    assert len(response.json()["image_urls"]) == len(post_images)
 
 
 def test_update_post(client, session, authorized_user):

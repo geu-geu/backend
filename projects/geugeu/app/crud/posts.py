@@ -69,6 +69,12 @@ def get_posts(session: Session) -> PostListSchema:
 def get_post(session: Session, code: str) -> PostSchema:
     post = session.exec(select(Post).where(Post.code == code)).one()
     author = session.exec(select(User).where(User.id == post.author_id)).one()
+    images = session.exec(
+        select(PostImage).where(
+            PostImage.post_id == post.id,
+            not_(PostImage.is_deleted),
+        )
+    ).all()
     return PostSchema(
         code=post.code,
         author=UserSchema(
@@ -79,6 +85,7 @@ def get_post(session: Session, code: str) -> PostSchema:
         ),
         title=post.title,
         content=post.content,
+        image_urls=[image.image_url for image in images],
         created_at=post.created_at,
         updated_at=post.updated_at,
     )
