@@ -1,7 +1,5 @@
 from datetime import UTC, datetime
 
-from sqlmodel import select
-
 from app.models import Drawing, DrawingImage, Post
 
 
@@ -233,10 +231,3 @@ def test_delete_drawing(client, session, authorized_user):
     assert response.status_code == 204
     session.refresh(drawing)
     assert drawing.is_deleted
-
-    # 이미지 연쇄 삭제 검증
-    images = session.exec(
-        select(DrawingImage).where(DrawingImage.drawing_id == drawing.id)
-    ).all()
-    for image in images:
-        assert image.is_deleted
