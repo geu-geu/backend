@@ -53,6 +53,7 @@ class Drawing(SQLModel, table=True):
     post_id: int = Field(nullable=False)
     author_id: int = Field(nullable=False)
     content: str = Field(nullable=False)
+    is_deleted: bool = Field(default=False, nullable=False)
     created_at: datetime = Field(nullable=False)
     updated_at: datetime = Field(nullable=False)
 
