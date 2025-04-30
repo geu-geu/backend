@@ -68,6 +68,17 @@ def test_get_post(client, session, authorized_user):
     assert len(response.json()["image_urls"]) == len(post_images)
 
 
+def test_get_post_404(client, authorized_user):
+    # given
+    code = "abcd123"
+
+    # when
+    response = client.get(f"/api/posts/{code}")
+
+    # then
+    assert response.status_code == 404
+
+
 def test_update_post(client, session, authorized_user):
     # given
     post = Post(
@@ -113,6 +124,24 @@ def test_update_post(client, session, authorized_user):
     assert len(response.json()["image_urls"]) == len(new_image_urls)
 
 
+def test_update_post_404(client, authorized_user):
+    # given
+    code = "abcd123"
+
+    # when
+    response = client.put(
+        f"/api/posts/{code}",
+        json={
+            "title": "new title",
+            "content": "new content",
+            "image_urls": ["http://example.com/image.png"],
+        },
+    )
+
+    # then
+    assert response.status_code == 404
+
+
 def test_delete_post(client, session, authorized_user):
     # given
     post = Post(
@@ -133,3 +162,14 @@ def test_delete_post(client, session, authorized_user):
     assert response.status_code == 204
     session.refresh(post)
     assert post.deleted_at is not None
+
+
+def test_delete_post_404(client, authorized_user):
+    # given
+    code = "abcd123"
+
+    # when
+    response = client.delete(f"/api/posts/{code}")
+
+    # then
+    assert response.status_code == 404

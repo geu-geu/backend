@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -93,7 +94,9 @@ def get_post(session: Session, code: str) -> PostSchema:
             Post.code == code,
             Post.deleted_at.is_(None),
         )
-    ).scalar_one()
+    ).scalar_one_or_none()
+    if post is None:
+        raise HTTPException(status_code=404, detail="Post not found")
     author = session.execute(
         select(User).where(
             User.id == post.author_id,
@@ -132,7 +135,9 @@ def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSc
             Post.code == code,
             Post.deleted_at.is_(None),
         )
-    ).scalar_one()
+    ).scalar_one_or_none()
+    if post is None:
+        raise HTTPException(status_code=404, detail="Post not found")
     author = session.execute(
         select(User).where(
             User.id == post.author_id,
@@ -194,6 +199,8 @@ def delete_post(session: Session, code: str) -> None:
             Post.code == code,
             Post.deleted_at.is_(None),
         )
-    ).scalar_one()
+    ).scalar_one_or_none()
+    if post is None:
+        raise HTTPException(status_code=404, detail="Post not found")
     post.deleted_at = datetime.now(UTC)
     session.commit()

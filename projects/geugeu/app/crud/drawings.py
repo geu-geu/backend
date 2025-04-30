@@ -122,7 +122,9 @@ def get_drawing(session: Session, code: str) -> DrawingSchema:
             Drawing.code == code,
             Drawing.deleted_at.is_(None),
         )
-    ).scalar_one()
+    ).scalar_one_or_none()
+    if drawing is None:
+        raise HTTPException(status_code=404, detail="Drawing not found")
     post = session.execute(
         select(Post).where(
             Post.id == drawing.post_id,
@@ -169,7 +171,9 @@ def update_drawing(
             Drawing.code == code,
             Drawing.deleted_at.is_(None),
         )
-    ).scalar_one()
+    ).scalar_one_or_none()
+    if drawing is None:
+        raise HTTPException(status_code=404, detail="Drawing not found")
     post = session.execute(
         select(Post).where(
             Post.id == drawing.post_id,
@@ -236,6 +240,8 @@ def delete_drawing(session: Session, code: str) -> None:
             Drawing.code == code,
             Drawing.deleted_at.is_(None),
         )
-    ).scalar_one()
+    ).scalar_one_or_none()
+    if drawing is None:
+        raise HTTPException(status_code=404, detail="Drawing not found")
     drawing.deleted_at = datetime.now(UTC)
     session.commit()
