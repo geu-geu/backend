@@ -150,7 +150,6 @@ def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSc
             code=generate_code(),
             post_id=post.id,
             image_url=image_url,
-            is_deleted=False,
         )
         post_images.append(post_image)
     session.add_all(post_images)

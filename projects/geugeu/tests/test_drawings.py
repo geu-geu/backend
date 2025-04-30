@@ -188,7 +188,6 @@ def test_delete_drawing(client, session, authorized_user):
             code=f"abcd{i}",
             drawing_id=drawing.id,
             image_url=f"https://example.com/image{i}.jpg",
-            is_deleted=False,
         )
         for i in range(1, 4)
     ]

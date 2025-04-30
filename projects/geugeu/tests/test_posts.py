@@ -120,7 +120,6 @@ def test_delete_post(client, session, authorized_user):
         author_id=authorized_user.id,
         title="test title",
         content="test content",
-        is_deleted=False,
     )
     session.add(post)
     session.flush()

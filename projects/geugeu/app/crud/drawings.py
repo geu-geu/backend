@@ -198,7 +198,6 @@ def update_drawing(
             code=generate_code(),
             drawing_id=drawing.id,
             image_url=image_url,
-            is_deleted=False,
         )
         drawing_images.append(drawing_image)
     session.add_all(drawing_images)
