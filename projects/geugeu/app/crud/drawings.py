@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import not_, select
 from sqlalchemy.orm import Session
 
 from app.models import Drawing, DrawingImage, Post, User
@@ -17,7 +17,10 @@ def create_drawing(
     session: Session, user: User, schema: CreateDrawingSchema
 ) -> DrawingSchema:
     post = session.execute(
-        select(Post).where(Post.code == schema.post_code)
+        select(Post).where(
+            Post.code == schema.post_code,
+            not_(Post.is_deleted),
+        )
     ).scalar_one()
     drawing = Drawing(
         code=generate_code(),
@@ -60,14 +63,23 @@ def get_drawings(session: Session) -> DrawingListSchema:
     results = []
     for drawing in drawings:
         post = session.execute(
-            select(Post).where(Post.id == drawing.post_id)
+            select(Post).where(
+                Post.id == drawing.post_id,
+                not_(Post.is_deleted),
+            )
         ).scalar_one()
         author = session.execute(
-            select(User).where(User.id == drawing.author_id)
+            select(User).where(
+                User.id == drawing.author_id,
+                User.is_active,
+            )
         ).scalar_one()
         images = (
             session.execute(
-                select(DrawingImage).where(DrawingImage.drawing_id == drawing.id)
+                select(DrawingImage).where(
+                    DrawingImage.drawing_id == drawing.id,
+                    not_(DrawingImage.is_deleted),
+                )
             )
             .scalars()
             .all()
@@ -94,14 +106,30 @@ def get_drawings(session: Session) -> DrawingListSchema:
 
 
 def get_drawing(session: Session, code: str) -> DrawingSchema:
-    drawing = session.execute(select(Drawing).where(Drawing.code == code)).scalar_one()
-    post = session.execute(select(Post).where(Post.id == drawing.post_id)).scalar_one()
+    drawing = session.execute(
+        select(Drawing).where(
+            Drawing.code == code,
+            not_(Drawing.is_deleted),
+        )
+    ).scalar_one()
+    post = session.execute(
+        select(Post).where(
+            Post.id == drawing.post_id,
+            not_(Post.is_deleted),
+        )
+    ).scalar_one()
     author = session.execute(
-        select(User).where(User.id == drawing.author_id)
+        select(User).where(
+            User.id == drawing.author_id,
+            User.is_active,
+        )
     ).scalar_one()
     images = (
         session.execute(
-            select(DrawingImage).where(DrawingImage.drawing_id == drawing.id)
+            select(DrawingImage).where(
+                DrawingImage.drawing_id == drawing.id,
+                not_(DrawingImage.is_deleted),
+            )
         )
         .scalars()
         .all()
@@ -125,14 +153,30 @@ def get_drawing(session: Session, code: str) -> DrawingSchema:
 def update_drawing(
     session: Session, code: str, schema: UpdateDrawingSchema
 ) -> DrawingSchema:
-    drawing = session.execute(select(Drawing).where(Drawing.code == code)).scalar_one()
-    post = session.execute(select(Post).where(Post.id == drawing.post_id)).scalar_one()
+    drawing = session.execute(
+        select(Drawing).where(
+            Drawing.code == code,
+            not_(Drawing.is_deleted),
+        )
+    ).scalar_one()
+    post = session.execute(
+        select(Post).where(
+            Post.id == drawing.post_id,
+            not_(Post.is_deleted),
+        )
+    ).scalar_one()
     author = session.execute(
-        select(User).where(User.id == drawing.author_id)
+        select(User).where(
+            User.id == drawing.author_id,
+            User.is_active,
+        )
     ).scalar_one()
     images = (
         session.execute(
-            select(DrawingImage).where(DrawingImage.drawing_id == drawing.id)
+            select(DrawingImage).where(
+                DrawingImage.drawing_id == drawing.id,
+                not_(DrawingImage.is_deleted),
+            )
         )
         .scalars()
         .all()
@@ -177,6 +221,11 @@ def update_drawing(
 
 
 def delete_drawing(session: Session, code: str) -> None:
-    drawing = session.execute(select(Drawing).where(Drawing.code == code)).scalar_one()
+    drawing = session.execute(
+        select(Drawing).where(
+            Drawing.code == code,
+            not_(Drawing.is_deleted),
+        )
+    ).scalar_one()
     drawing.is_deleted = True
     session.commit()

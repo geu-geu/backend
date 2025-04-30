@@ -9,20 +9,26 @@ from app.utils import generate_code
 
 
 def create_user(session: Session, schema: SignupSchema):
-    users = (
-        session.execute(select(User).where(User.email == schema.email)).scalars().all()
-    )
-    if users:
-        raise HTTPException(status_code=400, detail="User already exists")
-    user = User(
-        code=generate_code(),
-        email=schema.email,
-        nickname=schema.nickname,
-        password=get_password_hash(schema.password),
-        is_admin=False,
-        is_active=True,
-        profile_image_url=None,
-    )
+    user = session.execute(
+        select(User).where(User.email == schema.email)
+    ).scalar_one_or_none()
+    if user:
+        if user.is_active:
+            raise HTTPException(status_code=400, detail="User already exists")
+        else:
+            raise HTTPException(
+                status_code=400, detail="Cannot sign up with this email"
+            )
+    else:
+        user = User(
+            code=generate_code(),
+            email=schema.email,
+            nickname=schema.nickname,
+            password=get_password_hash(schema.password),
+            is_admin=False,
+            is_active=True,
+            profile_image_url="",
+        )
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -31,7 +37,10 @@ def create_user(session: Session, schema: SignupSchema):
 
 def get_user(session: Session, code: str):
     user = session.execute(
-        select(User).where(User.code == code, User.is_active)
+        select(User).where(
+            User.code == code,
+            User.is_active,
+        )
     ).scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

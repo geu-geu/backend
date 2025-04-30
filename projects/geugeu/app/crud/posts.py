@@ -38,11 +38,20 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
 
 
 def get_posts(session: Session) -> PostListSchema:
-    posts = session.execute(select(Post).order_by(Post.id.desc())).scalars().all()
+    posts = (
+        session.execute(
+            select(Post).where(not_(Post.is_deleted)).order_by(Post.id.desc())
+        )
+        .scalars()
+        .all()
+    )
     results = []
     for post in posts:
         author = session.execute(
-            select(User).where(User.id == post.author_id)
+            select(User).where(
+                User.id == post.author_id,
+                User.is_active,
+            )
         ).scalar_one()
         result = PostSchema(
             code=post.code,
@@ -65,8 +74,15 @@ def get_posts(session: Session) -> PostListSchema:
 
 
 def get_post(session: Session, code: str) -> PostSchema:
-    post = session.execute(select(Post).where(Post.code == code)).scalar_one()
-    author = session.execute(select(User).where(User.id == post.author_id)).scalar_one()
+    post = session.execute(
+        select(Post).where(
+            Post.code == code,
+            not_(Post.is_deleted),
+        )
+    ).scalar_one()
+    author = session.execute(
+        select(User).where(User.id == post.author_id, User.is_active)
+    ).scalar_one()
     images = (
         session.execute(
             select(PostImage).where(
@@ -94,10 +110,25 @@ def get_post(session: Session, code: str) -> PostSchema:
 
 
 def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSchema:
-    post = session.execute(select(Post).where(Post.code == code)).scalar_one()
-    author = session.execute(select(User).where(User.id == post.author_id)).scalar_one()
+    post = session.execute(
+        select(Post).where(
+            Post.code == code,
+            not_(Post.is_deleted),
+        )
+    ).scalar_one()
+    author = session.execute(
+        select(User).where(
+            User.id == post.author_id,
+            User.is_active,
+        )
+    ).scalar_one()
     images = (
-        session.execute(select(PostImage).where(PostImage.post_id == post.id))
+        session.execute(
+            select(PostImage).where(
+                PostImage.post_id == post.id,
+                not_(PostImage.is_deleted),
+            )
+        )
         .scalars()
         .all()
     )
@@ -142,6 +173,11 @@ def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSc
 
 
 def delete_post(session: Session, code: str) -> None:
-    post = session.execute(select(Post).where(Post.code == code)).scalar_one()
+    post = session.execute(
+        select(Post).where(
+            Post.code == code,
+            not_(Post.is_deleted),
+        )
+    ).scalar_one()
     post.is_deleted = True
     session.commit()
