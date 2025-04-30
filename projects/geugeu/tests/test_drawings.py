@@ -33,7 +33,7 @@ def test_create_drawing(client, session, authorized_user):
     )
 
     # then
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert response.json()["post"]["code"] == post.code
     assert response.json()["author"]["code"] == authorized_user.code
     assert response.json()["content"] == content
