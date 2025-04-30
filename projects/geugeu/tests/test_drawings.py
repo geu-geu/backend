@@ -106,6 +106,8 @@ def test_get_drawing(client, session, authorized_user):
             code=f"abcd{i}",
             drawing_id=drawing.id,
             image_url=f"https://example.com/image{i}.jpg",
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
         )
         for i in range(1, 4)
     ]

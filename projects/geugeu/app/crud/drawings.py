@@ -33,6 +33,8 @@ def create_drawing(
             code=generate_code(),
             drawing_id=drawing.id,
             image_url=image_url,
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
         )
         drawing_images.append(drawing_image)
     session.add_all(drawing_images)
