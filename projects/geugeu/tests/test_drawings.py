@@ -4,7 +4,6 @@ from app.models import Drawing, DrawingImage, Post
 def test_create_drawing(client, session, authorized_user):
     # given
     post = Post(
-        id=1,
         code="abcd123",
         author_id=authorized_user.id,
         title="test title",
@@ -39,13 +38,13 @@ def test_create_drawing(client, session, authorized_user):
 def test_get_drawings(client, session, authorized_user):
     # given
     post = Post(
-        id=1,
         code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
     session.add(post)
+    session.flush()
 
     drawings = [
         Drawing(
@@ -57,6 +56,7 @@ def test_get_drawings(client, session, authorized_user):
         for i in range(1, 4)
     ]
     session.add_all(drawings)
+    session.flush()
 
     # when
     response = client.get("/api/drawings")
@@ -70,22 +70,22 @@ def test_get_drawings(client, session, authorized_user):
 def test_get_drawing(client, session, authorized_user):
     # given
     post = Post(
-        id=1,
         code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
     session.add(post)
+    session.flush()
 
     drawing = Drawing(
-        id=1,
         code="abcd123",
         post_id=post.id,
         author_id=authorized_user.id,
         content="test content",
     )
     session.add(drawing)
+    session.flush()
 
     drawing_images = [
         DrawingImage(
@@ -112,22 +112,22 @@ def test_get_drawing(client, session, authorized_user):
 def test_update_drawing(client, session, authorized_user):
     # given
     post = Post(
-        id=1,
         code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
     session.add(post)
+    session.flush()
 
     drawing = Drawing(
-        id=1,
         code="abcd123",
         post_id=post.id,
         author_id=authorized_user.id,
         content="test content",
     )
     session.add(drawing)
+    session.flush()
 
     drawing_images = [
         DrawingImage(
@@ -166,22 +166,22 @@ def test_update_drawing(client, session, authorized_user):
 def test_delete_drawing(client, session, authorized_user):
     # given
     post = Post(
-        id=1,
         code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
     session.add(post)
+    session.flush()
 
     drawing = Drawing(
-        id=1,
         code="abcd123",
         post_id=post.id,
         author_id=authorized_user.id,
         content="test content",
     )
     session.add(drawing)
+    session.flush()
 
     drawing_images = [
         DrawingImage(

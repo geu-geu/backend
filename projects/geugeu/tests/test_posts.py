@@ -40,13 +40,13 @@ def test_get_posts(client, session, authorized_user):
 def test_get_post(client, session, authorized_user):
     # given
     post = Post(
-        id=1,
         code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
     session.add(post)
+    session.flush()
 
     post_images = [
         PostImage(
@@ -71,13 +71,13 @@ def test_get_post(client, session, authorized_user):
 def test_update_post(client, session, authorized_user):
     # given
     post = Post(
-        id=1,
         code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
     session.add(post)
+    session.flush()
 
     post_images = [
         PostImage(
@@ -116,7 +116,6 @@ def test_update_post(client, session, authorized_user):
 def test_delete_post(client, session, authorized_user):
     # given
     post = Post(
-        id=1,
         code="abcd123",
         author_id=authorized_user.id,
         title="test title",
@@ -124,6 +123,7 @@ def test_delete_post(client, session, authorized_user):
         is_deleted=False,
     )
     session.add(post)
+    session.flush()
 
     # when
     response = client.delete(f"/api/posts/{post.code}")
