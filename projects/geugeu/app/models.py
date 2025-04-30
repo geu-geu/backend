@@ -17,6 +17,9 @@ class User(Base):
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=True)
+    is_deleted: Mapped[bool] = mapped_column(
+        Boolean(), nullable=False, server_default="FALSE"
+    )
     profile_image_url: Mapped[str] = mapped_column(
         String(2083),
         nullable=False,
