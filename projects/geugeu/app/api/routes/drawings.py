@@ -48,6 +48,10 @@ async def update_drawing(
     return crud.update_drawing(session, drawing_code, schema)
 
 
-@router.delete("/{drawing_code}")
-async def delete_drawing(drawing_code: str):
-    raise NotImplementedError
+@router.delete("/{drawing_code}", status_code=204)
+async def delete_drawing(
+    drawing_code: str,
+    session: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    crud.delete_drawing(session, drawing_code)

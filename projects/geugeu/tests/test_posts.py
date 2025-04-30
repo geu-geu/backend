@@ -148,6 +148,8 @@ def test_delete_post(client, session, authorized_user):
 
     # then
     assert response.status_code == 204
+
+    # 이미지 연쇄 삭제 검증
     session.refresh(post)
     assert post.is_deleted
     images = session.exec(select(PostImage).where(PostImage.post_id == post.id)).all()

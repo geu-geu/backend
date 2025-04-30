@@ -157,3 +157,14 @@ def update_drawing(
         created_at=drawing.created_at,
         updated_at=drawing.updated_at,
     )
+
+
+def delete_drawing(session: Session, code: str) -> None:
+    drawing = session.exec(select(Drawing).where(Drawing.code == code)).one()
+    images = session.exec(
+        select(DrawingImage).where(DrawingImage.drawing_id == drawing.id)
+    ).all()
+    for image in images:
+        image.is_deleted = True
+    drawing.is_deleted = True
+    session.commit()

@@ -1,5 +1,7 @@
 from datetime import UTC, datetime
 
+from sqlmodel import select
+
 from app.models import Drawing, DrawingImage, Post
 
 
@@ -216,9 +218,25 @@ def test_delete_drawing(client, session, authorized_user):
             code=f"abcd{i}",
             drawing_id=drawing.id,
             image_url=f"https://example.com/image{i}.jpg",
+            is_deleted=False,
             created_at=datetime.now(UTC),
             updated_at=datetime.now(UTC),
         )
         for i in range(1, 4)
     ]
     session.add_all(drawing_images)
+
+    # when
+    response = client.delete(f"/api/drawings/{drawing.code}")
+
+    # then
+    assert response.status_code == 204
+    session.refresh(drawing)
+    assert drawing.is_deleted
+
+    # 이미지 연쇄 삭제 검증
+    images = session.exec(
+        select(DrawingImage).where(DrawingImage.drawing_id == drawing.id)
+    ).all()
+    for image in images:
+        assert image.is_deleted
