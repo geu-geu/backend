@@ -32,6 +32,7 @@ class PostImage(SQLModel, table=True):
     code: str = Field(max_length=255, unique=True, nullable=False)
     post_id: int = Field(nullable=False)
     image_url: str = Field(max_length=2000, nullable=False)
+    is_deleted: bool = Field(default=False, nullable=False)
     created_at: datetime = Field(nullable=False)
     updated_at: datetime = Field(nullable=False)
 
@@ -61,6 +62,7 @@ class DrawingImage(SQLModel, table=True):
     code: str = Field(max_length=255, unique=True, nullable=False)
     drawing_id: int = Field(nullable=False)
     image_url: str = Field(max_length=2000, nullable=False)
+    is_deleted: bool = Field(default=False, nullable=False)
     created_at: datetime = Field(nullable=False)
     updated_at: datetime = Field(nullable=False)
 
