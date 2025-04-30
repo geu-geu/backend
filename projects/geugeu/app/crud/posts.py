@@ -1,6 +1,5 @@
-from datetime import datetime
-
-from sqlmodel import Session, not_, select
+from sqlalchemy import not_, select
+from sqlalchemy.orm import Session
 
 from app.models import Post, PostImage, User
 from app.schemas.posts import (
@@ -19,8 +18,6 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
         author_id=user.id,
         title=schema.title,
         content=schema.content,
-        created_at=datetime.now(),
-        updated_at=datetime.now(),
     )
     session.add(post)
     session.commit()
@@ -41,10 +38,12 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
 
 
 def get_posts(session: Session) -> PostListSchema:
-    posts = session.exec(select(Post).order_by(Post.id.desc())).all()
+    posts = session.execute(select(Post).order_by(Post.id.desc())).scalars().all()
     results = []
     for post in posts:
-        author = session.exec(select(User).where(User.id == post.author_id)).one()
+        author = session.execute(
+            select(User).where(User.id == post.author_id)
+        ).scalar_one()
         result = PostSchema(
             code=post.code,
             author=UserSchema(
@@ -66,14 +65,18 @@ def get_posts(session: Session) -> PostListSchema:
 
 
 def get_post(session: Session, code: str) -> PostSchema:
-    post = session.exec(select(Post).where(Post.code == code)).one()
-    author = session.exec(select(User).where(User.id == post.author_id)).one()
-    images = session.exec(
-        select(PostImage).where(
-            PostImage.post_id == post.id,
-            not_(PostImage.is_deleted),
+    post = session.execute(select(Post).where(Post.code == code)).scalar_one()
+    author = session.execute(select(User).where(User.id == post.author_id)).scalar_one()
+    images = (
+        session.execute(
+            select(PostImage).where(
+                PostImage.post_id == post.id,
+                not_(PostImage.is_deleted),
+            )
         )
-    ).all()
+        .scalars()
+        .all()
+    )
     return PostSchema(
         code=post.code,
         author=UserSchema(
@@ -91,20 +94,22 @@ def get_post(session: Session, code: str) -> PostSchema:
 
 
 def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSchema:
-    post = session.exec(select(Post).where(Post.code == code)).one()
-    images = session.exec(select(PostImage).where(PostImage.post_id == post.id)).all()
-    author = session.exec(select(User).where(User.id == post.author_id)).one()
+    post = session.execute(select(Post).where(Post.code == code)).scalar_one()
+    author = session.execute(select(User).where(User.id == post.author_id)).scalar_one()
+    images = (
+        session.execute(select(PostImage).where(PostImage.post_id == post.id))
+        .scalars()
+        .all()
+    )
 
     # post 수정
     post.title = schema.title
     post.content = schema.content
-    post.updated_at = datetime.now()
     session.add(post)
 
-    # 기존 post images 삭제
+    # 기존 post images 전부 삭제
     for image in images:
         image.is_deleted = True
-        image.updated_at = datetime.now()
         session.add(image)
 
     # 새로운 post images 생성
@@ -115,8 +120,6 @@ def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSc
             post_id=post.id,
             image_url=image_url,
             is_deleted=False,
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
         )
         post_images.append(post_image)
     session.add_all(post_images)
@@ -139,6 +142,6 @@ def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSc
 
 
 def delete_post(session: Session, code: str) -> None:
-    post = session.exec(select(Post).where(Post.code == code)).one()
+    post = session.execute(select(Post).where(Post.code == code)).scalar_one()
     post.is_deleted = True
     session.commit()

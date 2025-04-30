@@ -1,8 +1,14 @@
 from collections.abc import Generator
 
-from sqlmodel import Session, create_engine
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, Session
 
 from app.core.config import settings
+
+
+class Base(DeclarativeBase):
+    pass
+
 
 engine = create_engine(str(settings.POSTGRES_DATABASE_URL))
 

@@ -1,78 +1,163 @@
 from datetime import datetime
 
-from sqlmodel import Field, SQLModel
+from sqlalchemy import BigInteger, Boolean, DateTime, Identity, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.sql import func
+
+from app.core.db import Base
 
 
-class User(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    code: str = Field(max_length=255, unique=True, nullable=False)
-    email: str = Field(max_length=255, unique=True, nullable=False)
-    nickname: str | None = Field(max_length=255, nullable=True)
-    password: str = Field(max_length=255, nullable=False)
-    is_admin: bool = Field(default=False, nullable=False)
-    is_active: bool = Field(default=True, nullable=False)
-    profile_image_url: str | None = Field(max_length=2000, nullable=True)
-    created_at: datetime = Field(nullable=False)
-    updated_at: datetime = Field(nullable=False)
+class User(Base):
+    __tablename__ = "user"
+
+    id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
+    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    nickname: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    password: Mapped[str] = mapped_column(String(255), nullable=False)
+    is_admin: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
+    is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=True)
+    profile_image_url: Mapped[str] = mapped_column(
+        String(2083),
+        nullable=False,
+        default="",
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
 
 
-class Post(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    code: str = Field(max_length=255, unique=True, nullable=False)
-    author_id: int = Field(nullable=False)
-    title: str = Field(max_length=255, nullable=False)
-    content: str = Field(nullable=False)
-    is_deleted: bool = Field(default=False, nullable=False)
-    created_at: datetime = Field(nullable=False)
-    updated_at: datetime = Field(nullable=False)
+class Post(Base):
+    __tablename__ = "post"
+
+    id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
+    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
 
 
-class PostImage(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    code: str = Field(max_length=255, unique=True, nullable=False)
-    post_id: int = Field(nullable=False)
-    image_url: str = Field(max_length=2000, nullable=False)
-    is_deleted: bool = Field(default=False, nullable=False)
-    created_at: datetime = Field(nullable=False)
-    updated_at: datetime = Field(nullable=False)
+class PostImage(Base):
+    __tablename__ = "post_image"
+
+    id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
+    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    post_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
+    image_url: Mapped[str] = mapped_column(String(2083), nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
 
 
-class PostComment(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    code: str = Field(max_length=255, unique=True, nullable=False)
-    author_id: int = Field(nullable=False)
-    post_id: int = Field(nullable=False)
-    content: str = Field(nullable=False)
-    created_at: datetime = Field(nullable=False)
-    updated_at: datetime = Field(nullable=False)
+class PostComment(Base):
+    __tablename__ = "post_comment"
+
+    id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
+    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
+    post_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
 
 
-class Drawing(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    code: str = Field(max_length=255, unique=True, nullable=False)
-    post_id: int = Field(nullable=False)
-    author_id: int = Field(nullable=False)
-    content: str = Field(nullable=False)
-    is_deleted: bool = Field(default=False, nullable=False)
-    created_at: datetime = Field(nullable=False)
-    updated_at: datetime = Field(nullable=False)
+class Drawing(Base):
+    __tablename__ = "drawing"
+
+    id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
+    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    post_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
+    author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
 
 
-class DrawingImage(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    code: str = Field(max_length=255, unique=True, nullable=False)
-    drawing_id: int = Field(nullable=False)
-    image_url: str = Field(max_length=2000, nullable=False)
-    is_deleted: bool = Field(default=False, nullable=False)
-    created_at: datetime = Field(nullable=False)
-    updated_at: datetime = Field(nullable=False)
+class DrawingImage(Base):
+    __tablename__ = "drawing_image"
+
+    id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
+    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    drawing_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
+    image_url: Mapped[str] = mapped_column(String(2083), nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
 
 
-class DrawingComment(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    code: str = Field(max_length=255, unique=True, nullable=False)
-    author_id: int = Field(nullable=False)
-    drawing_id: int = Field(nullable=False)
-    content: str = Field(nullable=False)
-    created_at: datetime = Field(nullable=False)
-    updated_at: datetime = Field(nullable=False)
+class DrawingComment(Base):
+    __tablename__ = "drawing_comment"
+
+    id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
+    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
+    drawing_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )

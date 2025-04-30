@@ -22,7 +22,14 @@ async def sign_up(
 
 @router.get("/me", response_model=UserSchema)
 async def get_me(current_user: Annotated[User, Depends(get_current_user)]):
-    return current_user
+    return UserSchema(
+        code=current_user.code,
+        email=current_user.email,
+        nickname=current_user.nickname,
+        profile_image_url=current_user.profile_image_url,
+        created_at=current_user.created_at,
+        updated_at=current_user.updated_at,
+    )
 
 
 @router.put("/me", response_model=UserSchema)

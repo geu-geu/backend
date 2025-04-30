@@ -1,7 +1,6 @@
-from datetime import UTC, datetime
-
 from fastapi import HTTPException
-from sqlmodel import Session, select
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash
 from app.models import User
@@ -10,7 +9,9 @@ from app.utils import generate_code
 
 
 def create_user(session: Session, schema: SignupSchema):
-    users = session.exec(select(User).where(User.email == schema.email)).fetchall()
+    users = (
+        session.execute(select(User).where(User.email == schema.email)).scalars().all()
+    )
     if users:
         raise HTTPException(status_code=400, detail="User already exists")
     user = User(
@@ -21,8 +22,6 @@ def create_user(session: Session, schema: SignupSchema):
         is_admin=False,
         is_active=True,
         profile_image_url=None,
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
     )
     session.add(user)
     session.commit()
@@ -31,7 +30,9 @@ def create_user(session: Session, schema: SignupSchema):
 
 
 def get_user(session: Session, code: str):
-    user = session.exec(select(User).where(User.code == code, User.is_active)).first()
+    user = session.execute(
+        select(User).where(User.code == code, User.is_active)
+    ).scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user

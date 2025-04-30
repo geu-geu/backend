@@ -1,5 +1,3 @@
-from datetime import UTC, datetime
-
 from app.models import Drawing, DrawingImage, Post
 
 
@@ -11,8 +9,6 @@ def test_create_drawing(client, session, authorized_user):
         author_id=authorized_user.id,
         title="test title",
         content="test content",
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
     )
     session.add(post)
 
@@ -48,20 +44,15 @@ def test_get_drawings(client, session, authorized_user):
         author_id=authorized_user.id,
         title="test title",
         content="test content",
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
     )
     session.add(post)
 
     drawings = [
         Drawing(
-            id=i,
             code=f"abcd{i}",
             post_id=post.id,
             author_id=authorized_user.id,
             content="test content",
-            created_at=datetime.now(UTC),
-            updated_at=datetime.now(UTC),
         )
         for i in range(1, 4)
     ]
@@ -84,8 +75,6 @@ def test_get_drawing(client, session, authorized_user):
         author_id=authorized_user.id,
         title="test title",
         content="test content",
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
     )
     session.add(post)
 
@@ -95,19 +84,14 @@ def test_get_drawing(client, session, authorized_user):
         post_id=post.id,
         author_id=authorized_user.id,
         content="test content",
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
     )
     session.add(drawing)
 
     drawing_images = [
         DrawingImage(
-            id=i,
             code=f"abcd{i}",
             drawing_id=drawing.id,
             image_url=f"https://example.com/image{i}.jpg",
-            created_at=datetime.now(UTC),
-            updated_at=datetime.now(UTC),
         )
         for i in range(1, 4)
     ]
@@ -133,8 +117,6 @@ def test_update_drawing(client, session, authorized_user):
         author_id=authorized_user.id,
         title="test title",
         content="test content",
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
     )
     session.add(post)
 
@@ -144,19 +126,14 @@ def test_update_drawing(client, session, authorized_user):
         post_id=post.id,
         author_id=authorized_user.id,
         content="test content",
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
     )
     session.add(drawing)
 
     drawing_images = [
         DrawingImage(
-            id=i,
             code=f"abcd{i}",
             drawing_id=drawing.id,
             image_url=f"https://example.com/image{i}.jpg",
-            created_at=datetime.now(UTC),
-            updated_at=datetime.now(UTC),
         )
         for i in range(1, 4)
     ]
@@ -194,8 +171,6 @@ def test_delete_drawing(client, session, authorized_user):
         author_id=authorized_user.id,
         title="test title",
         content="test content",
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
     )
     session.add(post)
 
@@ -205,20 +180,15 @@ def test_delete_drawing(client, session, authorized_user):
         post_id=post.id,
         author_id=authorized_user.id,
         content="test content",
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
     )
     session.add(drawing)
 
     drawing_images = [
         DrawingImage(
-            id=i,
             code=f"abcd{i}",
             drawing_id=drawing.id,
             image_url=f"https://example.com/image{i}.jpg",
             is_deleted=False,
-            created_at=datetime.now(UTC),
-            updated_at=datetime.now(UTC),
         )
         for i in range(1, 4)
     ]

@@ -1,5 +1,3 @@
-from datetime import UTC, datetime
-
 from app.models import Post, PostImage
 
 
@@ -21,13 +19,10 @@ def test_get_posts(client, session, authorized_user):
     # given
     posts = [
         Post(
-            id=i,
             code=f"abcd{i}",
             author_id=authorized_user.id,
             title="test title",
             content="test content",
-            created_at=datetime.now(UTC),
-            updated_at=datetime.now(UTC),
         )
         for i in range(1, 4)
     ]
@@ -50,19 +45,14 @@ def test_get_post(client, session, authorized_user):
         author_id=authorized_user.id,
         title="test title",
         content="test content",
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
     )
     session.add(post)
 
     post_images = [
         PostImage(
-            id=i,
             code=f"abcd{i}",
             post_id=post.id,
             image_url=f"https://example.com/image{i}.jpg",
-            created_at=datetime.now(UTC),
-            updated_at=datetime.now(UTC),
         )
         for i in range(1, 4)
     ]
@@ -86,19 +76,14 @@ def test_update_post(client, session, authorized_user):
         author_id=authorized_user.id,
         title="test title",
         content="test content",
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
     )
     session.add(post)
 
     post_images = [
         PostImage(
-            id=i,
             code=f"abcd{i}",
             post_id=post.id,
             image_url=f"https://example.com/image{i}.jpg",
-            created_at=datetime.now(UTC),
-            updated_at=datetime.now(UTC),
         )
         for i in range(1, 4)
     ]
@@ -137,8 +122,6 @@ def test_delete_post(client, session, authorized_user):
         title="test title",
         content="test content",
         is_deleted=False,
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
     )
     session.add(post)
 
