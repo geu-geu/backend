@@ -35,6 +35,21 @@ def test_create_drawing(client, session, authorized_user):
     assert response.json()["image_urls"] == image_urls
 
 
+def test_create_drawing_401(client, user):
+    # when
+    response = client.post(
+        "/api/drawings",
+        json={
+            "post_code": "abcd123",
+            "content": "test content",
+            "image_urls": ["https://example.com/image.jpg"],
+        },
+    )
+
+    # then
+    assert response.status_code == 401
+
+
 def test_create_drawing_twice_fails(client, session, authorized_user):
     # given
     post = Post(
@@ -102,6 +117,14 @@ def test_get_drawings(client, session, authorized_user):
     assert len(response.json()["items"]) == 3
 
 
+def test_get_drawings_401(client, user):
+    # when
+    response = client.get("/api/drawings")
+
+    # then
+    assert response.status_code == 401
+
+
 def test_get_drawing(client, session, authorized_user):
     # given
     post = Post(
@@ -142,6 +165,14 @@ def test_get_drawing(client, session, authorized_user):
     assert response.json()["author"]["code"] == authorized_user.code
     assert response.json()["content"] == drawing.content
     assert len(response.json()["image_urls"]) == 3
+
+
+def test_get_drawing_401(client, user):
+    # when
+    response = client.get("/api/drawings/abcd123")
+
+    # then
+    assert response.status_code == 401
 
 
 def test_get_drawing_404(client, authorized_user):
@@ -209,6 +240,20 @@ def test_update_drawing(client, session, authorized_user):
     assert len(response.json()["image_urls"]) == 2
 
 
+def test_update_drawing_401(client, user):
+    # when
+    response = client.put(
+        "/api/drawings/abcd123",
+        json={
+            "content": "new content",
+            "image_urls": ["http://example.com/image.png"],
+        },
+    )
+
+    # then
+    assert response.status_code == 401
+
+
 def test_update_drawing_404(client, authorized_user):
     # given
     code = "abcd123"
@@ -265,6 +310,14 @@ def test_delete_drawing(client, session, authorized_user):
     assert response.status_code == 204
     session.refresh(drawing)
     assert drawing.deleted_at is not None
+
+
+def test_delete_drawing_401(client, user):
+    # when
+    response = client.delete("/api/drawings/abcd123")
+
+    # then
+    assert response.status_code == 401
 
 
 def test_delete_drawing_404(client, authorized_user):

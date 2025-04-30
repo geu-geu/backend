@@ -15,6 +15,20 @@ def test_create_post(client, authorized_user):
     assert response.json()["content"] == content
 
 
+def test_create_post_401(client, user):
+    # when
+    response = client.post(
+        "/api/posts",
+        json={
+            "title": "test title",
+            "content": "test content",
+        },
+    )
+
+    # then
+    assert response.status_code == 401
+
+
 def test_get_posts(client, session, authorized_user):
     # given
     posts = [
@@ -35,6 +49,14 @@ def test_get_posts(client, session, authorized_user):
     assert response.status_code == 200
     assert response.json()["count"] == 3
     assert len(response.json()["items"]) == 3
+
+
+def test_get_posts_401(client, user):
+    # when
+    response = client.get("/api/posts")
+
+    # then
+    assert response.status_code == 401
 
 
 def test_get_post(client, session, authorized_user):
@@ -66,6 +88,14 @@ def test_get_post(client, session, authorized_user):
     assert response.json()["title"] == post.title
     assert response.json()["content"] == post.content
     assert len(response.json()["image_urls"]) == len(post_images)
+
+
+def test_get_post_401(client, user):
+    # when
+    response = client.get("/api/posts/abcd123")
+
+    # then
+    assert response.status_code == 401
 
 
 def test_get_post_404(client, authorized_user):
@@ -124,6 +154,20 @@ def test_update_post(client, session, authorized_user):
     assert len(response.json()["image_urls"]) == len(new_image_urls)
 
 
+def test_update_post_401(client, user):
+    # when
+    response = client.put(
+        "/api/posts/abcd123",
+        json={
+            "title": "new title",
+            "content": "new content",
+        },
+    )
+
+    # then
+    assert response.status_code == 401
+
+
 def test_update_post_404(client, authorized_user):
     # given
     code = "abcd123"
@@ -162,6 +206,14 @@ def test_delete_post(client, session, authorized_user):
     assert response.status_code == 204
     session.refresh(post)
     assert post.deleted_at is not None
+
+
+def test_delete_post_401(client, user):
+    # when
+    response = client.delete("/api/posts/abcd123")
+
+    # then
+    assert response.status_code == 401
 
 
 def test_delete_post_404(client, authorized_user):

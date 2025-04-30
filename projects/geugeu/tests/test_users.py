@@ -28,6 +28,14 @@ def test_get_me(client, authorized_user):
     ] == authorized_user.updated_at.isoformat().replace("+00:00", "Z")
 
 
+def test_get_me_401(client, user):
+    # when
+    response = client.get("/api/users/me")
+
+    # then
+    assert response.status_code == 401
+
+
 def test_update_me(client, authorized_user):
     # given
     new_nickname = "geugeugood"
@@ -40,6 +48,17 @@ def test_update_me(client, authorized_user):
     assert response.json()["nickname"] == new_nickname
 
 
+def test_update_me_401(client, user):
+    # given
+    new_nickname = "geugeugood"
+
+    # when
+    response = client.put("/api/users/me", json={"nickname": new_nickname})
+
+    # then
+    assert response.status_code == 401
+
+
 def test_delete_me(client, session, authorized_user):
     assert authorized_user.deleted_at is None
 
@@ -50,3 +69,11 @@ def test_delete_me(client, session, authorized_user):
     assert response.status_code == 204
     session.refresh(authorized_user)
     assert authorized_user.deleted_at is not None
+
+
+def test_delete_me_401(client, user):
+    # when
+    response = client.delete("/api/users/me")
+
+    # then
+    assert response.status_code == 401
