@@ -115,21 +115,27 @@ def update_drawing(
     drawing = session.exec(select(Drawing).where(Drawing.code == code)).one()
     post = session.exec(select(Post).where(Post.id == drawing.post_id)).one()
     author = session.exec(select(User).where(User.id == drawing.author_id)).one()
+    images = session.exec(
+        select(DrawingImage).where(DrawingImage.drawing_id == drawing.id)
+    ).all()
 
     # drawing 수정
     drawing.content = schema.content
     drawing.updated_at = datetime.now(UTC)
     session.add(drawing)
-    session.flush()
 
     # drawing images 전부 삭제 후 재생성
-    session.exec(delete(DrawingImage).where(DrawingImage.drawing_id == drawing.id))
+    for image in images:
+        image.is_deleted = True
+        session.add(image)
+
     drawing_images = []
     for image_url in schema.image_urls:
         drawing_image = DrawingImage(
             code=generate_code(),
             drawing_id=drawing.id,
             image_url=image_url,
+            is_deleted=False,
             created_at=datetime.now(UTC),
             updated_at=datetime.now(UTC),
         )
