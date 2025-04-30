@@ -6,6 +6,13 @@ on:
 env:
   PROJECT_DIR: projects/geugeu
 
+  SECRET_KEY: postgrestestpostgrestestpostgrestestpostgrestestpostgrestest
+  POSTGRES_USER: postgrestest
+  POSTGRES_PASSWORD: postgrestest
+  POSTGRES_DB: postgrestest
+  POSTGRES_HOST: postgrestest
+  POSTGRES_PORT: 5432
+
 jobs:
   build:
     runs-on: ubuntu-latest
