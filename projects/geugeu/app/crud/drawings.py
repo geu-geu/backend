@@ -116,7 +116,7 @@ def update_drawing(
     post = session.exec(select(Post).where(Post.id == drawing.post_id)).one()
     author = session.exec(select(User).where(User.id == drawing.author_id)).one()
 
-    # drawing 생성
+    # drawing 수정
     drawing.content = schema.content
     drawing.updated_at = datetime.now(UTC)
     session.add(drawing)

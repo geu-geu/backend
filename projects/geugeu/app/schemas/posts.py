@@ -20,6 +20,7 @@ class PostSchema(BaseModel):
     author: UserSchema
     title: str
     content: str
+    image_urls: list[str] = []
     created_at: datetime
     updated_at: datetime
 
@@ -32,3 +33,4 @@ class PostListSchema(BaseModel):
 class UpdatePostSchema(BaseModel):
     title: str
     content: str = ""
+    image_urls: list[str] = []

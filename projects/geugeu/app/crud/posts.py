@@ -1,8 +1,9 @@
 from datetime import datetime
 
+from sqlalchemy import delete
 from sqlmodel import Session, select
 
-from app.models import Post, User
+from app.models import Post, PostImage, User
 from app.schemas.posts import (
     CreatePostSchema,
     PostListSchema,
@@ -86,10 +87,28 @@ def get_post(session: Session, code: str) -> PostSchema:
 def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSchema:
     post = session.exec(select(Post).where(Post.code == code)).one()
     author = session.exec(select(User).where(User.id == post.author_id)).one()
+
+    # post 수정
     post.title = schema.title
     post.content = schema.content
+    post.updated_at = datetime.now()
+    session.add(post)
+    session.flush()
+
+    # post images 업데이트
+    session.exec(delete(PostImage).where(PostImage.post_id == post.id))
+    post_images = []
+    for image_url in schema.image_urls:
+        post_image = PostImage(
+            code=generate_code(),
+            post_id=post.id,
+            image_url=image_url,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        )
+        post_images.append(post_image)
+    session.add_all(post_images)
     session.commit()
-    session.refresh(post)
 
     return PostSchema(
         code=post.code,
@@ -101,6 +120,7 @@ def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSc
         ),
         title=post.title,
         content=post.content,
+        image_urls=[post_image.image_url for post_image in post_images],
         created_at=post.created_at,
         updated_at=post.updated_at,
     )
