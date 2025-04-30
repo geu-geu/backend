@@ -1,3 +1,10 @@
+from datetime import UTC, datetime
+
+import pytest
+
+from app.models import User
+
+
 def test_create_user(client):
     # given
     email = "user@example.com"
@@ -9,6 +16,82 @@ def test_create_user(client):
     # then
     assert response.status_code == 201
     assert response.json()["email"] == email
+
+
+def test_create_user_with_existing_email(client, session):
+    # given
+    email = "user@example.com"
+    password = "P@ssw0rd1234"
+
+    user = User(
+        code="abcd123",
+        email=email,
+        password="$2b$12$g6AeAJXUJmaOcyYwUFVqgeeDL4UOnPVPuAXjSgqmgw/ZuTztFwAe.",
+    )
+    session.add(user)
+    session.commit()
+
+    # when
+    response = client.post("/api/users", json={"email": email, "password": password})
+
+    # then
+    assert response.status_code == 400
+    assert response.json()["detail"] == "User already exists"
+
+
+def test_create_user_with_deleted_email(client, session):
+    # given
+    email = "user@example.com"
+    password = "P@ssw0rd1234"
+
+    user = User(
+        code="abcd123",
+        email=email,
+        password="$2b$12$g6AeAJXUJmaOcyYwUFVqgeeDL4UOnPVPuAXjSgqmgw/ZuTztFwAe.",
+        deleted_at=datetime.now(UTC),
+    )
+    session.add(user)
+    session.commit()
+
+    # when
+    response = client.post("/api/users", json={"email": email, "password": password})
+
+    # then
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Cannot sign up with this email"
+
+
+def test_create_user_with_invalid_email(client):
+    # given
+    email = "user"
+    password = "P@ssw0rd1234"
+
+    # when
+    response = client.post("/api/users", json={"email": email, "password": password})
+
+    # then
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize(
+    "password",
+    [
+        "P@ssw0r",  # 8자 이상 미충족
+        "p@ssw0rd1234",  # 대문자 포함 미충족
+        "P@SSW0RD1234",  # 소문자 포함 미충족
+        "P@sswXrdXXXX",  # 숫자 포함 미충족
+        "PAssw0rd1234",  # 특수문자 포함 미충족
+    ],
+)
+def test_create_user_with_invalid_password(client, password):
+    # given
+    email = "user@example.com"
+
+    # when
+    response = client.post("/api/users", json={"email": email, "password": password})
+
+    # then
+    assert response.status_code == 422
 
 
 def test_get_me(client, authorized_user):
