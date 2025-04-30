@@ -1,5 +1,7 @@
 from datetime import UTC, datetime
 
+from sqlmodel import select
+
 from app.models import Post, PostImage
 
 
@@ -148,3 +150,6 @@ def test_delete_post(client, session, authorized_user):
     assert response.status_code == 204
     session.refresh(post)
     assert post.is_deleted
+    images = session.exec(select(PostImage).where(PostImage.post_id == post.id)).all()
+    for image in images:
+        assert image.is_deleted

@@ -140,5 +140,8 @@ def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSc
 
 def delete_post(session: Session, code: str) -> None:
     post = session.exec(select(Post).where(Post.code == code)).one()
+    images = session.exec(select(PostImage).where(PostImage.post_id == post.id)).all()
+    for image in images:
+        image.is_deleted = True
     post.is_deleted = True
     session.commit()
