@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+from testcontainers.postgres import PostgresContainer
 
 from app.api.dependencies import get_current_user
 from app.core.db import Base, get_db
@@ -13,12 +14,11 @@ from app.models import User
 
 @pytest.fixture(scope="session")
 def test_db():
-    engine = create_engine(
-        "postgresql+psycopg2://postgres:postgres@localhost:5432/postgres"
-    )
-    Base.metadata.create_all(engine)
-    yield engine
-    # Base.metadata.drop_all(engine)
+    with PostgresContainer("postgres:16") as postgres_container:
+        engine = create_engine(postgres_container.get_connection_url())
+        Base.metadata.create_all(engine)
+        yield engine
+        Base.metadata.drop_all(engine)
 
 
 @pytest.fixture()
