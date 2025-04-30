@@ -55,8 +55,7 @@ def user(session):
         password="$2b$12$g6AeAJXUJmaOcyYwUFVqgeeDL4UOnPVPuAXjSgqmgw/ZuTztFwAe.",
         nickname="user",
         is_admin=False,
-        is_active=True,
-        profile_image_url=None,
+        profile_image_url="",
     )
     session.add(user)
     session.flush()

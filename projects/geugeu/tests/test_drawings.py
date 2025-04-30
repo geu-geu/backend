@@ -193,10 +193,12 @@ def test_delete_drawing(client, session, authorized_user):
     ]
     session.add_all(drawing_images)
 
+    assert drawing.deleted_at is None
+
     # when
     response = client.delete(f"/api/drawings/{drawing.code}")
 
     # then
     assert response.status_code == 204
     session.refresh(drawing)
-    assert drawing.is_deleted
+    assert drawing.deleted_at is not None

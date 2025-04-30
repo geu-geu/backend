@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -13,12 +15,12 @@ def create_user(session: Session, schema: SignupSchema):
         select(User).where(User.email == schema.email)
     ).scalar_one_or_none()
     if user:
-        if user.is_active:
-            raise HTTPException(status_code=400, detail="User already exists")
-        else:
+        if user.deleted_at:
             raise HTTPException(
                 status_code=400, detail="Cannot sign up with this email"
             )
+        else:
+            raise HTTPException(status_code=400, detail="User already exists")
     else:
         user = User(
             code=generate_code(),
@@ -26,7 +28,6 @@ def create_user(session: Session, schema: SignupSchema):
             nickname=schema.nickname,
             password=get_password_hash(schema.password),
             is_admin=False,
-            is_active=True,
             profile_image_url="",
         )
     session.add(user)
@@ -39,7 +40,7 @@ def get_user(session: Session, code: str):
     user = session.execute(
         select(User).where(
             User.code == code,
-            User.is_active,
+            User.deleted_at.is_(None),
         )
     ).scalar_one_or_none()
     if not user:
@@ -56,6 +57,6 @@ def update_user(session: Session, user: User, schema: UserUpdateSchema):
 
 
 def delete_user(session: Session, user: User):
-    user.is_active = False
+    user.deleted_at = datetime.now(UTC)
     session.add(user)
     session.commit()

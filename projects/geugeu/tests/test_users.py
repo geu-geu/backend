@@ -41,10 +41,12 @@ def test_update_me(client, authorized_user):
 
 
 def test_delete_me(client, session, authorized_user):
+    assert authorized_user.deleted_at is None
+
     # when
     response = client.delete("/api/users/me")
 
     # then
     assert response.status_code == 204
     session.refresh(authorized_user)
-    assert authorized_user.is_active is False
+    assert authorized_user.deleted_at is not None

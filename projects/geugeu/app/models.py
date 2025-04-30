@@ -13,13 +13,9 @@ class User(Base):
     id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
     code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    nickname: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     password: Mapped[str] = mapped_column(String(255), nullable=False)
+    nickname: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     is_admin: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
-    is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=True)
-    is_deleted: Mapped[bool] = mapped_column(
-        Boolean(), nullable=False, server_default="FALSE"
-    )
     profile_image_url: Mapped[str] = mapped_column(
         String(2083),
         nullable=False,
@@ -36,6 +32,7 @@ class User(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class Post(Base):
@@ -46,7 +43,6 @@ class Post(Base):
     author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    is_deleted: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -58,6 +54,7 @@ class Post(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class PostImage(Base):
@@ -67,7 +64,6 @@ class PostImage(Base):
     code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     post_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
     image_url: Mapped[str] = mapped_column(String(2083), nullable=False)
-    is_deleted: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -79,6 +75,7 @@ class PostImage(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class PostComment(Base):
@@ -100,6 +97,7 @@ class PostComment(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class Drawing(Base):
@@ -110,7 +108,6 @@ class Drawing(Base):
     post_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
     author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    is_deleted: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -122,6 +119,7 @@ class Drawing(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class DrawingImage(Base):
@@ -131,7 +129,6 @@ class DrawingImage(Base):
     code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     drawing_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
     image_url: Mapped[str] = mapped_column(String(2083), nullable=False)
-    is_deleted: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -143,6 +140,7 @@ class DrawingImage(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class DrawingComment(Base):
@@ -164,3 +162,4 @@ class DrawingComment(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

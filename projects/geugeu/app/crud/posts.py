@@ -1,4 +1,6 @@
-from sqlalchemy import not_, select
+from datetime import UTC, datetime
+
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Post, PostImage, User
@@ -52,7 +54,7 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
 def get_posts(session: Session) -> PostListSchema:
     posts = (
         session.execute(
-            select(Post).where(not_(Post.is_deleted)).order_by(Post.id.desc())
+            select(Post).where(Post.deleted_at.is_(None)).order_by(Post.id.desc())
         )
         .scalars()
         .all()
@@ -62,7 +64,7 @@ def get_posts(session: Session) -> PostListSchema:
         author = session.execute(
             select(User).where(
                 User.id == post.author_id,
-                User.is_active,
+                User.deleted_at.is_(None),
             )
         ).scalar_one()
         result = PostSchema(
@@ -89,17 +91,20 @@ def get_post(session: Session, code: str) -> PostSchema:
     post = session.execute(
         select(Post).where(
             Post.code == code,
-            not_(Post.is_deleted),
+            Post.deleted_at.is_(None),
         )
     ).scalar_one()
     author = session.execute(
-        select(User).where(User.id == post.author_id, User.is_active)
+        select(User).where(
+            User.id == post.author_id,
+            User.deleted_at.is_(None),
+        )
     ).scalar_one()
     images = (
         session.execute(
             select(PostImage).where(
                 PostImage.post_id == post.id,
-                not_(PostImage.is_deleted),
+                PostImage.deleted_at.is_(None),
             )
         )
         .scalars()
@@ -125,20 +130,20 @@ def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSc
     post = session.execute(
         select(Post).where(
             Post.code == code,
-            not_(Post.is_deleted),
+            Post.deleted_at.is_(None),
         )
     ).scalar_one()
     author = session.execute(
         select(User).where(
             User.id == post.author_id,
-            User.is_active,
+            User.deleted_at.is_(None),
         )
     ).scalar_one()
     images = (
         session.execute(
             select(PostImage).where(
                 PostImage.post_id == post.id,
-                not_(PostImage.is_deleted),
+                PostImage.deleted_at.is_(None),
             )
         )
         .scalars()
@@ -152,7 +157,7 @@ def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSc
 
     # 기존 post images 전부 삭제
     for image in images:
-        image.is_deleted = True
+        image.deleted_at = datetime.now(UTC)
         session.add(image)
 
     # 새로운 post images 생성
@@ -187,8 +192,8 @@ def delete_post(session: Session, code: str) -> None:
     post = session.execute(
         select(Post).where(
             Post.code == code,
-            not_(Post.is_deleted),
+            Post.deleted_at.is_(None),
         )
     ).scalar_one()
-    post.is_deleted = True
+    post.deleted_at = datetime.now(UTC)
     session.commit()

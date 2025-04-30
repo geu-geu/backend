@@ -16,8 +16,8 @@ class PostSchema(BaseModel):
 class UserSchema(BaseModel):
     code: str
     email: EmailStr
-    nickname: str | None = None
-    profile_image_url: str | None = None
+    nickname: str = ""
+    profile_image_url: str = ""
 
 
 class DrawingSchema(BaseModel):

@@ -124,10 +124,12 @@ def test_delete_post(client, session, authorized_user):
     session.add(post)
     session.flush()
 
+    assert post.deleted_at is None
+
     # when
     response = client.delete(f"/api/posts/{post.code}")
 
     # then
     assert response.status_code == 204
     session.refresh(post)
-    assert post.is_deleted
+    assert post.deleted_at is not None

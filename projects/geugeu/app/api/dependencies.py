@@ -32,6 +32,6 @@ def get_current_user(
     user = get_user(session, token_data.sub) if token_data.sub else None
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if not user.is_active:
+    if user.deleted_at:
         raise HTTPException(status_code=400, detail="Inactive user")
     return user

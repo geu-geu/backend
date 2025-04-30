@@ -9,7 +9,7 @@ def get_user(session: Session, email: str):
     user = session.execute(
         select(User).where(
             User.email == email,
-            User.is_active,
+            User.deleted_at.is_(None),
         )
     ).scalar_one_or_none()
     if not user:

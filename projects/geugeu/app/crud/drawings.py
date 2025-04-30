@@ -1,4 +1,6 @@
-from sqlalchemy import not_, select
+from datetime import UTC, datetime
+
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Drawing, DrawingImage, Post, User
@@ -19,7 +21,7 @@ def create_drawing(
     post = session.execute(
         select(Post).where(
             Post.code == schema.post_code,
-            not_(Post.is_deleted),
+            Post.deleted_at.is_(None),
         )
     ).scalar_one()
     drawing = Drawing(
@@ -65,20 +67,20 @@ def get_drawings(session: Session) -> DrawingListSchema:
         post = session.execute(
             select(Post).where(
                 Post.id == drawing.post_id,
-                not_(Post.is_deleted),
+                Post.deleted_at.is_(None),
             )
         ).scalar_one()
         author = session.execute(
             select(User).where(
                 User.id == drawing.author_id,
-                User.is_active,
+                User.deleted_at.is_(None),
             )
         ).scalar_one()
         images = (
             session.execute(
                 select(DrawingImage).where(
                     DrawingImage.drawing_id == drawing.id,
-                    not_(DrawingImage.is_deleted),
+                    DrawingImage.deleted_at.is_(None),
                 )
             )
             .scalars()
@@ -109,26 +111,26 @@ def get_drawing(session: Session, code: str) -> DrawingSchema:
     drawing = session.execute(
         select(Drawing).where(
             Drawing.code == code,
-            not_(Drawing.is_deleted),
+            Drawing.deleted_at.is_(None),
         )
     ).scalar_one()
     post = session.execute(
         select(Post).where(
             Post.id == drawing.post_id,
-            not_(Post.is_deleted),
+            Post.deleted_at.is_(None),
         )
     ).scalar_one()
     author = session.execute(
         select(User).where(
             User.id == drawing.author_id,
-            User.is_active,
+            User.deleted_at.is_(None),
         )
     ).scalar_one()
     images = (
         session.execute(
             select(DrawingImage).where(
                 DrawingImage.drawing_id == drawing.id,
-                not_(DrawingImage.is_deleted),
+                DrawingImage.deleted_at.is_(None),
             )
         )
         .scalars()
@@ -156,26 +158,26 @@ def update_drawing(
     drawing = session.execute(
         select(Drawing).where(
             Drawing.code == code,
-            not_(Drawing.is_deleted),
+            Drawing.deleted_at.is_(None),
         )
     ).scalar_one()
     post = session.execute(
         select(Post).where(
             Post.id == drawing.post_id,
-            not_(Post.is_deleted),
+            Post.deleted_at.is_(None),
         )
     ).scalar_one()
     author = session.execute(
         select(User).where(
             User.id == drawing.author_id,
-            User.is_active,
+            User.deleted_at.is_(None),
         )
     ).scalar_one()
     images = (
         session.execute(
             select(DrawingImage).where(
                 DrawingImage.drawing_id == drawing.id,
-                not_(DrawingImage.is_deleted),
+                DrawingImage.deleted_at.is_(None),
             )
         )
         .scalars()
@@ -188,7 +190,7 @@ def update_drawing(
 
     # 기존 drawing images 전부 삭제
     for image in images:
-        image.is_deleted = True
+        image.deleted_at = datetime.now(UTC)
         session.add(image)
 
     # 새로운 drawing images 생성
@@ -223,8 +225,8 @@ def delete_drawing(session: Session, code: str) -> None:
     drawing = session.execute(
         select(Drawing).where(
             Drawing.code == code,
-            not_(Drawing.is_deleted),
+            Drawing.deleted_at.is_(None),
         )
     ).scalar_one()
-    drawing.is_deleted = True
+    drawing.deleted_at = datetime.now(UTC)
     session.commit()
