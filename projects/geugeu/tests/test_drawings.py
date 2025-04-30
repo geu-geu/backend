@@ -35,6 +35,41 @@ def test_create_drawing(client, session, authorized_user):
     assert response.json()["image_urls"] == image_urls
 
 
+def test_create_drawing_twice_fails(client, session, authorized_user):
+    # given
+    post = Post(
+        code="abcd123",
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+    )
+    session.add(post)
+    session.flush()
+
+    drawing = Drawing(
+        code="abcd123",
+        post_id=post.id,
+        author_id=authorized_user.id,
+        content="test content",
+    )
+    session.add(drawing)
+    session.flush()
+
+    # when
+    response = client.post(
+        "/api/drawings",
+        json={
+            "post_code": post.code,
+            "content": "test content",
+            "image_urls": ["https://example.com/image.jpg"],
+        },
+    )
+
+    # then
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Drawing already exists"
+
+
 def test_get_drawings(client, session, authorized_user):
     # given
     post = Post(

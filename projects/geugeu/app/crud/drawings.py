@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
-from sqlalchemy import select
+from fastapi import HTTPException
+from sqlalchemy import exists, select
 from sqlalchemy.orm import Session
 
 from app.models import Drawing, DrawingImage, Post, User
@@ -24,6 +25,14 @@ def create_drawing(
             Post.deleted_at.is_(None),
         )
     ).scalar_one()
+
+    if session.execute(
+        exists(Drawing.id)
+        .where(Drawing.post_id == post.id, Drawing.deleted_at.is_(None))
+        .select()
+    ).scalar():
+        raise HTTPException(status_code=400, detail="Drawing already exists")
+
     drawing = Drawing(
         code=generate_code(),
         post_id=post.id,
