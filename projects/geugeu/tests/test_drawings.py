@@ -123,3 +123,64 @@ def test_get_drawing(client, session, authorized_user):
     assert response.json()["author"]["code"] == authorized_user.code
     assert response.json()["content"] == drawing.content
     assert len(response.json()["image_urls"]) == 3
+
+
+def test_update_drawing(client, session, authorized_user):
+    # given
+    post = Post(
+        id=1,
+        code="abcd123",
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    session.add(post)
+
+    drawing = Drawing(
+        id=1,
+        code="abcd123",
+        post_id=post.id,
+        author_id=authorized_user.id,
+        content="test content",
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    session.add(drawing)
+
+    drawing_images = [
+        DrawingImage(
+            id=i,
+            code=f"abcd{i}",
+            drawing_id=drawing.id,
+            image_url=f"https://example.com/image{i}.jpg",
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
+        )
+        for i in range(1, 4)
+    ]
+    session.add_all(drawing_images)
+
+    new_content = "new content"
+    new_image_urls = [
+        "https://example.com/new1.jpg",
+        "https://example.com/new2.jpg",
+    ]
+
+    # when
+    response = client.put(
+        f"/api/drawings/{drawing.code}",
+        json={
+            "content": new_content,
+            "image_urls": new_image_urls,
+        },
+    )
+
+    # then
+    assert response.status_code == 200
+    assert response.json()["code"] == drawing.code
+    assert response.json()["post"]["code"] == post.code
+    assert response.json()["author"]["code"] == authorized_user.code
+    assert response.json()["content"] == new_content
+    assert len(response.json()["image_urls"]) == 2

@@ -33,3 +33,8 @@ class DrawingSchema(BaseModel):
 class DrawingListSchema(BaseModel):
     count: int
     items: list[DrawingSchema]
+
+
+class UpdateDrawingSchema(BaseModel):
+    content: str
+    image_urls: list[str]

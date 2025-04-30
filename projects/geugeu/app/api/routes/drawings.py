@@ -7,7 +7,7 @@ from app.api.dependencies import get_current_user
 from app.core.db import get_db
 from app.crud import drawings as crud
 from app.models import User
-from app.schemas.drawings import CreateDrawingSchema
+from app.schemas.drawings import CreateDrawingSchema, UpdateDrawingSchema
 
 router = APIRouter()
 
@@ -39,8 +39,13 @@ async def get_drawing(
 
 
 @router.put("/{drawing_code}")
-async def update_drawing(drawing_code: str):
-    raise NotImplementedError
+async def update_drawing(
+    drawing_code: str,
+    schema: UpdateDrawingSchema,
+    session: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    return crud.update_drawing(session, drawing_code, schema)
 
 
 @router.delete("/{drawing_code}")

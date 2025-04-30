@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from sqlmodel import Session, select
+from sqlmodel import Session, delete, select
 
 from app.models import Drawing, DrawingImage, Post, User
 from app.schemas.drawings import (
@@ -8,6 +8,7 @@ from app.schemas.drawings import (
     DrawingListSchema,
     DrawingSchema,
     PostSchema,
+    UpdateDrawingSchema,
     UserSchema,
 )
 from app.utils import generate_code
@@ -103,6 +104,50 @@ def get_drawing(session: Session, code: str) -> DrawingSchema:
         ),
         content=drawing.content,
         image_urls=[drawing_image.image_url for drawing_image in images],
+        created_at=drawing.created_at,
+        updated_at=drawing.updated_at,
+    )
+
+
+def update_drawing(
+    session: Session, code: str, schema: UpdateDrawingSchema
+) -> DrawingSchema:
+    drawing = session.exec(select(Drawing).where(Drawing.code == code)).one()
+    post = session.exec(select(Post).where(Post.id == drawing.post_id)).one()
+    author = session.exec(select(User).where(User.id == drawing.author_id)).one()
+
+    # drawing 생성
+    drawing.content = schema.content
+    drawing.updated_at = datetime.now(UTC)
+    session.add(drawing)
+    session.flush()
+
+    # drawing images 전부 삭제 후 재생성
+    session.exec(delete(DrawingImage).where(DrawingImage.drawing_id == drawing.id))
+    drawing_images = []
+    for image_url in schema.image_urls:
+        drawing_image = DrawingImage(
+            code=generate_code(),
+            drawing_id=drawing.id,
+            image_url=image_url,
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
+        )
+        drawing_images.append(drawing_image)
+    session.add_all(drawing_images)
+    session.commit()
+
+    return DrawingSchema(
+        code=drawing.code,
+        post=PostSchema(code=post.code),
+        author=UserSchema(
+            code=author.code,
+            email=author.email,
+            nickname=author.nickname,
+            profile_image_url=author.profile_image_url,
+        ),
+        content=drawing.content,
+        image_urls=[drawing_image.image_url for drawing_image in drawing_images],
         created_at=drawing.created_at,
         updated_at=drawing.updated_at,
     )
