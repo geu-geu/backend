@@ -20,8 +20,19 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
         content=schema.content,
     )
     session.add(post)
+    session.flush()
+
+    post_images = []
+    for image_url in schema.image_urls:
+        post_image = PostImage(
+            code=generate_code(),
+            post_id=post.id,
+            image_url=image_url,
+        )
+        post_images.append(post_image)
+    session.add_all(post_images)
     session.commit()
-    session.refresh(post)
+
     return PostSchema(
         code=post.code,
         author=UserSchema(
@@ -32,6 +43,7 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
         ),
         title=post.title,
         content=post.content,
+        image_urls=[post_image.image_url for post_image in post_images],
         created_at=post.created_at,
         updated_at=post.updated_at,
     )

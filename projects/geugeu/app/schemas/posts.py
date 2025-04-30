@@ -6,6 +6,7 @@ from pydantic import BaseModel, EmailStr
 class CreatePostSchema(BaseModel):
     title: str
     content: str
+    image_urls: list[str] = []
 
 
 class UserSchema(BaseModel):
