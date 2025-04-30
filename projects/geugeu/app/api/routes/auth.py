@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.core.security import create_access_token, verify_password
-from app.crud.auth import get_user
+from app.crud import auth as crud
 from app.schemas.auth import Token
 
 router = APIRouter()
@@ -18,7 +18,7 @@ async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[Session, Depends(get_db)],
 ):
-    user = get_user(session, form_data.username)
+    user = crud.get_user(session, form_data.username)
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
     if not verify_password(form_data.password, user.password):
