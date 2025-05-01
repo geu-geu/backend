@@ -8,6 +8,7 @@ from testcontainers.postgres import PostgresContainer
 
 from app.api.dependencies import get_current_user
 from app.core.db import Base, get_db
+from app.core.security import get_password_hash
 from app.main import app
 from app.models import User
 
@@ -48,11 +49,21 @@ def client():
 
 
 @pytest.fixture()
-def user(session):
+def raw_password():
+    return "P@ssw0rd1234"
+
+
+@pytest.fixture()
+def hashed_password(raw_password):
+    return get_password_hash(raw_password)
+
+
+@pytest.fixture()
+def user(session, hashed_password):
     user = User(
         code="abcd123",
         email="user@example.com",
-        password="$2b$12$g6AeAJXUJmaOcyYwUFVqgeeDL4UOnPVPuAXjSgqmgw/ZuTztFwAe.",
+        password=hashed_password,
         nickname="user",
         is_admin=False,
         profile_image_url="",

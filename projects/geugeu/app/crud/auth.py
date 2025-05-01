@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -12,6 +11,4 @@ def get_user(session: Session, email: str):
             User.deleted_at.is_(None),
         )
     ).scalar_one_or_none()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
     return user
