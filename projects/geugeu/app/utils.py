@@ -1,6 +1,5 @@
-import random
-import string
+from nanoid import generate
 
 
-def generate_code(length: int = 10) -> str:
-    return "".join(random.choices(string.ascii_letters + string.digits, k=length))
+def generate_code() -> str:
+    return generate()
