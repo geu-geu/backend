@@ -1,8 +1,9 @@
 from datetime import datetime
+from typing import List, Optional
 
 from nanoid import generate
 from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Identity, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from app.core.db import Base
@@ -44,6 +45,11 @@ class User(Base):
     )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
+    # Relationships
+    posts: Mapped[List["Post"]] = relationship(back_populates="author")
+    drawings: Mapped[List["Drawing"]] = relationship(back_populates="author")
+    comments: Mapped[List["Comment"]] = relationship(back_populates="author")
+
 
 class Post(Base):
     __tablename__ = "post"
@@ -74,6 +80,12 @@ class Post(Base):
         onupdate=func.now(),
     )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    # Relationships
+    author: Mapped["User"] = relationship(back_populates="posts")
+    drawings: Mapped[List["Drawing"]] = relationship(back_populates="post")
+    images: Mapped[List["Image"]] = relationship(back_populates="post")
+    comments: Mapped[List["Comment"]] = relationship(back_populates="post")
 
 
 class Drawing(Base):
@@ -110,6 +122,12 @@ class Drawing(Base):
     )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
+    # Relationships
+    post: Mapped["Post"] = relationship(back_populates="drawings")
+    author: Mapped["User"] = relationship(back_populates="drawings")
+    images: Mapped[List["Image"]] = relationship(back_populates="drawing")
+    comments: Mapped[List["Comment"]] = relationship(back_populates="drawing")
+
 
 class Image(Base):
     __tablename__ = "image"
@@ -144,6 +162,10 @@ class Image(Base):
         onupdate=func.now(),
     )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    # Relationships
+    post: Mapped[Optional["Post"]] = relationship(back_populates="images")
+    drawing: Mapped[Optional["Drawing"]] = relationship(back_populates="images")
 
 
 class Comment(Base):
@@ -184,3 +206,8 @@ class Comment(Base):
         onupdate=func.now(),
     )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    # Relationships
+    author: Mapped["User"] = relationship(back_populates="comments")
+    post: Mapped[Optional["Post"]] = relationship(back_populates="comments")
+    drawing: Mapped[Optional["Drawing"]] = relationship(back_populates="comments")
