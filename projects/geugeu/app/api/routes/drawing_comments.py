@@ -6,12 +6,21 @@ from sqlalchemy.orm import Session
 from app.api.dependencies import get_current_user, get_db
 from app.crud import drawing_comments as crud
 from app.models import User
-from app.schemas.drawing_comments import CreateCommentSchema, UpdateCommentSchema
+from app.schemas.drawing_comments import (
+    CommentListSchema,
+    CommentSchema,
+    CreateCommentSchema,
+    UpdateCommentSchema,
+)
 
 router = APIRouter()
 
 
-@router.post("/{drawing_code}/comments", status_code=201)
+@router.post(
+    "/{drawing_code}/comments",
+    status_code=201,
+    response_model=CommentSchema,
+)
 async def create_comment(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
@@ -26,7 +35,7 @@ async def create_comment(
     )
 
 
-@router.get("/{drawing_code}/comments")
+@router.get("/{drawing_code}/comments", response_model=CommentListSchema)
 async def get_comments(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
@@ -39,7 +48,10 @@ async def get_comments(
     )
 
 
-@router.get("/{drawing_code}/comments/{comment_code}")
+@router.get(
+    "/{drawing_code}/comments/{comment_code}",
+    response_model=CommentSchema,
+)
 async def get_comment(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
@@ -54,7 +66,7 @@ async def get_comment(
     )
 
 
-@router.put("/{drawing_code}/comments/{comment_code}")
+@router.put("/{drawing_code}/comments/{comment_code}", response_model=CommentSchema)
 async def update_comment(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],

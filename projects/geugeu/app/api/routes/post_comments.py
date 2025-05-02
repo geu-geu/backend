@@ -7,12 +7,17 @@ from app.api.dependencies import get_current_user
 from app.core.db import get_db
 from app.crud import post_comments as crud
 from app.models import User
-from app.schemas.post_comments import CreateCommentSchema, UpdateCommentSchema
+from app.schemas.post_comments import (
+    CommentListSchema,
+    CommentSchema,
+    CreateCommentSchema,
+    UpdateCommentSchema,
+)
 
 router = APIRouter()
 
 
-@router.post("/{post_code}/comments", status_code=201)
+@router.post("/{post_code}/comments", status_code=201, response_model=CommentSchema)
 async def create_comment(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
@@ -27,7 +32,7 @@ async def create_comment(
     )
 
 
-@router.get("/{post_code}/comments")
+@router.get("/{post_code}/comments", response_model=CommentListSchema)
 async def get_comments(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
@@ -40,7 +45,7 @@ async def get_comments(
     )
 
 
-@router.get("/{post_code}/comments/{comment_code}")
+@router.get("/{post_code}/comments/{comment_code}", response_model=CommentSchema)
 async def get_comment(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
@@ -55,7 +60,7 @@ async def get_comment(
     )
 
 
-@router.put("/{post_code}/comments/{comment_code}")
+@router.put("/{post_code}/comments/{comment_code}", response_model=CommentSchema)
 async def update_comment(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],

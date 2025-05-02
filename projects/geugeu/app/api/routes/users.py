@@ -12,7 +12,7 @@ from app.schemas.users import SignupSchema, UserSchema, UserUpdateSchema
 router = APIRouter()
 
 
-@router.post("", response_model=UserSchema, status_code=201)
+@router.post("", status_code=201, response_model=UserSchema)
 async def sign_up(
     schema: SignupSchema,
     session: Annotated[Session, Depends(get_db)],
@@ -39,4 +39,4 @@ async def delete_me(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return crud.delete_user(session, current_user)
+    crud.delete_user(session, current_user)

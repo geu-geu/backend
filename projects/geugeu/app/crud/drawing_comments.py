@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Comment, Drawing, User
-from app.schemas.post_comments import (
+from app.schemas.drawing_comments import (
     CommentListSchema,
     CommentSchema,
     CreateCommentSchema,

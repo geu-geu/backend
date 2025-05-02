@@ -13,7 +13,7 @@ from app.schemas.auth import Token
 router = APIRouter()
 
 
-@router.post("/login")
+@router.post("/login", response_model=Token)
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[Session, Depends(get_db)],

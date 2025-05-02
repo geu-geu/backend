@@ -7,12 +7,17 @@ from app.api.dependencies import get_current_user
 from app.core.db import get_db
 from app.crud import drawings as crud
 from app.models import User
-from app.schemas.drawings import CreateDrawingSchema, UpdateDrawingSchema
+from app.schemas.drawings import (
+    CreateDrawingSchema,
+    DrawingListSchema,
+    DrawingSchema,
+    UpdateDrawingSchema,
+)
 
 router = APIRouter()
 
 
-@router.post("", status_code=201)
+@router.post("", status_code=201, response_model=DrawingSchema)
 async def create_drawing(
     schema: CreateDrawingSchema,
     session: Annotated[Session, Depends(get_db)],
@@ -21,7 +26,7 @@ async def create_drawing(
     return crud.create_drawing(session, current_user, schema)
 
 
-@router.get("")
+@router.get("", response_model=DrawingListSchema)
 async def get_drawings(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
@@ -29,7 +34,7 @@ async def get_drawings(
     return crud.get_drawings(session)
 
 
-@router.get("/{drawing_code}")
+@router.get("/{drawing_code}", response_model=DrawingSchema)
 async def get_drawing(
     drawing_code: str,
     session: Annotated[Session, Depends(get_db)],
@@ -38,7 +43,7 @@ async def get_drawing(
     return crud.get_drawing(session, drawing_code)
 
 
-@router.put("/{drawing_code}")
+@router.put("/{drawing_code}", response_model=DrawingSchema)
 async def update_drawing(
     drawing_code: str,
     schema: UpdateDrawingSchema,
