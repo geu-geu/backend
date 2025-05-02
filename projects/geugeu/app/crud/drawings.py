@@ -13,7 +13,6 @@ from app.schemas.drawings import (
     UpdateDrawingSchema,
     UserSchema,
 )
-from app.utils import generate_code
 
 
 def create_drawing(
@@ -34,7 +33,6 @@ def create_drawing(
         raise HTTPException(status_code=400, detail="Drawing already exists")
 
     drawing = Drawing(
-        code=generate_code(),
         post_id=post.id,
         author_id=user.id,
         content=schema.content,
@@ -45,7 +43,6 @@ def create_drawing(
     images = []
     for image_url in schema.image_urls:
         image = Image(
-            code=generate_code(),
             drawing_id=drawing.id,
             url=image_url,
         )
@@ -220,7 +217,6 @@ def update_drawing(
     images = []
     for image_url in schema.image_urls:
         image = Image(
-            code=generate_code(),
             drawing_id=drawing.id,
             url=image_url,
         )

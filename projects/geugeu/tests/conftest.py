@@ -61,7 +61,6 @@ def hashed_password(raw_password):
 @pytest.fixture()
 def user(session, hashed_password):
     user = User(
-        code="abcd123",
         email="user@example.com",
         password=hashed_password,
         nickname="user",

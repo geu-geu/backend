@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from app.core.security import get_password_hash
 from app.models import User
 from app.schemas.users import SignupSchema, UserUpdateSchema
-from app.utils import generate_code
 
 
 def create_user(session: Session, schema: SignupSchema):
@@ -23,7 +22,6 @@ def create_user(session: Session, schema: SignupSchema):
             raise HTTPException(status_code=400, detail="User already exists")
     else:
         user = User(
-            code=generate_code(),
             email=schema.email,
             nickname=schema.nickname,
             password=get_password_hash(schema.password),

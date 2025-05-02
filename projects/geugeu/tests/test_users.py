@@ -24,7 +24,6 @@ def test_create_user_with_existing_email(client, session):
     password = "P@ssw0rd1234"
 
     user = User(
-        code="abcd123",
         email=email,
         password="$2b$12$g6AeAJXUJmaOcyYwUFVqgeeDL4UOnPVPuAXjSgqmgw/ZuTztFwAe.",
     )
@@ -45,7 +44,6 @@ def test_create_user_with_deleted_email(client, session):
     password = "P@ssw0rd1234"
 
     user = User(
-        code="abcd123",
         email=email,
         password="$2b$12$g6AeAJXUJmaOcyYwUFVqgeeDL4UOnPVPuAXjSgqmgw/ZuTztFwAe.",
         deleted_at=datetime.now(UTC),

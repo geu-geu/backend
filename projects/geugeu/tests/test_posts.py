@@ -33,7 +33,6 @@ def test_get_posts(client, session, authorized_user):
     # given
     posts = [
         Post(
-            code=f"abcd{i}",
             author_id=authorized_user.id,
             title="test title",
             content="test content",
@@ -62,7 +61,6 @@ def test_get_posts_401(client, user):
 def test_get_post(client, session, authorized_user):
     # given
     post = Post(
-        code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
@@ -72,7 +70,6 @@ def test_get_post(client, session, authorized_user):
 
     images = [
         Image(
-            code=f"abcd{i}",
             post_id=post.id,
             url=f"https://example.com/image{i}.jpg",
         )
@@ -112,7 +109,6 @@ def test_get_post_404(client, authorized_user):
 def test_update_post(client, session, authorized_user):
     # given
     post = Post(
-        code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
@@ -122,7 +118,6 @@ def test_update_post(client, session, authorized_user):
 
     post_images = [
         Image(
-            code=f"abcd{i}",
             post_id=post.id,
             url=f"https://example.com/image{i}.jpg",
         )
@@ -157,7 +152,6 @@ def test_update_post(client, session, authorized_user):
 def test_update_post_403(client, session, authorized_user, hashed_password):
     # given
     author = User(
-        code="abcd124",
         email="test@example.com",
         password=hashed_password,
     )
@@ -165,7 +159,6 @@ def test_update_post_403(client, session, authorized_user, hashed_password):
     session.flush()
 
     post = Post(
-        code="abcd123",
         author_id=author.id,
         title="test title",
         content="test content",
@@ -190,7 +183,6 @@ def test_update_post_403(client, session, authorized_user, hashed_password):
 def test_update_post_by_admin(client, session, authorized_user, hashed_password):
     # given
     author = User(
-        code="abcd124",
         email="test@example.com",
         password=hashed_password,
     )
@@ -198,7 +190,6 @@ def test_update_post_by_admin(client, session, authorized_user, hashed_password)
     session.flush()
 
     post = Post(
-        code="abcd123",
         author_id=author.id,
         title="test title",
         content="test content",
@@ -257,7 +248,6 @@ def test_update_post_404(client, authorized_user):
 def test_delete_post(client, session, authorized_user):
     # given
     post = Post(
-        code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
@@ -287,7 +277,6 @@ def test_delete_post_401(client, user):
 def test_delete_post_403(client, session, authorized_user, hashed_password):
     # given
     author = User(
-        code="abcd124",
         email="test@example.com",
         password=hashed_password,
     )
@@ -295,7 +284,6 @@ def test_delete_post_403(client, session, authorized_user, hashed_password):
     session.flush()
 
     post = Post(
-        code="abcd123",
         author_id=author.id,
         title="test title",
         content="test content",
@@ -313,7 +301,6 @@ def test_delete_post_403(client, session, authorized_user, hashed_password):
 def test_delete_post_by_admin(client, session, authorized_user, hashed_password):
     # given
     author = User(
-        code="abcd124",
         email="test@example.com",
         password=hashed_password,
     )
@@ -321,7 +308,6 @@ def test_delete_post_by_admin(client, session, authorized_user, hashed_password)
     session.flush()
 
     post = Post(
-        code="abcd123",
         author_id=author.id,
         title="test title",
         content="test content",

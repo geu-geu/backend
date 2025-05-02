@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from nanoid import generate
 from sqlalchemy import BigInteger, Boolean, DateTime, Identity, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
@@ -7,11 +8,20 @@ from sqlalchemy.sql import func
 from app.core.db import Base
 
 
+def generate_code() -> str:
+    return generate()
+
+
 class User(Base):
     __tablename__ = "user"
 
     id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
-    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    code: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        nullable=False,
+        default=generate_code,
+    )
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     nickname: Mapped[str] = mapped_column(String(255), nullable=False, default="")
@@ -39,7 +49,12 @@ class Post(Base):
     __tablename__ = "post"
 
     id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
-    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    code: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        nullable=False,
+        default=generate_code,
+    )
     author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
@@ -61,7 +76,12 @@ class Drawing(Base):
     __tablename__ = "drawing"
 
     id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
-    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    code: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        nullable=False,
+        default=generate_code,
+    )
     post_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
     author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
@@ -83,7 +103,12 @@ class Image(Base):
     __tablename__ = "image"
 
     id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
-    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    code: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        nullable=False,
+        default=generate_code,
+    )
     post_id: Mapped[int | None] = mapped_column(BigInteger(), nullable=True)
     drawing_id: Mapped[int | None] = mapped_column(BigInteger(), nullable=True)
     url: Mapped[str] = mapped_column(String(2083), nullable=False)
@@ -105,7 +130,12 @@ class Comment(Base):
     __tablename__ = "comment"
 
     id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
-    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    code: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        nullable=False,
+        default=generate_code,
+    )
     author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
     post_id: Mapped[int | None] = mapped_column(BigInteger(), nullable=True)
     drawing_id: Mapped[int | None] = mapped_column(BigInteger(), nullable=True)

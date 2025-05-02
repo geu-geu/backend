@@ -12,12 +12,10 @@ from app.schemas.posts import (
     UpdatePostSchema,
     UserSchema,
 )
-from app.utils import generate_code
 
 
 def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostSchema:
     post = Post(
-        code=generate_code(),
         author_id=user.id,
         title=schema.title,
         content=schema.content,
@@ -28,7 +26,6 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
     post_images = []
     for image_url in schema.image_urls:
         post_image = Image(
-            code=generate_code(),
             post_id=post.id,
             url=image_url,
         )
@@ -179,7 +176,6 @@ def update_post(
     post_images = []
     for image_url in schema.image_urls:
         post_image = Image(
-            code=generate_code(),
             post_id=post.id,
             url=image_url,
         )

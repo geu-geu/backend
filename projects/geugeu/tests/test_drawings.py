@@ -4,12 +4,12 @@ from app.models import Drawing, Image, Post, User
 def test_create_drawing(client, session, authorized_user):
     # given
     post = Post(
-        code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
     session.add(post)
+    session.flush()
 
     content = "test content"
     image_urls = [
@@ -53,7 +53,6 @@ def test_create_drawing_401(client, user):
 def test_create_drawing_twice_fails(client, session, authorized_user):
     # given
     post = Post(
-        code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
@@ -62,7 +61,6 @@ def test_create_drawing_twice_fails(client, session, authorized_user):
     session.flush()
 
     drawing = Drawing(
-        code="abcd123",
         post_id=post.id,
         author_id=authorized_user.id,
         content="test content",
@@ -88,7 +86,6 @@ def test_create_drawing_twice_fails(client, session, authorized_user):
 def test_get_drawings(client, session, authorized_user):
     # given
     post = Post(
-        code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
@@ -98,7 +95,6 @@ def test_get_drawings(client, session, authorized_user):
 
     drawings = [
         Drawing(
-            code=f"abcd{i}",
             post_id=post.id,
             author_id=authorized_user.id,
             content="test content",
@@ -128,7 +124,6 @@ def test_get_drawings_401(client, user):
 def test_get_drawing(client, session, authorized_user):
     # given
     post = Post(
-        code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
@@ -137,7 +132,6 @@ def test_get_drawing(client, session, authorized_user):
     session.flush()
 
     drawing = Drawing(
-        code="abcd123",
         post_id=post.id,
         author_id=authorized_user.id,
         content="test content",
@@ -147,7 +141,6 @@ def test_get_drawing(client, session, authorized_user):
 
     images = [
         Image(
-            code=f"abcd{i}",
             drawing_id=drawing.id,
             url=f"https://example.com/image{i}.jpg",
         )
@@ -189,7 +182,6 @@ def test_get_drawing_404(client, authorized_user):
 def test_update_drawing(client, session, authorized_user):
     # given
     post = Post(
-        code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
@@ -198,7 +190,6 @@ def test_update_drawing(client, session, authorized_user):
     session.flush()
 
     drawing = Drawing(
-        code="abcd123",
         post_id=post.id,
         author_id=authorized_user.id,
         content="test content",
@@ -208,7 +199,6 @@ def test_update_drawing(client, session, authorized_user):
 
     images = [
         Image(
-            code=f"abcd{i}",
             drawing_id=drawing.id,
             url=f"https://example.com/image{i}.jpg",
         )
@@ -257,7 +247,6 @@ def test_update_drawing_401(client, user):
 def test_update_drawing_403(client, session, authorized_user, hashed_password):
     # given
     post = Post(
-        code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
@@ -266,7 +255,6 @@ def test_update_drawing_403(client, session, authorized_user, hashed_password):
     session.flush()
 
     author = User(
-        code="abcd124",
         email="test@example.com",
         password=hashed_password,
     )
@@ -274,7 +262,6 @@ def test_update_drawing_403(client, session, authorized_user, hashed_password):
     session.flush()
 
     drawing = Drawing(
-        code="abcd123",
         post_id=post.id,
         author_id=author.id,
         content="test content",
@@ -298,7 +285,6 @@ def test_update_drawing_403(client, session, authorized_user, hashed_password):
 def test_update_drawing_by_admin(client, session, authorized_user, hashed_password):
     # given
     post = Post(
-        code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
@@ -307,7 +293,6 @@ def test_update_drawing_by_admin(client, session, authorized_user, hashed_passwo
     session.flush()
 
     author = User(
-        code="abcd124",
         email="test@example.com",
         password=hashed_password,
     )
@@ -315,7 +300,6 @@ def test_update_drawing_by_admin(client, session, authorized_user, hashed_passwo
     session.flush()
 
     drawing = Drawing(
-        code="abcd123",
         post_id=post.id,
         author_id=author.id,
         content="test content",
@@ -358,7 +342,6 @@ def test_update_drawing_404(client, authorized_user):
 def test_delete_drawing(client, session, authorized_user):
     # given
     post = Post(
-        code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
@@ -367,7 +350,6 @@ def test_delete_drawing(client, session, authorized_user):
     session.flush()
 
     drawing = Drawing(
-        code="abcd123",
         post_id=post.id,
         author_id=authorized_user.id,
         content="test content",
@@ -377,7 +359,6 @@ def test_delete_drawing(client, session, authorized_user):
 
     images = [
         Image(
-            code=f"abcd{i}",
             drawing_id=drawing.id,
             url=f"https://example.com/image{i}.jpg",
         )
@@ -407,7 +388,6 @@ def test_delete_drawing_401(client, user):
 def test_delete_drawing_403(client, session, authorized_user, hashed_password):
     # given
     post = Post(
-        code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
@@ -416,7 +396,6 @@ def test_delete_drawing_403(client, session, authorized_user, hashed_password):
     session.flush()
 
     author = User(
-        code="abcd124",
         email="test@example.com",
         password=hashed_password,
     )
@@ -424,7 +403,6 @@ def test_delete_drawing_403(client, session, authorized_user, hashed_password):
     session.flush()
 
     drawing = Drawing(
-        code="abcd123",
         post_id=post.id,
         author_id=author.id,
         content="test content",
@@ -442,7 +420,6 @@ def test_delete_drawing_403(client, session, authorized_user, hashed_password):
 def test_delete_drawing_by_admin(client, session, authorized_user, hashed_password):
     # given
     post = Post(
-        code="abcd123",
         author_id=authorized_user.id,
         title="test title",
         content="test content",
@@ -451,7 +428,6 @@ def test_delete_drawing_by_admin(client, session, authorized_user, hashed_passwo
     session.flush()
 
     author = User(
-        code="abcd124",
         email="test@example.com",
         password=hashed_password,
     )
@@ -459,7 +435,6 @@ def test_delete_drawing_by_admin(client, session, authorized_user, hashed_passwo
     session.flush()
 
     drawing = Drawing(
-        code="abcd123",
         post_id=post.id,
         author_id=author.id,
         content="test content",
