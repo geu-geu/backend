@@ -2,7 +2,16 @@ from datetime import datetime
 from typing import List, Optional
 
 from nanoid import generate
-from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Identity, String, Text
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Identity,
+    String,
+    Text,
+    and_,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
@@ -46,9 +55,30 @@ class User(Base):
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     # Relationships
-    posts: Mapped[List["Post"]] = relationship(back_populates="author")
-    drawings: Mapped[List["Drawing"]] = relationship(back_populates="author")
-    comments: Mapped[List["Comment"]] = relationship(back_populates="author")
+    posts: Mapped[List["Post"]] = relationship(
+        "Post",
+        primaryjoin=lambda: and_(
+            Post.author_id == User.id,
+            Post.deleted_at.is_(None),
+        ),
+        back_populates="author",
+    )
+    drawings: Mapped[List["Drawing"]] = relationship(
+        "Drawing",
+        primaryjoin=lambda: and_(
+            Drawing.author_id == User.id,
+            Drawing.deleted_at.is_(None),
+        ),
+        back_populates="author",
+    )
+    comments: Mapped[List["Comment"]] = relationship(
+        "Comment",
+        primaryjoin=lambda: and_(
+            Comment.author_id == User.id,
+            Comment.deleted_at.is_(None),
+        ),
+        back_populates="author",
+    )
 
 
 class Post(Base):
@@ -83,9 +113,30 @@ class Post(Base):
 
     # Relationships
     author: Mapped["User"] = relationship(back_populates="posts")
-    drawings: Mapped[List["Drawing"]] = relationship(back_populates="post")
-    images: Mapped[List["Image"]] = relationship(back_populates="post")
-    comments: Mapped[List["Comment"]] = relationship(back_populates="post")
+    drawings: Mapped[List["Drawing"]] = relationship(
+        "Drawing",
+        primaryjoin=lambda: and_(
+            Drawing.post_id == Post.id,
+            Drawing.deleted_at.is_(None),
+        ),
+        back_populates="post",
+    )
+    images: Mapped[List["Image"]] = relationship(
+        "Image",
+        primaryjoin=lambda: and_(
+            Image.post_id == Post.id,
+            Image.deleted_at.is_(None),
+        ),
+        back_populates="post",
+    )
+    comments: Mapped[List["Comment"]] = relationship(
+        "Comment",
+        primaryjoin=lambda: and_(
+            Comment.post_id == Post.id,
+            Comment.deleted_at.is_(None),
+        ),
+        back_populates="post",
+    )
 
 
 class Drawing(Base):
@@ -125,8 +176,20 @@ class Drawing(Base):
     # Relationships
     post: Mapped["Post"] = relationship(back_populates="drawings")
     author: Mapped["User"] = relationship(back_populates="drawings")
-    images: Mapped[List["Image"]] = relationship(back_populates="drawing")
-    comments: Mapped[List["Comment"]] = relationship(back_populates="drawing")
+    images: Mapped[List["Image"]] = relationship(
+        "Image",
+        primaryjoin=lambda: and_(
+            Drawing.id == Image.drawing_id, Image.deleted_at.is_(None)
+        ),
+        back_populates="drawing",
+    )
+    comments: Mapped[List["Comment"]] = relationship(
+        "Comment",
+        primaryjoin=lambda: and_(
+            Drawing.id == Comment.drawing_id, Comment.deleted_at.is_(None)
+        ),
+        back_populates="drawing",
+    )
 
 
 class Image(Base):
