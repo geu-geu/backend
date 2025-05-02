@@ -24,6 +24,28 @@ def test_create_comment(client, session, authorized_user):
     assert response.json()["content"] == "test comment"
 
 
+def test_create_comment_401(client, user):
+    # when
+    response = client.post(
+        "/api/posts/abcd123/comments",
+        json={"content": "test comment"},
+    )
+
+    # then
+    assert response.status_code == 401
+
+
+def test_create_comment_404(client, authorized_user):
+    # when
+    response = client.post(
+        "/api/posts/abcd123/comments",
+        json={"content": "test comment"},
+    )
+
+    # then
+    assert response.status_code == 404
+
+
 def test_get_comments(client, session, authorized_user):
     # given
     post = Post(
@@ -66,6 +88,22 @@ def test_get_comments(client, session, authorized_user):
     assert len(response.json()["items"]) == 3
 
 
+def test_get_comments_401(client, user):
+    # when
+    response = client.get("/api/posts/abcd123/comments")
+
+    # then
+    assert response.status_code == 401
+
+
+def test_get_comments_404(client, authorized_user):
+    # when
+    response = client.get("/api/posts/abcd123/comments")
+
+    # then
+    assert response.status_code == 404
+
+
 def test_get_comment(client, session, authorized_user):
     # given
     post = Post(
@@ -91,6 +129,22 @@ def test_get_comment(client, session, authorized_user):
     assert response.status_code == 200
     assert response.json()["content"] == "test comment"
     assert response.json()["author"]["code"] == authorized_user.code
+
+
+def test_get_comment_401(client, user):
+    # when
+    response = client.get("/api/posts/abcd123/comments/abcd123")
+
+    # then
+    assert response.status_code == 401
+
+
+def test_get_comment_404(client, authorized_user):
+    # when
+    response = client.get("/api/posts/abcd123/comments/abcd123")
+
+    # then
+    assert response.status_code == 404
 
 
 def test_update_comment(client, session, authorized_user):
@@ -120,6 +174,17 @@ def test_update_comment(client, session, authorized_user):
     # then
     assert response.status_code == 200
     assert response.json()["content"] == "updated comment"
+
+
+def test_update_comment_401(client, user):
+    # when
+    response = client.put(
+        "/api/posts/abcd123/comments/abcd123",
+        json={"content": "updated comment"},
+    )
+
+    # then
+    assert response.status_code == 401
 
 
 def test_update_comment_403(client, session, authorized_user):
@@ -157,6 +222,17 @@ def test_update_comment_403(client, session, authorized_user):
     assert response.status_code == 403
 
 
+def test_update_comment_404(client, authorized_user):
+    # when
+    response = client.put(
+        "/api/posts/abcd123/comments/abcd123",
+        json={"content": "updated comment"},
+    )
+
+    # then
+    assert response.status_code == 404
+
+
 def test_delete_comment(client, session, authorized_user):
     # given
     post = Post(
@@ -183,6 +259,14 @@ def test_delete_comment(client, session, authorized_user):
     # then
     assert response.status_code == 204
     assert comment.deleted_at is not None
+
+
+def test_delete_comment_401(client, user):
+    # when
+    response = client.delete("/api/posts/abcd123/comments/abcd123")
+
+    # then
+    assert response.status_code == 401
 
 
 def test_delete_comment_403(client, session, authorized_user):
@@ -218,3 +302,11 @@ def test_delete_comment_403(client, session, authorized_user):
     # then
     assert response.status_code == 403
     assert comment.deleted_at is None
+
+
+def test_delete_comment_404(client, authorized_user):
+    # when
+    response = client.delete("/api/posts/abcd123/comments/abcd123")
+
+    # then
+    assert response.status_code == 404
