@@ -67,6 +67,7 @@ def get_posts(session: Session) -> PostListSchema:
             .order_by(Post.id.desc())
         )
         .scalars()
+        .unique()
         .all()
     )
     results = []
@@ -81,14 +82,7 @@ def get_posts(session: Session) -> PostListSchema:
             ),
             title=post.title,
             content=post.content,
-            images=[
-                ImageSchema(
-                    url=image.url,
-                    created_at=image.created_at,
-                    updated_at=image.updated_at,
-                )
-                for image in post.images
-            ],
+            image_urls=[image.url for image in post.images],
             created_at=post.created_at,
             updated_at=post.updated_at,
         )
@@ -124,14 +118,7 @@ def get_post(session: Session, code: str) -> PostSchema:
         ),
         title=post.title,
         content=post.content,
-        images=[
-            ImageSchema(
-                url=image.url,
-                created_at=image.created_at,
-                updated_at=image.updated_at,
-            )
-            for image in post.images
-        ],
+        image_urls=[image.url for image in post.images],
         created_at=post.created_at,
         updated_at=post.updated_at,
     )
@@ -191,14 +178,7 @@ def update_post(
         ),
         title=post.title,
         content=post.content,
-        images=[
-            ImageSchema(
-                url=image.url,
-                created_at=image.created_at,
-                updated_at=image.updated_at,
-            )
-            for image in images
-        ],
+        image_urls=[image.url for image in images],
         created_at=post.created_at,
         updated_at=post.updated_at,
     )

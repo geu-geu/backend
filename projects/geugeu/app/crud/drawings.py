@@ -77,9 +77,11 @@ def get_drawings(session: Session) -> DrawingListSchema:
                 selectinload(Drawing.images),
                 with_loader_criteria(Image, Image.deleted_at.is_(None)),
             )
+            .where(Drawing.deleted_at.is_(None))
             .order_by(Drawing.id.desc())
         )
         .scalars()
+        .unique()
         .all()
     )
     results = []
@@ -94,14 +96,7 @@ def get_drawings(session: Session) -> DrawingListSchema:
                 profile_image_url=drawing.author.profile_image_url,
             ),
             content=drawing.content,
-            images=[
-                ImageSchema(
-                    url=image.url,
-                    created_at=image.created_at,
-                    updated_at=image.updated_at,
-                )
-                for image in drawing.images
-            ],
+            image_urls=[image.url for image in drawing.images],
             created_at=drawing.created_at,
             updated_at=drawing.updated_at,
         )
@@ -138,14 +133,7 @@ def get_drawing(session: Session, code: str) -> DrawingSchema:
             profile_image_url=drawing.author.profile_image_url,
         ),
         content=drawing.content,
-        images=[
-            ImageSchema(
-                url=image.url,
-                created_at=image.created_at,
-                updated_at=image.updated_at,
-            )
-            for image in drawing.images
-        ],
+        image_urls=[image.url for image in drawing.images],
         created_at=drawing.created_at,
         updated_at=drawing.updated_at,
     )
