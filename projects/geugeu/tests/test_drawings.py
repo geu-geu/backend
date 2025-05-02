@@ -1,4 +1,4 @@
-from app.models import Drawing, DrawingImage, Post, User
+from app.models import Drawing, Image, Post, User
 
 
 def test_create_drawing(client, session, authorized_user):
@@ -145,15 +145,15 @@ def test_get_drawing(client, session, authorized_user):
     session.add(drawing)
     session.flush()
 
-    drawing_images = [
-        DrawingImage(
+    images = [
+        Image(
             code=f"abcd{i}",
             drawing_id=drawing.id,
-            image_url=f"https://example.com/image{i}.jpg",
+            url=f"https://example.com/image{i}.jpg",
         )
         for i in range(1, 4)
     ]
-    session.add_all(drawing_images)
+    session.add_all(images)
 
     # when
     response = client.get(f"/api/drawings/{drawing.code}")
@@ -206,15 +206,15 @@ def test_update_drawing(client, session, authorized_user):
     session.add(drawing)
     session.flush()
 
-    drawing_images = [
-        DrawingImage(
+    images = [
+        Image(
             code=f"abcd{i}",
             drawing_id=drawing.id,
-            image_url=f"https://example.com/image{i}.jpg",
+            url=f"https://example.com/image{i}.jpg",
         )
         for i in range(1, 4)
     ]
-    session.add_all(drawing_images)
+    session.add_all(images)
 
     new_content = "new content"
     new_image_urls = [
@@ -375,15 +375,15 @@ def test_delete_drawing(client, session, authorized_user):
     session.add(drawing)
     session.flush()
 
-    drawing_images = [
-        DrawingImage(
+    images = [
+        Image(
             code=f"abcd{i}",
             drawing_id=drawing.id,
-            image_url=f"https://example.com/image{i}.jpg",
+            url=f"https://example.com/image{i}.jpg",
         )
         for i in range(1, 4)
     ]
-    session.add_all(drawing_images)
+    session.add_all(images)
 
     assert drawing.deleted_at is None
 

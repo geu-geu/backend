@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy import exists, select
 from sqlalchemy.orm import Session
 
-from app.models import Drawing, DrawingImage, Post, User
+from app.models import Drawing, Image, Post, User
 from app.schemas.drawings import (
     CreateDrawingSchema,
     DrawingListSchema,
@@ -41,16 +41,18 @@ def create_drawing(
     )
     session.add(drawing)
     session.commit()
-    drawing_images = []
+
+    images = []
     for image_url in schema.image_urls:
-        drawing_image = DrawingImage(
+        image = Image(
             code=generate_code(),
             drawing_id=drawing.id,
-            image_url=image_url,
+            url=image_url,
         )
-        drawing_images.append(drawing_image)
-    session.add_all(drawing_images)
+        images.append(image)
+    session.add_all(images)
     session.commit()
+
     return DrawingSchema(
         code=drawing.code,
         post=PostSchema(code=post.code),
@@ -61,7 +63,7 @@ def create_drawing(
             profile_image_url=user.profile_image_url,
         ),
         content=drawing.content,
-        image_urls=[drawing_image.image_url for drawing_image in drawing_images],
+        image_urls=[image.url for image in images],
         created_at=drawing.created_at,
         updated_at=drawing.updated_at,
     )
@@ -87,9 +89,9 @@ def get_drawings(session: Session) -> DrawingListSchema:
         ).scalar_one()
         images = (
             session.execute(
-                select(DrawingImage).where(
-                    DrawingImage.drawing_id == drawing.id,
-                    DrawingImage.deleted_at.is_(None),
+                select(Image).where(
+                    Image.drawing_id == drawing.id,
+                    Image.deleted_at.is_(None),
                 )
             )
             .scalars()
@@ -105,7 +107,7 @@ def get_drawings(session: Session) -> DrawingListSchema:
                 profile_image_url=author.profile_image_url,
             ),
             content=drawing.content,
-            image_urls=[drawing_image.image_url for drawing_image in images],
+            image_urls=[image.url for image in images],
             created_at=drawing.created_at,
             updated_at=drawing.updated_at,
         )
@@ -139,9 +141,9 @@ def get_drawing(session: Session, code: str) -> DrawingSchema:
     ).scalar_one()
     images = (
         session.execute(
-            select(DrawingImage).where(
-                DrawingImage.drawing_id == drawing.id,
-                DrawingImage.deleted_at.is_(None),
+            select(Image).where(
+                Image.drawing_id == drawing.id,
+                Image.deleted_at.is_(None),
             )
         )
         .scalars()
@@ -157,7 +159,7 @@ def get_drawing(session: Session, code: str) -> DrawingSchema:
             profile_image_url=author.profile_image_url,
         ),
         content=drawing.content,
-        image_urls=[drawing_image.image_url for drawing_image in images],
+        image_urls=[image.url for image in images],
         created_at=drawing.created_at,
         updated_at=drawing.updated_at,
     )
@@ -196,9 +198,9 @@ def update_drawing(
     ).scalar_one()
     images = (
         session.execute(
-            select(DrawingImage).where(
-                DrawingImage.drawing_id == drawing.id,
-                DrawingImage.deleted_at.is_(None),
+            select(Image).where(
+                Image.drawing_id == drawing.id,
+                Image.deleted_at.is_(None),
             )
         )
         .scalars()
@@ -215,15 +217,15 @@ def update_drawing(
         session.add(image)
 
     # 새로운 drawing images 생성
-    drawing_images = []
+    images = []
     for image_url in schema.image_urls:
-        drawing_image = DrawingImage(
+        image = Image(
             code=generate_code(),
             drawing_id=drawing.id,
-            image_url=image_url,
+            url=image_url,
         )
-        drawing_images.append(drawing_image)
-    session.add_all(drawing_images)
+        images.append(image)
+    session.add_all(images)
     session.commit()
 
     return DrawingSchema(
@@ -236,7 +238,7 @@ def update_drawing(
             profile_image_url=author.profile_image_url,
         ),
         content=drawing.content,
-        image_urls=[drawing_image.image_url for drawing_image in drawing_images],
+        image_urls=[image.url for image in images],
         created_at=drawing.created_at,
         updated_at=drawing.updated_at,
     )
