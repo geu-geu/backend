@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Post, PostImage, User
+from app.models import Image, Post, User
 from app.schemas.posts import (
     CreatePostSchema,
     PostListSchema,
@@ -27,10 +27,10 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
 
     post_images = []
     for image_url in schema.image_urls:
-        post_image = PostImage(
+        post_image = Image(
             code=generate_code(),
             post_id=post.id,
-            image_url=image_url,
+            url=image_url,
         )
         post_images.append(post_image)
     session.add_all(post_images)
@@ -46,7 +46,7 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
         ),
         title=post.title,
         content=post.content,
-        image_urls=[post_image.image_url for post_image in post_images],
+        image_urls=[post_image.url for post_image in post_images],
         created_at=post.created_at,
         updated_at=post.updated_at,
     )
@@ -105,9 +105,9 @@ def get_post(session: Session, code: str) -> PostSchema:
     ).scalar_one()
     images = (
         session.execute(
-            select(PostImage).where(
-                PostImage.post_id == post.id,
-                PostImage.deleted_at.is_(None),
+            select(Image).where(
+                Image.post_id == post.id,
+                Image.deleted_at.is_(None),
             )
         )
         .scalars()
@@ -123,7 +123,7 @@ def get_post(session: Session, code: str) -> PostSchema:
         ),
         title=post.title,
         content=post.content,
-        image_urls=[image.image_url for image in images],
+        image_urls=[image.url for image in images],
         created_at=post.created_at,
         updated_at=post.updated_at,
     )
@@ -156,9 +156,9 @@ def update_post(
     ).scalar_one()
     images = (
         session.execute(
-            select(PostImage).where(
-                PostImage.post_id == post.id,
-                PostImage.deleted_at.is_(None),
+            select(Image).where(
+                Image.post_id == post.id,
+                Image.deleted_at.is_(None),
             )
         )
         .scalars()
@@ -178,10 +178,10 @@ def update_post(
     # 새로운 post images 생성
     post_images = []
     for image_url in schema.image_urls:
-        post_image = PostImage(
+        post_image = Image(
             code=generate_code(),
             post_id=post.id,
-            image_url=image_url,
+            url=image_url,
         )
         post_images.append(post_image)
     session.add_all(post_images)
@@ -197,7 +197,7 @@ def update_post(
         ),
         title=post.title,
         content=post.content,
-        image_urls=[post_image.image_url for post_image in post_images],
+        image_urls=[post_image.url for post_image in post_images],
         created_at=post.created_at,
         updated_at=post.updated_at,
     )

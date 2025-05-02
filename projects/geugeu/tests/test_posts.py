@@ -1,4 +1,4 @@
-from app.models import Post, PostImage, User
+from app.models import Image, Post, User
 
 
 def test_create_post(client, authorized_user):
@@ -70,15 +70,15 @@ def test_get_post(client, session, authorized_user):
     session.add(post)
     session.flush()
 
-    post_images = [
-        PostImage(
+    images = [
+        Image(
             code=f"abcd{i}",
             post_id=post.id,
-            image_url=f"https://example.com/image{i}.jpg",
+            url=f"https://example.com/image{i}.jpg",
         )
         for i in range(1, 4)
     ]
-    session.add_all(post_images)
+    session.add_all(images)
 
     # when
     response = client.get(f"/api/posts/{post.code}")
@@ -87,7 +87,7 @@ def test_get_post(client, session, authorized_user):
     assert response.status_code == 200
     assert response.json()["title"] == post.title
     assert response.json()["content"] == post.content
-    assert len(response.json()["image_urls"]) == len(post_images)
+    assert len(response.json()["image_urls"]) == len(images)
 
 
 def test_get_post_401(client, user):
@@ -121,10 +121,10 @@ def test_update_post(client, session, authorized_user):
     session.flush()
 
     post_images = [
-        PostImage(
+        Image(
             code=f"abcd{i}",
             post_id=post.id,
-            image_url=f"https://example.com/image{i}.jpg",
+            url=f"https://example.com/image{i}.jpg",
         )
         for i in range(1, 4)
     ]
