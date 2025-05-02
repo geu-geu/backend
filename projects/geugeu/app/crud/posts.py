@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload, with_loader_criter
 from app.models import Image, Post, User
 from app.schemas.posts import (
     CreatePostSchema,
+    ImageSchema,
     PostListSchema,
     PostSchema,
     UpdatePostSchema,
@@ -40,7 +41,14 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
         ),
         title=post.title,
         content=post.content,
-        image_urls=[post_image.url for post_image in post_images],
+        images=[
+            ImageSchema(
+                url=image.url,
+                created_at=image.created_at,
+                updated_at=image.updated_at,
+            )
+            for image in post_images
+        ],
         created_at=post.created_at,
         updated_at=post.updated_at,
     )
@@ -73,7 +81,14 @@ def get_posts(session: Session) -> PostListSchema:
             ),
             title=post.title,
             content=post.content,
-            image_urls=[image.url for image in post.images],
+            images=[
+                ImageSchema(
+                    url=image.url,
+                    created_at=image.created_at,
+                    updated_at=image.updated_at,
+                )
+                for image in post.images
+            ],
             created_at=post.created_at,
             updated_at=post.updated_at,
         )
@@ -109,7 +124,14 @@ def get_post(session: Session, code: str) -> PostSchema:
         ),
         title=post.title,
         content=post.content,
-        image_urls=[image.url for image in post.images],
+        images=[
+            ImageSchema(
+                url=image.url,
+                created_at=image.created_at,
+                updated_at=image.updated_at,
+            )
+            for image in post.images
+        ],
         created_at=post.created_at,
         updated_at=post.updated_at,
     )
@@ -169,7 +191,14 @@ def update_post(
         ),
         title=post.title,
         content=post.content,
-        image_urls=[image.url for image in images],
+        images=[
+            ImageSchema(
+                url=image.url,
+                created_at=image.created_at,
+                updated_at=image.updated_at,
+            )
+            for image in images
+        ],
         created_at=post.created_at,
         updated_at=post.updated_at,
     )

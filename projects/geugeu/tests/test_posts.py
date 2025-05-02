@@ -5,14 +5,22 @@ def test_create_post(client, authorized_user):
     # given
     title = "test title"
     content = "test content"
+    image_urls = [
+        "https://example.com/image1.jpg",
+        "https://example.com/image2.jpg",
+    ]
 
     # when
-    response = client.post("/api/posts", json={"title": title, "content": content})
+    response = client.post(
+        "/api/posts",
+        json={"title": title, "content": content, "image_urls": image_urls},
+    )
 
     # then
     assert response.status_code == 201
     assert response.json()["title"] == title
     assert response.json()["content"] == content
+    assert len(response.json()["images"]) == len(image_urls)
 
 
 def test_create_post_401(client, user):
@@ -84,7 +92,7 @@ def test_get_post(client, session, authorized_user):
     assert response.status_code == 200
     assert response.json()["title"] == post.title
     assert response.json()["content"] == post.content
-    assert len(response.json()["image_urls"]) == len(images)
+    assert len(response.json()["images"]) == len(images)
 
 
 def test_get_post_401(client, user):
@@ -146,7 +154,7 @@ def test_update_post(client, session, authorized_user):
     assert response.status_code == 200
     assert response.json()["title"] == new_title
     assert response.json()["content"] == new_content
-    assert len(response.json()["image_urls"]) == len(new_image_urls)
+    assert len(response.json()["images"]) == len(new_image_urls)
 
 
 def test_update_post_403(client, session, authorized_user, hashed_password):

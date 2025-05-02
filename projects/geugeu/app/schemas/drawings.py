@@ -20,12 +20,18 @@ class UserSchema(BaseModel):
     profile_image_url: str = ""
 
 
+class ImageSchema(BaseModel):
+    url: str
+    created_at: datetime
+    updated_at: datetime
+
+
 class DrawingSchema(BaseModel):
     code: str
     post: PostSchema
     author: UserSchema
     content: str
-    image_urls: list[str]
+    images: list[ImageSchema]
     created_at: datetime
     updated_at: datetime
 

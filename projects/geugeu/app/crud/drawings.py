@@ -9,6 +9,7 @@ from app.schemas.drawings import (
     CreateDrawingSchema,
     DrawingListSchema,
     DrawingSchema,
+    ImageSchema,
     PostSchema,
     UpdateDrawingSchema,
     UserSchema,
@@ -53,7 +54,14 @@ def create_drawing(
             profile_image_url=user.profile_image_url,
         ),
         content=drawing.content,
-        image_urls=[image.url for image in images],
+        images=[
+            ImageSchema(
+                url=image.url,
+                created_at=image.created_at,
+                updated_at=image.updated_at,
+            )
+            for image in images
+        ],
         created_at=drawing.created_at,
         updated_at=drawing.updated_at,
     )
@@ -86,7 +94,14 @@ def get_drawings(session: Session) -> DrawingListSchema:
                 profile_image_url=drawing.author.profile_image_url,
             ),
             content=drawing.content,
-            image_urls=[image.url for image in drawing.images],
+            images=[
+                ImageSchema(
+                    url=image.url,
+                    created_at=image.created_at,
+                    updated_at=image.updated_at,
+                )
+                for image in drawing.images
+            ],
             created_at=drawing.created_at,
             updated_at=drawing.updated_at,
         )
@@ -123,7 +138,14 @@ def get_drawing(session: Session, code: str) -> DrawingSchema:
             profile_image_url=drawing.author.profile_image_url,
         ),
         content=drawing.content,
-        image_urls=[image.url for image in drawing.images],
+        images=[
+            ImageSchema(
+                url=image.url,
+                created_at=image.created_at,
+                updated_at=image.updated_at,
+            )
+            for image in drawing.images
+        ],
         created_at=drawing.created_at,
         updated_at=drawing.updated_at,
     )
@@ -183,7 +205,14 @@ def update_drawing(
             profile_image_url=drawing.author.profile_image_url,
         ),
         content=drawing.content,
-        image_urls=[image.url for image in images],
+        images=[
+            ImageSchema(
+                url=image.url,
+                created_at=image.created_at,
+                updated_at=image.updated_at,
+            )
+            for image in images
+        ],
         created_at=drawing.created_at,
         updated_at=drawing.updated_at,
     )

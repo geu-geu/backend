@@ -32,7 +32,7 @@ def test_create_drawing(client, session, authorized_user):
     assert response.json()["post"]["code"] == post.code
     assert response.json()["author"]["code"] == authorized_user.code
     assert response.json()["content"] == content
-    assert response.json()["image_urls"] == image_urls
+    assert len(response.json()["images"]) == len(image_urls)
 
 
 def test_create_drawing_401(client, user):
@@ -157,7 +157,7 @@ def test_get_drawing(client, session, authorized_user):
     assert response.json()["post"]["code"] == post.code
     assert response.json()["author"]["code"] == authorized_user.code
     assert response.json()["content"] == drawing.content
-    assert len(response.json()["image_urls"]) == 3
+    assert len(response.json()["images"]) == 3
 
 
 def test_get_drawing_401(client, user):
@@ -227,7 +227,7 @@ def test_update_drawing(client, session, authorized_user):
     assert response.json()["post"]["code"] == post.code
     assert response.json()["author"]["code"] == authorized_user.code
     assert response.json()["content"] == new_content
-    assert len(response.json()["image_urls"]) == 2
+    assert len(response.json()["images"]) == 2
 
 
 def test_update_drawing_401(client, user):
