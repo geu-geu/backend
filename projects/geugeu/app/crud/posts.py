@@ -7,11 +7,9 @@ from sqlalchemy.orm import Session, joinedload, selectinload, with_loader_criter
 from app.models import Image, Post, User
 from app.schemas.posts import (
     CreatePostSchema,
-    ImageSchema,
     PostListSchema,
     PostSchema,
     UpdatePostSchema,
-    UserSchema,
 )
 
 
@@ -30,28 +28,7 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
         post_images.append(post_image)
     session.add_all(post_images)
     session.commit()
-
-    return PostSchema(
-        code=post.code,
-        author=UserSchema(
-            code=user.code,
-            email=user.email,
-            nickname=user.nickname,
-            profile_image_url=user.profile_image_url,
-        ),
-        title=post.title,
-        content=post.content,
-        images=[
-            ImageSchema(
-                url=image.url,
-                created_at=image.created_at,
-                updated_at=image.updated_at,
-            )
-            for image in post_images
-        ],
-        created_at=post.created_at,
-        updated_at=post.updated_at,
-    )
+    return PostSchema.from_model(post)
 
 
 def get_posts(session: Session) -> PostListSchema:
@@ -70,26 +47,9 @@ def get_posts(session: Session) -> PostListSchema:
         .unique()
         .all()
     )
-    results = []
-    for post in posts:
-        result = PostSchema(
-            code=post.code,
-            author=UserSchema(
-                code=post.author.code,
-                email=post.author.email,
-                nickname=post.author.nickname,
-                profile_image_url=post.author.profile_image_url,
-            ),
-            title=post.title,
-            content=post.content,
-            image_urls=[image.url for image in post.images],
-            created_at=post.created_at,
-            updated_at=post.updated_at,
-        )
-        results.append(result)
     return PostListSchema(
-        count=len(results),
-        items=results,
+        count=len(posts),
+        items=[PostSchema.from_model(post) for post in posts],
     )
 
 
@@ -108,20 +68,7 @@ def get_post(session: Session, code: str) -> PostSchema:
     ).scalar_one_or_none()
     if post is None:
         raise HTTPException(status_code=404, detail="Post not found")
-    return PostSchema(
-        code=post.code,
-        author=UserSchema(
-            code=post.author.code,
-            email=post.author.email,
-            nickname=post.author.nickname,
-            profile_image_url=post.author.profile_image_url,
-        ),
-        title=post.title,
-        content=post.content,
-        image_urls=[image.url for image in post.images],
-        created_at=post.created_at,
-        updated_at=post.updated_at,
-    )
+    return PostSchema.from_model(post)
 
 
 def update_post(
@@ -167,21 +114,8 @@ def update_post(
         images.append(image)
     session.add_all(images)
     session.commit()
-
-    return PostSchema(
-        code=post.code,
-        author=UserSchema(
-            code=post.author.code,
-            email=post.author.email,
-            nickname=post.author.nickname,
-            profile_image_url=post.author.profile_image_url,
-        ),
-        title=post.title,
-        content=post.content,
-        image_urls=[image.url for image in images],
-        created_at=post.created_at,
-        updated_at=post.updated_at,
-    )
+    session.refresh(post)
+    return PostSchema.from_model(post)
 
 
 def delete_post(*, session: Session, code: str, user: User) -> None:

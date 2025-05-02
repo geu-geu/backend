@@ -10,7 +10,6 @@ from app.schemas.post_comments import (
     CommentSchema,
     CreateCommentSchema,
     UpdateCommentSchema,
-    UserSchema,
 )
 
 
@@ -36,18 +35,7 @@ def create_comment(
     )
     session.add(comment)
     session.commit()
-    return CommentSchema(
-        code=comment.code,
-        author=UserSchema(
-            code=user.code,
-            email=user.email,
-            nickname=user.nickname,
-            profile_image_url=user.profile_image_url,
-        ),
-        content=comment.content,
-        created_at=comment.created_at,
-        updated_at=comment.updated_at,
-    )
+    return CommentSchema.from_model(comment)
 
 
 def get_comments(
@@ -76,24 +64,9 @@ def get_comments(
         .scalars()
         .all()
     )
-    items = []
-    for comment in comments:
-        item = CommentSchema(
-            code=comment.code,
-            author=UserSchema(
-                code=comment.author.code,
-                email=comment.author.email,
-                nickname=comment.author.nickname,
-                profile_image_url=comment.author.profile_image_url,
-            ),
-            content=comment.content,
-            created_at=comment.created_at,
-            updated_at=comment.updated_at,
-        )
-        items.append(item)
     return CommentListSchema(
         count=len(comments),
-        items=items,
+        items=[CommentSchema.from_model(comment) for comment in comments],
     )
 
 
@@ -122,18 +95,7 @@ def get_comment(
     ).scalar_one_or_none()
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
-    return CommentSchema(
-        code=comment.code,
-        author=UserSchema(
-            code=comment.author.code,
-            email=comment.author.email,
-            nickname=comment.author.nickname,
-            profile_image_url=comment.author.profile_image_url,
-        ),
-        content=comment.content,
-        created_at=comment.created_at,
-        updated_at=comment.updated_at,
-    )
+    return CommentSchema.from_model(comment)
 
 
 def update_comment(
@@ -168,18 +130,7 @@ def update_comment(
         raise HTTPException(status_code=403, detail="Forbiden")
     comment.content = schema.content
     session.commit()
-    return CommentSchema(
-        code=comment.code,
-        author=UserSchema(
-            code=comment.author.code,
-            email=comment.author.email,
-            nickname=comment.author.nickname,
-            profile_image_url=comment.author.profile_image_url,
-        ),
-        content=comment.content,
-        created_at=comment.created_at,
-        updated_at=comment.updated_at,
-    )
+    return CommentSchema.from_model(comment)
 
 
 def delete_comment(

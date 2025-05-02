@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, EmailStr
 
+from app.models import Drawing
+
 
 class CreateDrawingSchema(BaseModel):
     post_code: str
@@ -34,6 +36,30 @@ class DrawingSchema(BaseModel):
     images: list[ImageSchema]
     created_at: datetime
     updated_at: datetime
+
+    @classmethod
+    def from_model(cls, drawing: Drawing):
+        return cls(
+            code=drawing.code,
+            post=PostSchema(code=drawing.post.code),
+            author=UserSchema(
+                code=drawing.author.code,
+                email=drawing.author.email,
+                nickname=drawing.author.nickname,
+                profile_image_url=drawing.author.profile_image_url,
+            ),
+            content=drawing.content,
+            images=[
+                ImageSchema(
+                    url=image.url,
+                    created_at=image.created_at,
+                    updated_at=image.updated_at,
+                )
+                for image in drawing.images
+            ],
+            created_at=drawing.created_at,
+            updated_at=drawing.updated_at,
+        )
 
 
 class DrawingListSchema(BaseModel):

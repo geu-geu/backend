@@ -9,10 +9,7 @@ from app.schemas.drawings import (
     CreateDrawingSchema,
     DrawingListSchema,
     DrawingSchema,
-    ImageSchema,
-    PostSchema,
     UpdateDrawingSchema,
-    UserSchema,
 )
 
 
@@ -44,27 +41,7 @@ def create_drawing(
     session.add_all(images)
     session.commit()
 
-    return DrawingSchema(
-        code=drawing.code,
-        post=PostSchema(code=post.code),
-        author=UserSchema(
-            code=user.code,
-            email=user.email,
-            nickname=user.nickname,
-            profile_image_url=user.profile_image_url,
-        ),
-        content=drawing.content,
-        images=[
-            ImageSchema(
-                url=image.url,
-                created_at=image.created_at,
-                updated_at=image.updated_at,
-            )
-            for image in images
-        ],
-        created_at=drawing.created_at,
-        updated_at=drawing.updated_at,
-    )
+    return DrawingSchema.from_model(drawing)
 
 
 def get_drawings(session: Session) -> DrawingListSchema:
@@ -84,26 +61,9 @@ def get_drawings(session: Session) -> DrawingListSchema:
         .unique()
         .all()
     )
-    results = []
-    for drawing in drawings:
-        result = DrawingSchema(
-            code=drawing.code,
-            post=PostSchema(code=drawing.post.code),
-            author=UserSchema(
-                code=drawing.author.code,
-                email=drawing.author.email,
-                nickname=drawing.author.nickname,
-                profile_image_url=drawing.author.profile_image_url,
-            ),
-            content=drawing.content,
-            image_urls=[image.url for image in drawing.images],
-            created_at=drawing.created_at,
-            updated_at=drawing.updated_at,
-        )
-        results.append(result)
     return DrawingListSchema(
         count=len(drawings),
-        items=results,
+        items=[DrawingSchema.from_model(drawing) for drawing in drawings],
     )
 
 
@@ -123,20 +83,7 @@ def get_drawing(session: Session, code: str) -> DrawingSchema:
     ).scalar_one_or_none()
     if drawing is None:
         raise HTTPException(status_code=404, detail="Drawing not found")
-    return DrawingSchema(
-        code=drawing.code,
-        post=PostSchema(code=drawing.post.code),
-        author=UserSchema(
-            code=drawing.author.code,
-            email=drawing.author.email,
-            nickname=drawing.author.nickname,
-            profile_image_url=drawing.author.profile_image_url,
-        ),
-        content=drawing.content,
-        image_urls=[image.url for image in drawing.images],
-        created_at=drawing.created_at,
-        updated_at=drawing.updated_at,
-    )
+    return DrawingSchema.from_model(drawing)
 
 
 def update_drawing(
@@ -182,28 +129,8 @@ def update_drawing(
         images.append(image)
     session.add_all(images)
     session.commit()
-
-    return DrawingSchema(
-        code=drawing.code,
-        post=PostSchema(code=drawing.post.code),
-        author=UserSchema(
-            code=drawing.author.code,
-            email=drawing.author.email,
-            nickname=drawing.author.nickname,
-            profile_image_url=drawing.author.profile_image_url,
-        ),
-        content=drawing.content,
-        images=[
-            ImageSchema(
-                url=image.url,
-                created_at=image.created_at,
-                updated_at=image.updated_at,
-            )
-            for image in images
-        ],
-        created_at=drawing.created_at,
-        updated_at=drawing.updated_at,
-    )
+    session.refresh(drawing)
+    return DrawingSchema.from_model(drawing)
 
 
 def delete_drawing(*, session: Session, code: str, user: User) -> None:
