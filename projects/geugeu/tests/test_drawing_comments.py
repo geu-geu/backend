@@ -1,4 +1,4 @@
-from app.models import Comment, Drawing, Post
+from app.models import Comment, Drawing, Post, User
 
 
 def test_create_comment(client, session, authorized_user):
@@ -140,6 +140,49 @@ def test_update_comment(client, session, authorized_user):
     assert response.json()["content"] == "updated comment"
 
 
+def test_update_comment_403(client, session, authorized_user):
+    # given
+    post = Post(
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+    )
+    session.add(post)
+    session.flush()
+
+    drawing = Drawing(
+        post_id=post.id,
+        author_id=authorized_user.id,
+        content="test content",
+    )
+    session.add(drawing)
+    session.flush()
+
+    other_user = User(
+        email="other@example.com",
+        password="password",
+    )
+    session.add(other_user)
+    session.flush()
+
+    comment = Comment(
+        drawing_id=drawing.id,
+        author_id=other_user.id,  # other user
+        content="test comment",
+    )
+    session.add(comment)
+    session.flush()
+
+    # when
+    response = client.put(
+        f"/api/drawings/{drawing.code}/comments/{comment.code}",
+        json={"content": "updated comment"},
+    )
+
+    # then
+    assert response.status_code == 403
+
+
 def test_delete_comment(client, session, authorized_user):
     # given
     post = Post(
@@ -174,3 +217,46 @@ def test_delete_comment(client, session, authorized_user):
     # then
     assert response.status_code == 204
     assert comment.deleted_at is not None
+
+
+def test_delete_comment_403(client, session, authorized_user):
+    # given
+    post = Post(
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+    )
+    session.add(post)
+    session.flush()
+
+    drawing = Drawing(
+        post_id=post.id,
+        author_id=authorized_user.id,
+        content="test content",
+    )
+    session.add(drawing)
+    session.flush()
+
+    other_user = User(
+        email="other@example.com",
+        password="password",
+    )
+    session.add(other_user)
+    session.flush()
+
+    comment = Comment(
+        drawing_id=drawing.id,
+        author_id=other_user.id,  # other user
+        content="test comment",
+    )
+    session.add(comment)
+    session.flush()
+
+    assert comment.deleted_at is None
+
+    # when
+    response = client.delete(f"/api/drawings/{drawing.code}/comments/{comment.code}")
+
+    # then
+    assert response.status_code == 403
+    assert comment.deleted_at is None
