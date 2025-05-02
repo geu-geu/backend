@@ -57,49 +57,6 @@ class Post(Base):
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
-class PostImage(Base):
-    __tablename__ = "post_image"
-
-    id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
-    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    post_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
-    image_url: Mapped[str] = mapped_column(String(2083), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now(),
-    )
-    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-
-
-class PostComment(Base):
-    __tablename__ = "post_comment"
-
-    id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
-    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
-    post_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
-    content: Mapped[str] = mapped_column(Text, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now(),
-    )
-    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-
-
 class Drawing(Base):
     __tablename__ = "drawing"
 
@@ -107,49 +64,6 @@ class Drawing(Base):
     code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     post_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
     author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
-    content: Mapped[str] = mapped_column(Text, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now(),
-    )
-    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-
-
-class DrawingImage(Base):
-    __tablename__ = "drawing_image"
-
-    id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
-    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    drawing_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
-    image_url: Mapped[str] = mapped_column(String(2083), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now(),
-    )
-    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-
-
-class DrawingComment(Base):
-    __tablename__ = "drawing_comment"
-
-    id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
-    code: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
-    drawing_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
