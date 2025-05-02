@@ -164,7 +164,11 @@ def get_drawing(session: Session, code: str) -> DrawingSchema:
 
 
 def update_drawing(
-    session: Session, code: str, schema: UpdateDrawingSchema
+    *,
+    session: Session,
+    code: str,
+    schema: UpdateDrawingSchema,
+    user: User,
 ) -> DrawingSchema:
     drawing = session.execute(
         select(Drawing).where(
@@ -174,6 +178,10 @@ def update_drawing(
     ).scalar_one_or_none()
     if drawing is None:
         raise HTTPException(status_code=404, detail="Drawing not found")
+    if drawing.author_id == user.id or user.is_admin:
+        pass
+    else:
+        raise HTTPException(status_code=403, detail="Forbidden")
     post = session.execute(
         select(Post).where(
             Post.id == drawing.post_id,
@@ -234,7 +242,7 @@ def update_drawing(
     )
 
 
-def delete_drawing(session: Session, code: str) -> None:
+def delete_drawing(*, session: Session, code: str, user: User) -> None:
     drawing = session.execute(
         select(Drawing).where(
             Drawing.code == code,
@@ -243,5 +251,9 @@ def delete_drawing(session: Session, code: str) -> None:
     ).scalar_one_or_none()
     if drawing is None:
         raise HTTPException(status_code=404, detail="Drawing not found")
+    if drawing.author_id == user.id or user.is_admin:
+        pass
+    else:
+        raise HTTPException(status_code=403, detail="Forbidden")
     drawing.deleted_at = datetime.now(UTC)
     session.commit()

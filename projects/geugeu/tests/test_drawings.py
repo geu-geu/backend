@@ -1,4 +1,4 @@
-from app.models import Drawing, DrawingImage, Post
+from app.models import Drawing, DrawingImage, Post, User
 
 
 def test_create_drawing(client, session, authorized_user):
@@ -254,6 +254,90 @@ def test_update_drawing_401(client, user):
     assert response.status_code == 401
 
 
+def test_update_drawing_403(client, session, authorized_user, hashed_password):
+    # given
+    post = Post(
+        code="abcd123",
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+    )
+    session.add(post)
+    session.flush()
+
+    author = User(
+        code="abcd124",
+        email="test@example.com",
+        password=hashed_password,
+    )
+    session.add(author)
+    session.flush()
+
+    drawing = Drawing(
+        code="abcd123",
+        post_id=post.id,
+        author_id=author.id,
+        content="test content",
+    )
+    session.add(drawing)
+    session.flush()
+
+    # when
+    response = client.put(
+        f"/api/drawings/{drawing.code}",
+        json={
+            "content": "new content",
+            "image_urls": ["http://example.com/image.png"],
+        },
+    )
+
+    # then
+    assert response.status_code == 403
+
+
+def test_update_drawing_by_admin(client, session, authorized_user, hashed_password):
+    # given
+    post = Post(
+        code="abcd123",
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+    )
+    session.add(post)
+    session.flush()
+
+    author = User(
+        code="abcd124",
+        email="test@example.com",
+        password=hashed_password,
+    )
+    session.add(author)
+    session.flush()
+
+    drawing = Drawing(
+        code="abcd123",
+        post_id=post.id,
+        author_id=author.id,
+        content="test content",
+    )
+    session.add(drawing)
+    session.flush()
+
+    authorized_user.is_admin = True
+
+    # when
+    response = client.put(
+        f"/api/drawings/{drawing.code}",
+        json={
+            "content": "new content",
+            "image_urls": ["http://example.com/image.png"],
+        },
+    )
+
+    # then
+    assert response.status_code == 200
+
+
 def test_update_drawing_404(client, authorized_user):
     # given
     code = "abcd123"
@@ -318,6 +402,78 @@ def test_delete_drawing_401(client, user):
 
     # then
     assert response.status_code == 401
+
+
+def test_delete_drawing_403(client, session, authorized_user, hashed_password):
+    # given
+    post = Post(
+        code="abcd123",
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+    )
+    session.add(post)
+    session.flush()
+
+    author = User(
+        code="abcd124",
+        email="test@example.com",
+        password=hashed_password,
+    )
+    session.add(author)
+    session.flush()
+
+    drawing = Drawing(
+        code="abcd123",
+        post_id=post.id,
+        author_id=author.id,
+        content="test content",
+    )
+    session.add(drawing)
+    session.flush()
+
+    # when
+    response = client.delete(f"/api/drawings/{drawing.code}")
+
+    # then
+    assert response.status_code == 403
+
+
+def test_delete_drawing_by_admin(client, session, authorized_user, hashed_password):
+    # given
+    post = Post(
+        code="abcd123",
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+    )
+    session.add(post)
+    session.flush()
+
+    author = User(
+        code="abcd124",
+        email="test@example.com",
+        password=hashed_password,
+    )
+    session.add(author)
+    session.flush()
+
+    drawing = Drawing(
+        code="abcd123",
+        post_id=post.id,
+        author_id=author.id,
+        content="test content",
+    )
+    session.add(drawing)
+    session.flush()
+
+    authorized_user.is_admin = True
+
+    # when
+    response = client.delete(f"/api/drawings/{drawing.code}")
+
+    # then
+    assert response.status_code == 204
 
 
 def test_delete_drawing_404(client, authorized_user):

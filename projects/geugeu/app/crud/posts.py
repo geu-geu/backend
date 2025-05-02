@@ -129,7 +129,13 @@ def get_post(session: Session, code: str) -> PostSchema:
     )
 
 
-def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSchema:
+def update_post(
+    *,
+    session: Session,
+    code: str,
+    schema: UpdatePostSchema,
+    user: User,
+) -> PostSchema:
     post = session.execute(
         select(Post).where(
             Post.code == code,
@@ -138,6 +144,10 @@ def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSc
     ).scalar_one_or_none()
     if post is None:
         raise HTTPException(status_code=404, detail="Post not found")
+    if post.author_id == user.id or user.is_admin:
+        pass
+    else:
+        raise HTTPException(status_code=403, detail="Forbidden")
     author = session.execute(
         select(User).where(
             User.id == post.author_id,
@@ -193,7 +203,7 @@ def update_post(session: Session, code: str, schema: UpdatePostSchema) -> PostSc
     )
 
 
-def delete_post(session: Session, code: str) -> None:
+def delete_post(*, session: Session, code: str, user: User) -> None:
     post = session.execute(
         select(Post).where(
             Post.code == code,
@@ -202,5 +212,9 @@ def delete_post(session: Session, code: str) -> None:
     ).scalar_one_or_none()
     if post is None:
         raise HTTPException(status_code=404, detail="Post not found")
+    if post.author_id == user.id or user.is_admin:
+        pass
+    else:
+        raise HTTPException(status_code=403, detail="Forbidden")
     post.deleted_at = datetime.now(UTC)
     session.commit()

@@ -45,7 +45,12 @@ async def update_drawing(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return crud.update_drawing(session, drawing_code, schema)
+    return crud.update_drawing(
+        session=session,
+        code=drawing_code,
+        schema=schema,
+        user=current_user,
+    )
 
 
 @router.delete("/{drawing_code}", status_code=204)
@@ -54,4 +59,4 @@ async def delete_drawing(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    crud.delete_drawing(session, drawing_code)
+    crud.delete_drawing(session=session, code=drawing_code, user=current_user)

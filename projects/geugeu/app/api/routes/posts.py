@@ -45,7 +45,9 @@ async def update_post(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return crud.update_post(session, post_code, schema)
+    return crud.update_post(
+        session=session, code=post_code, schema=schema, user=current_user
+    )
 
 
 @router.delete("/{post_code}", status_code=204)
@@ -54,4 +56,4 @@ async def delete_post(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    crud.delete_post(session, post_code)
+    crud.delete_post(session=session, code=post_code, user=current_user)

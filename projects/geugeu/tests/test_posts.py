@@ -1,4 +1,4 @@
-from app.models import Post, PostImage
+from app.models import Post, PostImage, User
 
 
 def test_create_post(client, authorized_user):
@@ -154,6 +154,74 @@ def test_update_post(client, session, authorized_user):
     assert len(response.json()["image_urls"]) == len(new_image_urls)
 
 
+def test_update_post_403(client, session, authorized_user, hashed_password):
+    # given
+    author = User(
+        code="abcd124",
+        email="test@example.com",
+        password=hashed_password,
+    )
+    session.add(author)
+    session.flush()
+
+    post = Post(
+        code="abcd123",
+        author_id=author.id,
+        title="test title",
+        content="test content",
+    )
+    session.add(post)
+    session.flush()
+
+    # when
+    response = client.put(
+        f"/api/posts/{post.code}",
+        json={
+            "title": "new title",
+            "content": "new content",
+            "image_urls": ["http://example.com/image.png"],
+        },
+    )
+
+    # then
+    assert response.status_code == 403
+
+
+def test_update_post_by_admin(client, session, authorized_user, hashed_password):
+    # given
+    author = User(
+        code="abcd124",
+        email="test@example.com",
+        password=hashed_password,
+    )
+    session.add(author)
+    session.flush()
+
+    post = Post(
+        code="abcd123",
+        author_id=author.id,
+        title="test title",
+        content="test content",
+    )
+    session.add(post)
+    session.flush()
+
+    authorized_user.is_admin = True
+
+    # when
+    response = client.put(
+        f"/api/posts/{post.code}",
+        json={
+            "title": "new title",
+            "content": "new content",
+            "image_urls": ["http://example.com/image.png"],
+        },
+    )
+
+    # then
+    assert response.status_code == 200
+
+
 def test_update_post_401(client, user):
     # when
     response = client.put(
@@ -214,6 +282,60 @@ def test_delete_post_401(client, user):
 
     # then
     assert response.status_code == 401
+
+
+def test_delete_post_403(client, session, authorized_user, hashed_password):
+    # given
+    author = User(
+        code="abcd124",
+        email="test@example.com",
+        password=hashed_password,
+    )
+    session.add(author)
+    session.flush()
+
+    post = Post(
+        code="abcd123",
+        author_id=author.id,
+        title="test title",
+        content="test content",
+    )
+    session.add(post)
+    session.flush()
+
+    # when
+    response = client.delete(f"/api/posts/{post.code}")
+
+    # then
+    assert response.status_code == 403
+
+
+def test_delete_post_by_admin(client, session, authorized_user, hashed_password):
+    # given
+    author = User(
+        code="abcd124",
+        email="test@example.com",
+        password=hashed_password,
+    )
+    session.add(author)
+    session.flush()
+
+    post = Post(
+        code="abcd123",
+        author_id=author.id,
+        title="test title",
+        content="test content",
+    )
+    session.add(post)
+    session.flush()
+
+    authorized_user.is_admin = True
+
+    # when
+    response = client.delete(f"/api/posts/{post.code}")
+
+    # then
+    assert response.status_code == 204
 
 
 def test_delete_post_404(client, authorized_user):
