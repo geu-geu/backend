@@ -28,7 +28,7 @@ def test_create_user_with_existing_email(client, session):
         password="$2b$12$g6AeAJXUJmaOcyYwUFVqgeeDL4UOnPVPuAXjSgqmgw/ZuTztFwAe.",
     )
     session.add(user)
-    session.commit()
+    session.flush()
 
     # when
     response = client.post("/api/users", json={"email": email, "password": password})
@@ -49,7 +49,7 @@ def test_create_user_with_deleted_email(client, session):
         deleted_at=datetime.now(UTC),
     )
     session.add(user)
-    session.commit()
+    session.flush()
 
     # when
     response = client.post("/api/users", json={"email": email, "password": password})
