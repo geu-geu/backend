@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 from fastapi import HTTPException
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models import Comment, Drawing, User
 from app.schemas.drawing_comments import (
@@ -66,7 +66,9 @@ def get_comments(
         raise HTTPException(status_code=404, detail="Drawing not found")
     comments = (
         session.execute(
-            select(Comment).where(
+            select(Comment)
+            .options(joinedload(Comment.author))
+            .where(
                 Comment.drawing_id == drawing.id,
                 Comment.deleted_at.is_(None),
             )
@@ -76,16 +78,13 @@ def get_comments(
     )
     items = []
     for comment in comments:
-        author = session.execute(
-            select(User).where(User.id == comment.author_id)
-        ).scalar_one()
         item = CommentSchema(
             code=comment.code,
             author=UserSchema(
-                code=author.code,
-                email=author.email,
-                nickname=author.nickname,
-                profile_image_url=author.profile_image_url,
+                code=comment.author.code,
+                email=comment.author.email,
+                nickname=comment.author.nickname,
+                profile_image_url=comment.author.profile_image_url,
             ),
             content=comment.content,
             created_at=comment.created_at,
@@ -114,23 +113,22 @@ def get_comment(
     if not drawing:
         raise HTTPException(status_code=404, detail="Drawing not found")
     comment = session.execute(
-        select(Comment).where(
+        select(Comment)
+        .options(joinedload(Comment.author))
+        .where(
             Comment.code == comment_code,
             Comment.deleted_at.is_(None),
         )
     ).scalar_one_or_none()
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
-    author = session.execute(
-        select(User).where(User.id == comment.author_id)
-    ).scalar_one()
     return CommentSchema(
         code=comment.code,
         author=UserSchema(
-            code=author.code,
-            email=author.email,
-            nickname=author.nickname,
-            profile_image_url=author.profile_image_url,
+            code=comment.author.code,
+            email=comment.author.email,
+            nickname=comment.author.nickname,
+            profile_image_url=comment.author.profile_image_url,
         ),
         content=comment.content,
         created_at=comment.created_at,
@@ -155,7 +153,9 @@ def update_comment(
     if not drawing:
         raise HTTPException(status_code=404, detail="Drawing not found")
     comment = session.execute(
-        select(Comment).where(
+        select(Comment)
+        .options(joinedload(Comment.author))
+        .where(
             Comment.code == comment_code,
             Comment.deleted_at.is_(None),
         )
@@ -171,10 +171,10 @@ def update_comment(
     return CommentSchema(
         code=comment.code,
         author=UserSchema(
-            code=user.code,
-            email=user.email,
-            nickname=user.nickname,
-            profile_image_url=user.profile_image_url,
+            code=comment.author.code,
+            email=comment.author.email,
+            nickname=comment.author.nickname,
+            profile_image_url=comment.author.profile_image_url,
         ),
         content=comment.content,
         created_at=comment.created_at,

@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 from fastapi import HTTPException
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload, with_loader_criteria
 
 from app.models import Image, Post, User
 from app.schemas.posts import (
@@ -49,75 +49,67 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
 def get_posts(session: Session) -> PostListSchema:
     posts = (
         session.execute(
-            select(Post).where(Post.deleted_at.is_(None)).order_by(Post.id.desc())
+            select(Post)
+            .options(
+                joinedload(Post.author),
+                selectinload(Post.images),
+                with_loader_criteria(Image, Image.deleted_at.is_(None)),
+            )
+            .where(Post.deleted_at.is_(None))
+            .order_by(Post.id.desc())
         )
         .scalars()
         .all()
     )
     results = []
     for post in posts:
-        author = session.execute(
-            select(User).where(
-                User.id == post.author_id,
-                User.deleted_at.is_(None),
-            )
-        ).scalar_one()
         result = PostSchema(
             code=post.code,
             author=UserSchema(
-                code=author.code,
-                email=author.email,
-                nickname=author.nickname,
-                profile_image_url=author.profile_image_url,
+                code=post.author.code,
+                email=post.author.email,
+                nickname=post.author.nickname,
+                profile_image_url=post.author.profile_image_url,
             ),
             title=post.title,
             content=post.content,
+            image_urls=[image.url for image in post.images],
             created_at=post.created_at,
             updated_at=post.updated_at,
         )
         results.append(result)
     return PostListSchema(
-        count=len(posts),
+        count=len(results),
         items=results,
     )
 
 
 def get_post(session: Session, code: str) -> PostSchema:
     post = session.execute(
-        select(Post).where(
+        select(Post)
+        .options(
+            joinedload(Post.author),
+            selectinload(Post.images),
+            with_loader_criteria(Image, Image.deleted_at.is_(None)),
+        )
+        .where(
             Post.code == code,
             Post.deleted_at.is_(None),
         )
     ).scalar_one_or_none()
     if post is None:
         raise HTTPException(status_code=404, detail="Post not found")
-    author = session.execute(
-        select(User).where(
-            User.id == post.author_id,
-            User.deleted_at.is_(None),
-        )
-    ).scalar_one()
-    images = (
-        session.execute(
-            select(Image).where(
-                Image.post_id == post.id,
-                Image.deleted_at.is_(None),
-            )
-        )
-        .scalars()
-        .all()
-    )
     return PostSchema(
         code=post.code,
         author=UserSchema(
-            code=author.code,
-            email=author.email,
-            nickname=author.nickname,
-            profile_image_url=author.profile_image_url,
+            code=post.author.code,
+            email=post.author.email,
+            nickname=post.author.nickname,
+            profile_image_url=post.author.profile_image_url,
         ),
         title=post.title,
         content=post.content,
-        image_urls=[image.url for image in images],
+        image_urls=[image.url for image in post.images],
         created_at=post.created_at,
         updated_at=post.updated_at,
     )
@@ -131,7 +123,13 @@ def update_post(
     user: User,
 ) -> PostSchema:
     post = session.execute(
-        select(Post).where(
+        select(Post)
+        .options(
+            joinedload(Post.author),
+            selectinload(Post.images),
+            with_loader_criteria(Image, Image.deleted_at.is_(None)),
+        )
+        .where(
             Post.code == code,
             Post.deleted_at.is_(None),
         )
@@ -142,22 +140,6 @@ def update_post(
         pass
     else:
         raise HTTPException(status_code=403, detail="Forbidden")
-    author = session.execute(
-        select(User).where(
-            User.id == post.author_id,
-            User.deleted_at.is_(None),
-        )
-    ).scalar_one()
-    images = (
-        session.execute(
-            select(Image).where(
-                Image.post_id == post.id,
-                Image.deleted_at.is_(None),
-            )
-        )
-        .scalars()
-        .all()
-    )
 
     # post 수정
     post.title = schema.title
@@ -165,29 +147,29 @@ def update_post(
     session.add(post)
 
     # 기존 post images 전부 삭제
-    for image in images:
+    for image in post.images:
         image.deleted_at = datetime.now(UTC)
         session.add(image)
 
     # 새로운 post images 생성
-    post_images = []
+    images = []
     for image_url in schema.image_urls:
-        post_image = Image(post_id=post.id, url=image_url)
-        post_images.append(post_image)
-    session.add_all(post_images)
+        image = Image(post_id=post.id, url=image_url)
+        images.append(image)
+    session.add_all(images)
     session.commit()
 
     return PostSchema(
         code=post.code,
         author=UserSchema(
-            code=author.code,
-            email=author.email,
-            nickname=author.nickname,
-            profile_image_url=author.profile_image_url,
+            code=post.author.code,
+            email=post.author.email,
+            nickname=post.author.nickname,
+            profile_image_url=post.author.profile_image_url,
         ),
         title=post.title,
         content=post.content,
-        image_urls=[post_image.url for post_image in post_images],
+        image_urls=[image.url for image in images],
         created_at=post.created_at,
         updated_at=post.updated_at,
     )

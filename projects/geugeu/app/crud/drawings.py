@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 from fastapi import HTTPException
 from sqlalchemy import exists, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload, with_loader_criteria
 
 from app.models import Drawing, Image, Post, User
 from app.schemas.drawings import (
@@ -61,43 +61,32 @@ def create_drawing(
 
 def get_drawings(session: Session) -> DrawingListSchema:
     drawings = (
-        session.execute(select(Drawing).order_by(Drawing.id.desc())).scalars().all()
+        session.execute(
+            select(Drawing)
+            .options(
+                joinedload(Drawing.post),
+                joinedload(Drawing.author),
+                selectinload(Drawing.images),
+                with_loader_criteria(Image, Image.deleted_at.is_(None)),
+            )
+            .order_by(Drawing.id.desc())
+        )
+        .scalars()
+        .all()
     )
     results = []
     for drawing in drawings:
-        post = session.execute(
-            select(Post).where(
-                Post.id == drawing.post_id,
-                Post.deleted_at.is_(None),
-            )
-        ).scalar_one()
-        author = session.execute(
-            select(User).where(
-                User.id == drawing.author_id,
-                User.deleted_at.is_(None),
-            )
-        ).scalar_one()
-        images = (
-            session.execute(
-                select(Image).where(
-                    Image.drawing_id == drawing.id,
-                    Image.deleted_at.is_(None),
-                )
-            )
-            .scalars()
-            .all()
-        )
         result = DrawingSchema(
             code=drawing.code,
-            post=PostSchema(code=post.code),
+            post=PostSchema(code=drawing.post.code),
             author=UserSchema(
-                code=author.code,
-                email=author.email,
-                nickname=author.nickname,
-                profile_image_url=author.profile_image_url,
+                code=drawing.author.code,
+                email=drawing.author.email,
+                nickname=drawing.author.nickname,
+                profile_image_url=drawing.author.profile_image_url,
             ),
             content=drawing.content,
-            image_urls=[image.url for image in images],
+            image_urls=[image.url for image in drawing.images],
             created_at=drawing.created_at,
             updated_at=drawing.updated_at,
         )
@@ -110,46 +99,31 @@ def get_drawings(session: Session) -> DrawingListSchema:
 
 def get_drawing(session: Session, code: str) -> DrawingSchema:
     drawing = session.execute(
-        select(Drawing).where(
+        select(Drawing)
+        .options(
+            joinedload(Drawing.post),
+            joinedload(Drawing.author),
+            selectinload(Drawing.images),
+            with_loader_criteria(Image, Image.deleted_at.is_(None)),
+        )
+        .where(
             Drawing.code == code,
             Drawing.deleted_at.is_(None),
         )
     ).scalar_one_or_none()
     if drawing is None:
         raise HTTPException(status_code=404, detail="Drawing not found")
-    post = session.execute(
-        select(Post).where(
-            Post.id == drawing.post_id,
-            Post.deleted_at.is_(None),
-        )
-    ).scalar_one()
-    author = session.execute(
-        select(User).where(
-            User.id == drawing.author_id,
-            User.deleted_at.is_(None),
-        )
-    ).scalar_one()
-    images = (
-        session.execute(
-            select(Image).where(
-                Image.drawing_id == drawing.id,
-                Image.deleted_at.is_(None),
-            )
-        )
-        .scalars()
-        .all()
-    )
     return DrawingSchema(
         code=drawing.code,
-        post=PostSchema(code=post.code),
+        post=PostSchema(code=drawing.post.code),
         author=UserSchema(
-            code=author.code,
-            email=author.email,
-            nickname=author.nickname,
-            profile_image_url=author.profile_image_url,
+            code=drawing.author.code,
+            email=drawing.author.email,
+            nickname=drawing.author.nickname,
+            profile_image_url=drawing.author.profile_image_url,
         ),
         content=drawing.content,
-        image_urls=[image.url for image in images],
+        image_urls=[image.url for image in drawing.images],
         created_at=drawing.created_at,
         updated_at=drawing.updated_at,
     )
@@ -163,7 +137,14 @@ def update_drawing(
     user: User,
 ) -> DrawingSchema:
     drawing = session.execute(
-        select(Drawing).where(
+        select(Drawing)
+        .options(
+            joinedload(Drawing.post),
+            joinedload(Drawing.author),
+            selectinload(Drawing.images),
+            with_loader_criteria(Image, Image.deleted_at.is_(None)),
+        )
+        .where(
             Drawing.code == code,
             Drawing.deleted_at.is_(None),
         )
@@ -174,35 +155,13 @@ def update_drawing(
         pass
     else:
         raise HTTPException(status_code=403, detail="Forbidden")
-    post = session.execute(
-        select(Post).where(
-            Post.id == drawing.post_id,
-            Post.deleted_at.is_(None),
-        )
-    ).scalar_one()
-    author = session.execute(
-        select(User).where(
-            User.id == drawing.author_id,
-            User.deleted_at.is_(None),
-        )
-    ).scalar_one()
-    images = (
-        session.execute(
-            select(Image).where(
-                Image.drawing_id == drawing.id,
-                Image.deleted_at.is_(None),
-            )
-        )
-        .scalars()
-        .all()
-    )
 
     # drawing 수정
     drawing.content = schema.content
     session.add(drawing)
 
     # 기존 drawing images 전부 삭제
-    for image in images:
+    for image in drawing.images:
         image.deleted_at = datetime.now(UTC)
         session.add(image)
 
@@ -216,12 +175,12 @@ def update_drawing(
 
     return DrawingSchema(
         code=drawing.code,
-        post=PostSchema(code=post.code),
+        post=PostSchema(code=drawing.post.code),
         author=UserSchema(
-            code=author.code,
-            email=author.email,
-            nickname=author.nickname,
-            profile_image_url=author.profile_image_url,
+            code=drawing.author.code,
+            email=drawing.author.email,
+            nickname=drawing.author.nickname,
+            profile_image_url=drawing.author.profile_image_url,
         ),
         content=drawing.content,
         image_urls=[image.url for image in images],
