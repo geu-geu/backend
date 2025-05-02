@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from app.models import Comment, Post, User
 
 
@@ -41,6 +43,18 @@ def test_get_comments(client, session, authorized_user):
         for _ in range(3)
     ]
     session.add_all(comments)
+    session.flush()
+
+    _deleted_comments = [
+        Comment(
+            post_id=post.id,
+            author_id=authorized_user.id,
+            content="deleted comment",
+            deleted_at=datetime.now(UTC),
+        )
+        for _ in range(2)
+    ]
+    session.add_all(_deleted_comments)
     session.flush()
 
     # when

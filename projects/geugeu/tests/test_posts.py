@@ -45,9 +45,10 @@ def test_get_posts(client, session, authorized_user):
             title="test title",
             content="test content",
         )
-        for i in range(1, 4)
+        for _ in range(3)
     ]
     session.add_all(posts)
+    session.flush()
 
     # when
     response = client.get("/api/posts")
@@ -79,11 +80,12 @@ def test_get_post(client, session, authorized_user):
     images = [
         Image(
             post_id=post.id,
-            url=f"https://example.com/image{i}.jpg",
+            url="https://example.com/image.jpg",
         )
-        for i in range(1, 4)
+        for _ in range(3)
     ]
     session.add_all(images)
+    session.flush()
 
     # when
     response = client.get(f"/api/posts/{post.code}")

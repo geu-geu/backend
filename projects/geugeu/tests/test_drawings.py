@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from app.models import Drawing, Image, Post, User
 
 
@@ -99,9 +101,21 @@ def test_get_drawings(client, session, authorized_user):
             author_id=authorized_user.id,
             content="test content",
         )
-        for i in range(1, 4)
+        for _ in range(3)
     ]
     session.add_all(drawings)
+    session.flush()
+
+    _deleted_drawings = [
+        Drawing(
+            post_id=post.id,
+            author_id=authorized_user.id,
+            content="deleted drawing",
+            deleted_at=datetime.now(UTC),
+        )
+        for _ in range(2)
+    ]
+    session.add_all(_deleted_drawings)
     session.flush()
 
     # when
@@ -142,11 +156,23 @@ def test_get_drawing(client, session, authorized_user):
     images = [
         Image(
             drawing_id=drawing.id,
-            url=f"https://example.com/image{i}.jpg",
+            url="https://example.com/image.jpg",
         )
-        for i in range(1, 4)
+        for _ in range(3)
     ]
     session.add_all(images)
+    session.flush()
+
+    _deleted_images = [
+        Image(
+            drawing_id=drawing.id,
+            url="https://example.com/image.jpg",
+            deleted_at=datetime.now(UTC),
+        )
+        for _ in range(2)
+    ]
+    session.add_all(_deleted_images)
+    session.flush()
 
     # when
     response = client.get(f"/api/drawings/{drawing.code}")
@@ -200,11 +226,12 @@ def test_update_drawing(client, session, authorized_user):
     images = [
         Image(
             drawing_id=drawing.id,
-            url=f"https://example.com/image{i}.jpg",
+            url="https://example.com/image.jpg",
         )
-        for i in range(1, 4)
+        for _ in range(3)
     ]
     session.add_all(images)
+    session.flush()
 
     new_content = "new content"
     new_image_urls = [
@@ -360,11 +387,12 @@ def test_delete_drawing(client, session, authorized_user):
     images = [
         Image(
             drawing_id=drawing.id,
-            url=f"https://example.com/image{i}.jpg",
+            url="https://example.com/image.jpg",
         )
-        for i in range(1, 4)
+        for _ in range(3)
     ]
     session.add_all(images)
+    session.flush()
 
     assert drawing.deleted_at is None
 
