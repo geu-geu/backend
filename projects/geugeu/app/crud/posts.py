@@ -25,10 +25,7 @@ def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostS
 
     post_images = []
     for image_url in schema.image_urls:
-        post_image = Image(
-            post_id=post.id,
-            url=image_url,
-        )
+        post_image = Image(post_id=post.id, url=image_url)
         post_images.append(post_image)
     session.add_all(post_images)
     session.commit()
@@ -175,10 +172,7 @@ def update_post(
     # 새로운 post images 생성
     post_images = []
     for image_url in schema.image_urls:
-        post_image = Image(
-            post_id=post.id,
-            url=image_url,
-        )
+        post_image = Image(post_id=post.id, url=image_url)
         post_images.append(post_image)
     session.add_all(post_images)
     session.commit()

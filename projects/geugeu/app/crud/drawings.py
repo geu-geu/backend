@@ -32,20 +32,13 @@ def create_drawing(
     ).scalar():
         raise HTTPException(status_code=400, detail="Drawing already exists")
 
-    drawing = Drawing(
-        post_id=post.id,
-        author_id=user.id,
-        content=schema.content,
-    )
+    drawing = Drawing(post_id=post.id, author_id=user.id, content=schema.content)
     session.add(drawing)
     session.commit()
 
     images = []
     for image_url in schema.image_urls:
-        image = Image(
-            drawing_id=drawing.id,
-            url=image_url,
-        )
+        image = Image(drawing_id=drawing.id, url=image_url)
         images.append(image)
     session.add_all(images)
     session.commit()
@@ -216,10 +209,7 @@ def update_drawing(
     # 새로운 drawing images 생성
     images = []
     for image_url in schema.image_urls:
-        image = Image(
-            drawing_id=drawing.id,
-            url=image_url,
-        )
+        image = Image(drawing_id=drawing.id, url=image_url)
         images.append(image)
     session.add_all(images)
     session.commit()
