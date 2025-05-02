@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from nanoid import generate
-from sqlalchemy import BigInteger, Boolean, DateTime, Identity, String, Text
+from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Identity, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
@@ -55,7 +55,11 @@ class Post(Base):
         nullable=False,
         default=generate_code,
     )
-    author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
+    author_id: Mapped[int] = mapped_column(
+        BigInteger(),
+        ForeignKey("user.id"),
+        nullable=False,
+    )
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
@@ -82,8 +86,16 @@ class Drawing(Base):
         nullable=False,
         default=generate_code,
     )
-    post_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
-    author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
+    post_id: Mapped[int] = mapped_column(
+        BigInteger(),
+        ForeignKey("post.id"),
+        nullable=False,
+    )
+    author_id: Mapped[int] = mapped_column(
+        BigInteger(),
+        ForeignKey("user.id"),
+        nullable=False,
+    )
     content: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -109,8 +121,16 @@ class Image(Base):
         nullable=False,
         default=generate_code,
     )
-    post_id: Mapped[int | None] = mapped_column(BigInteger(), nullable=True)
-    drawing_id: Mapped[int | None] = mapped_column(BigInteger(), nullable=True)
+    post_id: Mapped[int | None] = mapped_column(
+        BigInteger(),
+        ForeignKey("post.id"),
+        nullable=True,
+    )
+    drawing_id: Mapped[int | None] = mapped_column(
+        BigInteger(),
+        ForeignKey("drawing.id"),
+        nullable=True,
+    )
     url: Mapped[str] = mapped_column(String(2083), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -136,9 +156,21 @@ class Comment(Base):
         nullable=False,
         default=generate_code,
     )
-    author_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
-    post_id: Mapped[int | None] = mapped_column(BigInteger(), nullable=True)
-    drawing_id: Mapped[int | None] = mapped_column(BigInteger(), nullable=True)
+    author_id: Mapped[int] = mapped_column(
+        BigInteger(),
+        ForeignKey("user.id"),
+        nullable=False,
+    )
+    post_id: Mapped[int | None] = mapped_column(
+        BigInteger(),
+        ForeignKey("post.id"),
+        nullable=True,
+    )
+    drawing_id: Mapped[int | None] = mapped_column(
+        BigInteger(),
+        ForeignKey("drawing.id"),
+        nullable=True,
+    )
     content: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
