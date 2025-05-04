@@ -225,9 +225,9 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "alembic" },
+    { name = "bcrypt" },
     { name = "fastapi", extra = ["standard"] },
     { name = "nanoid" },
-    { name = "passlib", extra = ["bcrypt"] },
     { name = "psycopg2-binary" },
     { name = "pydantic-settings" },
     { name = "pyjwt" },
@@ -239,15 +239,14 @@ dev = [
     { name = "ruff" },
     { name = "testcontainers" },
     { name = "types-nanoid" },
-    { name = "types-passlib" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "alembic", specifier = ">=1.15.2" },
+    { name = "bcrypt", specifier = ">=4.3.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.12" },
     { name = "nanoid", specifier = ">=2.0.0" },
-    { name = "passlib", extras = ["bcrypt"], specifier = ">=1.7.4" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
     { name = "pydantic-settings", specifier = ">=2.9.1" },
     { name = "pyjwt", specifier = ">=2.10.1" },
@@ -259,7 +258,6 @@ dev = [
     { name = "ruff", specifier = ">=0.11.7" },
     { name = "testcontainers", specifier = ">=4.10.0" },
     { name = "types-nanoid", specifier = ">=2.0.0.20240601" },
-    { name = "types-passlib", specifier = ">=1.7.7.20250408" },
 ]
 
 [[package]]
@@ -446,20 +444,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a1/d4/1fc4078c65507b51b96ca8f8c3ba19e6a61c8253c72794544580a7b6c24d/packaging-25.0.tar.gz", hash = "sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f", size = 165727 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/20/12/38679034af332785aac8774540895e234f4d07f7545804097de4b666afd8/packaging-25.0-py3-none-any.whl", hash = "sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484", size = 66469 },
-]
-
-[[package]]
-name = "passlib"
-version = "1.7.4"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b6/06/9da9ee59a67fae7761aab3ccc84fa4f3f33f125b370f1ccdb915bf967c11/passlib-1.7.4.tar.gz", hash = "sha256:defd50f72b65c5402ab2c573830a6978e5f202ad0d984793c8dde2c4152ebe04", size = 689844 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3b/a4/ab6b7589382ca3df236e03faa71deac88cae040af60c071a78d254a62172/passlib-1.7.4-py2.py3-none-any.whl", hash = "sha256:aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1", size = 525554 },
-]
-
-[package.optional-dependencies]
-bcrypt = [
-    { name = "bcrypt" },
 ]
 
 [[package]]
@@ -777,15 +761,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/20/f2/b42b17bf27e90aa8dd9a06721b35804842ca72afac294b700b4fa23ffc92/types-nanoid-2.0.0.20240601.tar.gz", hash = "sha256:7246ee685ed55a367fc160d87cde75a550296ecca26e0602619552dae72efda0", size = 2614 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f4/2c/a584a285447ecb1997cda73477550068f461885e1676a4ac271ad16f8078/types_nanoid-2.0.0.20240601-py3-none-any.whl", hash = "sha256:5219f721b80748d82b14edd5429cc888d32eb816966d2a4719730ef3f2e3a417", size = 3862 },
-]
-
-[[package]]
-name = "types-passlib"
-version = "1.7.7.20250408"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/4a/f4/69f74230e5b5201e970ffa77a45237605063924b13e311ebf721291c3554/types_passlib-1.7.7.20250408.tar.gz", hash = "sha256:7db7cb394658b194b0b252f87bcedf57fdc2b494c203c8a8d80e81d3b26516ae", size = 25160 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/a2/3cbb10d8583656f84d45b39e3be3c5e50b8b416137e5cc70caaa73932da4/types_passlib-1.7.7.20250408-py3-none-any.whl", hash = "sha256:04cec96e438e1cf5d0440b1e31123abab1844f5293f8350c8d6d787bd00c46e6", size = 40311 },
 ]
 
 [[package]]
