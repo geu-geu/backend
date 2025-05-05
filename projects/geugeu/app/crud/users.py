@@ -1,12 +1,16 @@
+import logging
 from datetime import UTC, datetime
 
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash
 from app.models import User
 from app.schemas.users import SignupSchema, UserUpdateSchema
+from app.utils import upload_file
+
+logger = logging.getLogger(__name__)
 
 
 def create_user(session: Session, schema: SignupSchema):
@@ -58,3 +62,14 @@ def delete_user(session: Session, user: User):
     user.deleted_at = datetime.now(UTC)
     session.add(user)
     session.commit()
+
+
+def update_profile_image(
+    session: Session,
+    current_user: User,
+    profile_image: UploadFile,
+):
+    url = upload_file(profile_image)
+    current_user.profile_image_url = url
+    session.commit()
+    return current_user

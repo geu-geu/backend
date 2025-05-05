@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int
     POSTGRES_DB: str
 
+    AWS_S3_BUCKET_NAME: str
+
     TOKEN_URL: str = "/api/auth/login"
 
     @property

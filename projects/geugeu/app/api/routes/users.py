@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
@@ -32,6 +32,15 @@ async def update_me(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     return crud.update_user(session, current_user, schema)
+
+
+@router.put("/me/profile-image", response_model=UserSchema)
+async def upload_profile_image(
+    session: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+    profile_image: UploadFile = File(...),
+):
+    return crud.update_profile_image(session, current_user, profile_image)
 
 
 @router.delete("/me", status_code=204)
