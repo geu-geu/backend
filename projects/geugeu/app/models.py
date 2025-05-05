@@ -256,6 +256,11 @@ class Comment(Base):
         ForeignKey("drawing.id"),
         nullable=True,
     )
+    parent_id: Mapped[int | None] = mapped_column(
+        BigInteger(),
+        ForeignKey("comment.id"),
+        nullable=True,
+    )
     content: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -274,3 +279,9 @@ class Comment(Base):
     author: Mapped["User"] = relationship(back_populates="comments")
     post: Mapped[Optional["Post"]] = relationship(back_populates="comments")
     drawing: Mapped[Optional["Drawing"]] = relationship(back_populates="comments")
+    parent: Mapped[Optional["Comment"]] = relationship(
+        back_populates="replies", remote_side=[id]
+    )
+    replies: Mapped[List["Comment"]] = relationship(
+        back_populates="parent", cascade="all, delete-orphan"
+    )
