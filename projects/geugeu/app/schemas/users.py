@@ -35,7 +35,3 @@ class UserSchema(BaseModel):
 
 class UserUpdateSchema(BaseModel):
     nickname: str
-
-
-class TokenPayload(BaseModel):
-    sub: str | None = None

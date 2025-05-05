@@ -10,9 +10,9 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.db import get_db
 from app.core.security import ALGORITHM
-from app.crud.users import get_user
+from app.crud.auth import get_user_by_code
 from app.models import User
-from app.schemas.users import TokenPayload
+from app.schemas.auth import TokenPayload
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=settings.TOKEN_URL)
 
@@ -29,9 +29,9 @@ def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    user = get_user(session, token_data.sub) if token_data.sub else None
+    if token_data.sub is None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    user = get_user_by_code(session, token_data.sub)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    if user.deleted_at:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=401, detail="Unauthorized")
     return user

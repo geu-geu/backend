@@ -18,7 +18,7 @@ async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[Session, Depends(get_db)],
 ):
-    user = crud.get_user(session, form_data.username)
+    user = crud.get_user_by_email(session, form_data.username)
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
     if not verify_password(form_data.password, user.password):
