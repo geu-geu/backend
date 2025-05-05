@@ -28,9 +28,22 @@ def create_comment(
     ).scalar_one_or_none()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
+    if schema.parent_code:
+        parent = session.execute(
+            select(Comment).where(
+                Comment.code == schema.parent_code,
+                Comment.deleted_at.is_(None),
+            )
+        ).scalar_one_or_none()
+        if not parent:
+            raise HTTPException(status_code=400, detail="Invalid parent code")
+        parent_id = parent.id
+    else:
+        parent_id = None
     comment = Comment(
         post_id=post.id,
         author_id=user.id,
+        parent_id=parent_id,
         content=schema.content,
     )
     session.add(comment)

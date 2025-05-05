@@ -366,3 +366,40 @@ def test_delete_comment_404(client, authorized_user):
 
     # then
     assert response.status_code == 404
+
+
+def test_create_reply_comment(client, session, authorized_user):
+    # given
+    post = Post(
+        author_id=authorized_user.id,
+        title="그려주세요",
+        content="제곧내",
+    )
+    session.add(post)
+    session.flush()
+
+    drawing = Drawing(
+        post_id=post.id,
+        author_id=authorized_user.id,
+        content="그려드렸습니다",
+    )
+    session.add(drawing)
+    session.flush()
+
+    comment = Comment(
+        drawing_id=drawing.id,
+        author_id=authorized_user.id,
+        content="멋지네요",
+    )
+    session.add(comment)
+    session.flush()
+
+    # when
+    response = client.post(
+        f"/api/drawings/{drawing.code}/comments",
+        json={"content": "감사합니다", "parent_code": comment.code},
+    )
+
+    # then
+    assert response.status_code == 201
+    assert response.json()["content"] == "감사합니다"

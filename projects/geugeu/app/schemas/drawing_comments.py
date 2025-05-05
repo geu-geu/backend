@@ -7,6 +7,7 @@ from app.models import Comment
 
 class CreateCommentSchema(BaseModel):
     content: str
+    parent_code: str | None = None
 
 
 class UserSchema(BaseModel):

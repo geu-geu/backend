@@ -310,3 +310,32 @@ def test_delete_comment_404(client, authorized_user):
 
     # then
     assert response.status_code == 404
+
+
+def test_create_reply_comment(client, session, authorized_user):
+    # given
+    post = Post(
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+    )
+    session.add(post)
+    session.flush()
+
+    comment = Comment(
+        post_id=post.id,
+        author_id=authorized_user.id,
+        content="test comment",
+    )
+    session.add(comment)
+    session.flush()
+
+    # when
+    response = client.post(
+        f"/api/posts/{post.code}/comments",
+        json={"content": "test reply", "parent_code": comment.code},
+    )
+
+    # then
+    assert response.status_code == 201
+    assert response.json()["content"] == "test reply"
