@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "alembic>=1.15.2",
     "bcrypt>=4.3.0",
+    "boto3>=1.38.8",
     "fastapi[standard]>=0.115.12",
     "nanoid>=2.0.0",
     "psycopg2-binary>=2.9.10",
@@ -19,6 +20,7 @@ exclude = ["migrations"]
 
 [dependency-groups]
 dev = [
+    "boto3-stubs[s3]>=1.38.8",
     "pytest>=8.3.5",
     "ruff>=0.11.7",
     "testcontainers>=4.10.0",
