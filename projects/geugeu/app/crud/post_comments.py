@@ -71,6 +71,7 @@ def get_comments(
             .options(joinedload(Comment.author))
             .where(
                 Comment.post_id == post.id,
+                Comment.parent_id.is_(None),
                 Comment.deleted_at.is_(None),
             )
         )

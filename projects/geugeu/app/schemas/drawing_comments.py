@@ -21,6 +21,7 @@ class CommentSchema(BaseModel):
     code: str
     author: UserSchema
     content: str
+    replies: list["CommentSchema"]
     created_at: datetime
     updated_at: datetime
 
@@ -35,6 +36,7 @@ class CommentSchema(BaseModel):
                 profile_image_url=comment.author.profile_image_url,
             ),
             content=comment.content,
+            replies=[CommentSchema.from_model(reply) for reply in comment.replies],
             created_at=comment.created_at,
             updated_at=comment.updated_at,
         )
