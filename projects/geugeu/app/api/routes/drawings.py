@@ -19,11 +19,11 @@ router = APIRouter()
 
 @router.post("", status_code=201, response_model=DrawingSchema)
 async def create_drawing(
-    schema: CreateDrawingSchema,
+    payload: CreateDrawingSchema,
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return crud.create_drawing(session, current_user, schema)
+    return crud.create_drawing(session, current_user, payload)
 
 
 @router.get("", response_model=DrawingListSchema)
@@ -46,14 +46,14 @@ async def get_drawing(
 @router.put("/{drawing_code}", response_model=DrawingSchema)
 async def update_drawing(
     drawing_code: str,
-    schema: UpdateDrawingSchema,
+    payload: UpdateDrawingSchema,
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     return crud.update_drawing(
         session=session,
         code=drawing_code,
-        schema=schema,
+        payload=payload,
         user=current_user,
     )
 

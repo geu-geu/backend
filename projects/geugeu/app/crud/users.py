@@ -13,9 +13,9 @@ from app.utils import upload_file
 logger = logging.getLogger(__name__)
 
 
-def create_user(session: Session, schema: SignupSchema):
+def create_user(session: Session, payload: SignupSchema):
     user = session.execute(
-        select(User).where(User.email == schema.email)
+        select(User).where(User.email == payload.email)
     ).scalar_one_or_none()
     if user:
         if user.deleted_at:
@@ -26,9 +26,9 @@ def create_user(session: Session, schema: SignupSchema):
             raise HTTPException(status_code=400, detail="User already exists")
     else:
         user = User(
-            email=schema.email,
-            nickname=schema.nickname,
-            password=get_password_hash(schema.password),
+            email=payload.email,
+            nickname=payload.nickname,
+            password=get_password_hash(payload.password),
             is_admin=False,
             profile_image_url="",
         )
@@ -50,8 +50,8 @@ def get_user(session: Session, code: str):
     return user
 
 
-def update_user(session: Session, user: User, schema: UserUpdateSchema):
-    user.nickname = schema.nickname
+def update_user(session: Session, user: User, payload: UserUpdateSchema):
+    user.nickname = payload.nickname
     session.add(user)
     session.commit()
     session.refresh(user)

@@ -14,11 +14,11 @@ from app.schemas.drawings import (
 
 
 def create_drawing(
-    session: Session, user: User, schema: CreateDrawingSchema
+    session: Session, user: User, payload: CreateDrawingSchema
 ) -> DrawingSchema:
     post = session.execute(
         select(Post).where(
-            Post.code == schema.post_code,
+            Post.code == payload.post_code,
             Post.deleted_at.is_(None),
         )
     ).scalar_one()
@@ -30,12 +30,12 @@ def create_drawing(
     ).scalar():
         raise HTTPException(status_code=400, detail="Drawing already exists")
 
-    drawing = Drawing(post_id=post.id, author_id=user.id, content=schema.content)
+    drawing = Drawing(post_id=post.id, author_id=user.id, content=payload.content)
     session.add(drawing)
     session.commit()
 
     images = []
-    for image_url in schema.image_urls:
+    for image_url in payload.image_urls:
         image = Image(drawing_id=drawing.id, url=image_url)
         images.append(image)
     session.add_all(images)
@@ -90,7 +90,7 @@ def update_drawing(
     *,
     session: Session,
     code: str,
-    schema: UpdateDrawingSchema,
+    payload: UpdateDrawingSchema,
     user: User,
 ) -> DrawingSchema:
     drawing = session.execute(
@@ -114,7 +114,7 @@ def update_drawing(
         raise HTTPException(status_code=403, detail="Forbidden")
 
     # drawing 수정
-    drawing.content = schema.content
+    drawing.content = payload.content
     session.add(drawing)
 
     # 기존 drawing images 전부 삭제
@@ -124,7 +124,7 @@ def update_drawing(
 
     # 새로운 drawing images 생성
     images = []
-    for image_url in schema.image_urls:
+    for image_url in payload.image_urls:
         image = Image(drawing_id=drawing.id, url=image_url)
         images.append(image)
     session.add_all(images)

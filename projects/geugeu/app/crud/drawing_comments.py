@@ -18,7 +18,7 @@ def create_comment(
     session: Session,
     user: User,
     drawing_code: str,
-    schema: CreateCommentSchema,
+    payload: CreateCommentSchema,
 ) -> CommentSchema:
     drawing = session.execute(
         select(Drawing).where(
@@ -28,10 +28,10 @@ def create_comment(
     ).scalar_one_or_none()
     if not drawing:
         raise HTTPException(status_code=404, detail="Drawing not found")
-    if schema.parent_code:
+    if payload.parent_code:
         parent = session.execute(
             select(Comment).where(
-                Comment.code == schema.parent_code,
+                Comment.code == payload.parent_code,
                 Comment.deleted_at.is_(None),
             )
         ).scalar_one_or_none()
@@ -44,7 +44,7 @@ def create_comment(
         drawing_id=drawing.id,
         author_id=user.id,
         parent_id=parent_id,
-        content=schema.content,
+        content=payload.content,
     )
     session.add(comment)
     session.commit()
@@ -118,7 +118,7 @@ def update_comment(
     user: User,
     drawing_code: str,
     comment_code: str,
-    schema: UpdateCommentSchema,
+    payload: UpdateCommentSchema,
 ) -> CommentSchema:
     drawing = session.execute(
         select(Drawing).where(
@@ -142,7 +142,7 @@ def update_comment(
         pass
     else:
         raise HTTPException(status_code=403, detail="Forbiden")
-    comment.content = schema.content
+    comment.content = payload.content
     session.commit()
     return CommentSchema.from_model(comment)
 

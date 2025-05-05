@@ -19,11 +19,11 @@ router = APIRouter()
 
 @router.post("", status_code=201, response_model=PostSchema)
 async def create_post(
-    schema: CreatePostSchema,
+    payload: CreatePostSchema,
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return crud.create_post(session, current_user, schema)
+    return crud.create_post(session, current_user, payload)
 
 
 @router.get("", response_model=PostListSchema)
@@ -46,12 +46,12 @@ async def get_post(
 @router.put("/{post_code}", response_model=PostSchema)
 async def update_post(
     post_code: str,
-    schema: UpdatePostSchema,
+    payload: UpdatePostSchema,
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     return crud.update_post(
-        session=session, code=post_code, schema=schema, user=current_user
+        session=session, code=post_code, payload=payload, user=current_user
     )
 
 

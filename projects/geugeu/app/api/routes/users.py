@@ -14,10 +14,10 @@ router = APIRouter()
 
 @router.post("", status_code=201, response_model=UserSchema)
 async def sign_up(
-    schema: SignupSchema,
+    payload: SignupSchema,
     session: Annotated[Session, Depends(get_db)],
 ):
-    return crud.create_user(session, schema)
+    return crud.create_user(session, payload)
 
 
 @router.get("/me", response_model=UserSchema)
@@ -27,11 +27,11 @@ async def get_me(current_user: Annotated[User, Depends(get_current_user)]):
 
 @router.put("/me", response_model=UserSchema)
 async def update_me(
-    schema: UserUpdateSchema,
+    payload: UserUpdateSchema,
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return crud.update_user(session, current_user, schema)
+    return crud.update_user(session, current_user, payload)
 
 
 @router.put("/me/profile-image", response_model=UserSchema)

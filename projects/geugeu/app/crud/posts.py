@@ -13,17 +13,17 @@ from app.schemas.posts import (
 )
 
 
-def create_post(session: Session, user: User, schema: CreatePostSchema) -> PostSchema:
+def create_post(session: Session, user: User, payload: CreatePostSchema) -> PostSchema:
     post = Post(
         author_id=user.id,
-        title=schema.title,
-        content=schema.content,
+        title=payload.title,
+        content=payload.content,
     )
     session.add(post)
     session.flush()
 
     post_images = []
-    for image_url in schema.image_urls:
+    for image_url in payload.image_urls:
         post_image = Image(post_id=post.id, url=image_url)
         post_images.append(post_image)
     session.add_all(post_images)
@@ -75,7 +75,7 @@ def update_post(
     *,
     session: Session,
     code: str,
-    schema: UpdatePostSchema,
+    payload: UpdatePostSchema,
     user: User,
 ) -> PostSchema:
     post = session.execute(
@@ -98,8 +98,8 @@ def update_post(
         raise HTTPException(status_code=403, detail="Forbidden")
 
     # post 수정
-    post.title = schema.title
-    post.content = schema.content
+    post.title = payload.title
+    post.content = payload.content
     session.add(post)
 
     # 기존 post images 전부 삭제
@@ -109,7 +109,7 @@ def update_post(
 
     # 새로운 post images 생성
     images = []
-    for image_url in schema.image_urls:
+    for image_url in payload.image_urls:
         image = Image(post_id=post.id, url=image_url)
         images.append(image)
     session.add_all(images)

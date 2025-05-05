@@ -25,13 +25,13 @@ async def create_comment(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
     drawing_code: str,
-    schema: CreateCommentSchema,
+    payload: CreateCommentSchema,
 ):
     return crud.create_comment(
         session=session,
         user=current_user,
         drawing_code=drawing_code,
-        schema=schema,
+        payload=payload,
     )
 
 
@@ -72,14 +72,14 @@ async def update_comment(
     current_user: Annotated[User, Depends(get_current_user)],
     drawing_code: str,
     comment_code: str,
-    schema: UpdateCommentSchema,
+    payload: UpdateCommentSchema,
 ):
     return crud.update_comment(
         session=session,
         user=current_user,
         drawing_code=drawing_code,
         comment_code=comment_code,
-        schema=schema,
+        payload=payload,
     )
 
 
