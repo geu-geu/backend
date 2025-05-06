@@ -1,29 +1,26 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
 from app.core.db import get_db
 from app.crud import posts as crud
 from app.models import User
-from app.schemas.posts import (
-    CreatePostSchema,
-    PostListSchema,
-    PostSchema,
-    UpdatePostSchema,
-)
+from app.schemas.posts import PostListSchema, PostSchema, UpdatePostSchema
 
 router = APIRouter()
 
 
 @router.post("", status_code=201, response_model=PostSchema)
 async def create_post(
-    payload: CreatePostSchema,
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
+    title: str = Form(...),
+    content: str = Form(...),
+    files: list[UploadFile] = File(...),
 ):
-    return crud.create_post(session, current_user, payload)
+    return crud.create_post(session, current_user, title, content, files)
 
 
 @router.get("", response_model=PostListSchema)

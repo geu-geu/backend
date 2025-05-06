@@ -5,12 +5,6 @@ from pydantic import BaseModel, EmailStr
 from app.models import Post
 
 
-class CreatePostSchema(BaseModel):
-    title: str
-    content: str
-    image_urls: list[str] = []
-
-
 class UserSchema(BaseModel):
     code: str
     email: EmailStr

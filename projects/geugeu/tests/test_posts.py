@@ -1,3 +1,5 @@
+import io
+
 from app.models import Image, Post, User
 
 
@@ -5,22 +7,21 @@ def test_create_post(client, authorized_user):
     # given
     title = "test title"
     content = "test content"
-    image_urls = [
-        "https://example.com/image1.jpg",
-        "https://example.com/image2.jpg",
-    ]
 
     # when
     response = client.post(
         "/api/posts",
-        json={"title": title, "content": content, "image_urls": image_urls},
+        data={"title": title, "content": content},
+        files=[
+            ("files", ("test.png", io.BytesIO(b"imagebytes"), "image/png")),
+        ],
     )
 
     # then
     assert response.status_code == 201
     assert response.json()["title"] == title
     assert response.json()["content"] == content
-    assert len(response.json()["images"]) == len(image_urls)
+    assert len(response.json()["images"]) == 1
 
 
 def test_create_post_401(client, user):

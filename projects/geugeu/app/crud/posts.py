@@ -1,30 +1,29 @@
 from datetime import UTC, datetime
 
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload, with_loader_criteria
 
 from app.models import Image, Post, User
-from app.schemas.posts import (
-    CreatePostSchema,
-    PostListSchema,
-    PostSchema,
-    UpdatePostSchema,
-)
+from app.schemas.posts import PostListSchema, PostSchema, UpdatePostSchema
+from app.utils import upload_file
 
 
-def create_post(session: Session, user: User, payload: CreatePostSchema) -> PostSchema:
-    post = Post(
-        author_id=user.id,
-        title=payload.title,
-        content=payload.content,
-    )
+def create_post(
+    session: Session,
+    user: User,
+    title: str,
+    content: str,
+    files: list[UploadFile],
+) -> PostSchema:
+    post = Post(author_id=user.id, title=title, content=content)
     session.add(post)
     session.flush()
 
     post_images = []
-    for image_url in payload.image_urls:
-        post_image = Image(post_id=post.id, url=image_url)
+    for file in files:
+        url = upload_file(file)
+        post_image = Image(post_id=post.id, url=url)
         post_images.append(post_image)
     session.add_all(post_images)
     session.commit()
