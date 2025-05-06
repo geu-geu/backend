@@ -10,7 +10,7 @@ class Base(DeclarativeBase):
     pass
 
 
-engine = create_engine(str(settings.POSTGRES_DATABASE_URL))
+engine = create_engine(settings.POSTGRES_DATABASE_URL)
 
 
 def get_db() -> Generator[Session, None, None]:
