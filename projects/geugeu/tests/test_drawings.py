@@ -1,3 +1,4 @@
+import io
 from datetime import UTC, datetime
 
 from app.models import Drawing, Image, Post, User
@@ -13,39 +14,38 @@ def test_create_drawing(client, session, authorized_user):
     session.add(post)
     session.flush()
 
-    content = "test content"
-    image_urls = [
-        "https://example.com/image1.jpg",
-        "https://example.com/image2.jpg",
-    ]
-
     # when
     response = client.post(
         "/api/drawings",
-        json={
+        data={
             "post_code": post.code,
-            "content": content,
-            "image_urls": image_urls,
+            "content": "test content",
         },
+        files=[
+            ("files", ("test1.png", io.BytesIO(b"imagebytes"), "image/png")),
+            ("files", ("test2.png", io.BytesIO(b"imagebytes"), "image/png")),
+        ],
     )
 
     # then
     assert response.status_code == 201
     assert response.json()["post"]["code"] == post.code
     assert response.json()["author"]["code"] == authorized_user.code
-    assert response.json()["content"] == content
-    assert len(response.json()["images"]) == len(image_urls)
+    assert response.json()["content"] == "test content"
+    assert len(response.json()["images"]) == 2
 
 
 def test_create_drawing_401(client, user):
     # when
     response = client.post(
         "/api/drawings",
-        json={
+        data={
             "post_code": "abcd123",
             "content": "test content",
-            "image_urls": ["https://example.com/image.jpg"],
         },
+        files=[
+            ("files", ("test.png", io.BytesIO(b"imagebytes"), "image/png")),
+        ],
     )
 
     # then
@@ -73,11 +73,13 @@ def test_create_drawing_twice_fails(client, session, authorized_user):
     # when
     response = client.post(
         "/api/drawings",
-        json={
+        data={
             "post_code": post.code,
             "content": "test content",
-            "image_urls": ["https://example.com/image.jpg"],
         },
+        files=[
+            ("files", ("test.png", io.BytesIO(b"imagebytes"), "image/png")),
+        ],
     )
 
     # then
@@ -233,19 +235,16 @@ def test_update_drawing(client, session, authorized_user):
     session.add_all(images)
     session.flush()
 
-    new_content = "new content"
-    new_image_urls = [
-        "https://example.com/new1.jpg",
-        "https://example.com/new2.jpg",
-    ]
-
     # when
     response = client.put(
         f"/api/drawings/{drawing.code}",
-        json={
-            "content": new_content,
-            "image_urls": new_image_urls,
+        data={
+            "content": "new content",
         },
+        files=[
+            ("files", ("test1.png", io.BytesIO(b"imagebytes"), "image/png")),
+            ("files", ("test2.png", io.BytesIO(b"imagebytes"), "image/png")),
+        ],
     )
 
     # then
@@ -253,7 +252,7 @@ def test_update_drawing(client, session, authorized_user):
     assert response.json()["code"] == drawing.code
     assert response.json()["post"]["code"] == post.code
     assert response.json()["author"]["code"] == authorized_user.code
-    assert response.json()["content"] == new_content
+    assert response.json()["content"] == "new content"
     assert len(response.json()["images"]) == 2
 
 
@@ -261,10 +260,12 @@ def test_update_drawing_401(client, user):
     # when
     response = client.put(
         "/api/drawings/abcd123",
-        json={
+        data={
             "content": "new content",
-            "image_urls": ["http://example.com/image.png"],
         },
+        files=[
+            ("files", ("test.png", io.BytesIO(b"imagebytes"), "image/png")),
+        ],
     )
 
     # then
@@ -299,10 +300,12 @@ def test_update_drawing_403(client, session, authorized_user, hashed_password):
     # when
     response = client.put(
         f"/api/drawings/{drawing.code}",
-        json={
+        data={
             "content": "new content",
-            "image_urls": ["http://example.com/image.png"],
         },
+        files=[
+            ("files", ("test.png", io.BytesIO(b"imagebytes"), "image/png")),
+        ],
     )
 
     # then
@@ -339,10 +342,12 @@ def test_update_drawing_by_admin(client, session, authorized_user, hashed_passwo
     # when
     response = client.put(
         f"/api/drawings/{drawing.code}",
-        json={
+        data={
             "content": "new content",
-            "image_urls": ["http://example.com/image.png"],
         },
+        files=[
+            ("files", ("test.png", io.BytesIO(b"imagebytes"), "image/png")),
+        ],
     )
 
     # then
@@ -356,10 +361,12 @@ def test_update_drawing_404(client, authorized_user):
     # when
     response = client.put(
         f"/api/drawings/{code}",
-        json={
+        data={
             "content": "new content",
-            "image_urls": ["http://example.com/image.png"],
         },
+        files=[
+            ("files", ("test.png", io.BytesIO(b"imagebytes"), "image/png")),
+        ],
     )
 
     # then

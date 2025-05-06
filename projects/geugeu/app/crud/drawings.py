@@ -1,24 +1,20 @@
 from datetime import UTC, datetime
 
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 from sqlalchemy import exists, select
 from sqlalchemy.orm import Session, joinedload, selectinload, with_loader_criteria
 
 from app.models import Drawing, Image, Post, User
-from app.schemas.drawings import (
-    CreateDrawingSchema,
-    DrawingListSchema,
-    DrawingSchema,
-    UpdateDrawingSchema,
-)
+from app.schemas.drawings import DrawingListSchema, DrawingSchema
+from app.utils import upload_file
 
 
 def create_drawing(
-    session: Session, user: User, payload: CreateDrawingSchema
+    session: Session, user: User, post_code: str, content: str, files: list[UploadFile]
 ) -> DrawingSchema:
     post = session.execute(
         select(Post).where(
-            Post.code == payload.post_code,
+            Post.code == post_code,
             Post.deleted_at.is_(None),
         )
     ).scalar_one()
@@ -30,12 +26,13 @@ def create_drawing(
     ).scalar():
         raise HTTPException(status_code=400, detail="Drawing already exists")
 
-    drawing = Drawing(post_id=post.id, author_id=user.id, content=payload.content)
+    drawing = Drawing(post_id=post.id, author_id=user.id, content=content)
     session.add(drawing)
     session.commit()
 
     images = []
-    for image_url in payload.image_urls:
+    for file in files:
+        image_url = upload_file(file)
         image = Image(drawing_id=drawing.id, url=image_url)
         images.append(image)
     session.add_all(images)
@@ -89,9 +86,10 @@ def get_drawing(session: Session, code: str) -> DrawingSchema:
 def update_drawing(
     *,
     session: Session,
-    code: str,
-    payload: UpdateDrawingSchema,
     user: User,
+    code: str,
+    content: str,
+    files: list[UploadFile],
 ) -> DrawingSchema:
     drawing = session.execute(
         select(Drawing)
@@ -114,7 +112,7 @@ def update_drawing(
         raise HTTPException(status_code=403, detail="Forbidden")
 
     # drawing 수정
-    drawing.content = payload.content
+    drawing.content = content
     session.add(drawing)
 
     # 기존 drawing images 전부 삭제
@@ -124,7 +122,8 @@ def update_drawing(
 
     # 새로운 drawing images 생성
     images = []
-    for image_url in payload.image_urls:
+    for file in files:
+        image_url = upload_file(file)
         image = Image(drawing_id=drawing.id, url=image_url)
         images.append(image)
     session.add_all(images)

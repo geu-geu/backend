@@ -5,12 +5,6 @@ from pydantic import BaseModel, EmailStr
 from app.models import Drawing
 
 
-class CreateDrawingSchema(BaseModel):
-    post_code: str
-    content: str
-    image_urls: list[str]
-
-
 class PostSchema(BaseModel):
     code: str
 
@@ -65,8 +59,3 @@ class DrawingSchema(BaseModel):
 class DrawingListSchema(BaseModel):
     count: int
     items: list[DrawingSchema]
-
-
-class UpdateDrawingSchema(BaseModel):
-    content: str
-    image_urls: list[str]
