@@ -16,6 +16,7 @@ locals {
   }
   ecs_task_execution_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
+    "arn:aws:iam::aws:policy/SecretsManagerReadWrite",
   ]
   ecs_task_policy_arns = []
   secrets = [
@@ -25,6 +26,6 @@ locals {
     "POSTGRES_DB",
     "POSTGRES_HOST",
     "POSTGRES_PORT",
-    "S3_BUCKET_NAME",
+    "AWS_S3_BUCKET_NAME",
   ]
 }
