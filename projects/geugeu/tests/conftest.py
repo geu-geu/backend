@@ -1,12 +1,16 @@
+import os
 from collections.abc import Generator
 
+import boto3
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+from testcontainers.localstack import LocalStackContainer
 from testcontainers.postgres import PostgresContainer
 
 from app.api.dependencies import get_current_user
+from app.core.config import settings
 from app.core.db import Base, get_db
 from app.core.security import get_password_hash
 from app.main import app
@@ -77,3 +81,34 @@ def authorized_user(user):
     app.dependency_overrides[get_current_user] = lambda: user
     yield user
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def localstack():
+    with LocalStackContainer(
+        "localstack/localstack", region_name=settings.AWS_DEFAULT_REGION
+    ).with_services("s3") as container:
+        original_env = {
+            "AWS_ENDPOINT_URL": os.environ.get("AWS_ENDPOINT_URL"),
+            "AWS_DEFAULT_REGION": os.environ.get("AWS_DEFAULT_REGION"),
+        }
+        endpoint_url = container.get_url()
+        os.environ["AWS_ENDPOINT_URL"] = endpoint_url
+        os.environ["AWS_DEFAULT_REGION"] = settings.AWS_DEFAULT_REGION
+
+        yield container
+
+        for key, value in original_env.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+
+@pytest.fixture(scope="session", autouse=True)
+def init_s3(localstack):
+    s3_client = boto3.client("s3", endpoint_url=localstack.get_url())
+    s3_client.create_bucket(
+        Bucket=settings.AWS_S3_BUCKET_NAME,
+        CreateBucketConfiguration={"LocationConstraint": settings.AWS_DEFAULT_REGION},
+    )
