@@ -24,8 +24,7 @@ def upload_file(f: UploadFile):
         logger.error(response.text)
         raise HTTPException(status_code=500, detail="Failed to upload profile image")
 
-    url = f"https://{settings.AWS_S3_BUCKET_NAME}.s3.ap-northeast-2.amazonaws.com/{key}"
-    return url
+    return f"https://{settings.AWS_S3_BUCKET_NAME}.s3.{settings.AWS_DEFAULT_REGION}.amazonaws.com/{key}"
 
 
 def _generate_presigned_url(key: str):
