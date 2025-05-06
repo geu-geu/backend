@@ -7,7 +7,7 @@ from app.api.dependencies import get_current_user
 from app.core.db import get_db
 from app.crud import posts as crud
 from app.models import User
-from app.schemas.posts import PostListSchema, PostSchema, UpdatePostSchema
+from app.schemas.posts import PostListSchema, PostSchema
 
 router = APIRouter()
 
@@ -43,12 +43,19 @@ async def get_post(
 @router.put("/{post_code}", response_model=PostSchema)
 async def update_post(
     post_code: str,
-    payload: UpdatePostSchema,
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
+    title: str = Form(...),
+    content: str = Form(...),
+    files: list[UploadFile] = File(...),
 ):
     return crud.update_post(
-        session=session, code=post_code, payload=payload, user=current_user
+        session=session,
+        code=post_code,
+        user=current_user,
+        title=title,
+        content=content,
+        files=files,
     )
 
 

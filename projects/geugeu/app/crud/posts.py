@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload, with_loader_criteria
 
 from app.models import Image, Post, User
-from app.schemas.posts import PostListSchema, PostSchema, UpdatePostSchema
+from app.schemas.posts import PostListSchema, PostSchema
 from app.utils import upload_file
 
 
@@ -74,8 +74,10 @@ def update_post(
     *,
     session: Session,
     code: str,
-    payload: UpdatePostSchema,
     user: User,
+    title: str,
+    content: str,
+    files: list[UploadFile],
 ) -> PostSchema:
     post = session.execute(
         select(Post)
@@ -97,8 +99,8 @@ def update_post(
         raise HTTPException(status_code=403, detail="Forbidden")
 
     # post 수정
-    post.title = payload.title
-    post.content = payload.content
+    post.title = title
+    post.content = content
     session.add(post)
 
     # 기존 post images 전부 삭제
@@ -108,8 +110,9 @@ def update_post(
 
     # 새로운 post images 생성
     images = []
-    for image_url in payload.image_urls:
-        image = Image(post_id=post.id, url=image_url)
+    for file in files:
+        url = upload_file(file)
+        image = Image(post_id=post.id, url=url)
         images.append(image)
     session.add_all(images)
     session.commit()

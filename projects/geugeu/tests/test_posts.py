@@ -136,28 +136,24 @@ def test_update_post(client, session, authorized_user):
     ]
     session.add_all(post_images)
 
-    new_title = "new title"
-    new_content = "new content"
-    new_image_urls = [
-        "https://example.com/new1.jpg",
-        "https://example.com/new2.jpg",
-    ]
-
     # when
     response = client.put(
         f"/api/posts/{post.code}",
-        json={
-            "title": new_title,
-            "content": new_content,
-            "image_urls": new_image_urls,
+        data={
+            "title": "new title",
+            "content": "new content",
         },
+        files=[
+            ("files", ("test1.png", io.BytesIO(b"imagebytes"), "image/png")),
+            ("files", ("test2.png", io.BytesIO(b"imagebytes"), "image/png")),
+        ],
     )
 
     # then
     assert response.status_code == 200
-    assert response.json()["title"] == new_title
-    assert response.json()["content"] == new_content
-    assert len(response.json()["images"]) == len(new_image_urls)
+    assert response.json()["title"] == "new title"
+    assert response.json()["content"] == "new content"
+    assert len(response.json()["images"]) == 2
 
 
 def test_update_post_403(client, session, authorized_user, hashed_password):
@@ -180,11 +176,14 @@ def test_update_post_403(client, session, authorized_user, hashed_password):
     # when
     response = client.put(
         f"/api/posts/{post.code}",
-        json={
+        data={
             "title": "new title",
             "content": "new content",
-            "image_urls": ["http://example.com/image.png"],
         },
+        files=[
+            ("files", ("test1.png", io.BytesIO(b"imagebytes"), "image/png")),
+            ("files", ("test2.png", io.BytesIO(b"imagebytes"), "image/png")),
+        ],
     )
 
     # then
@@ -213,11 +212,14 @@ def test_update_post_by_admin(client, session, authorized_user, hashed_password)
     # when
     response = client.put(
         f"/api/posts/{post.code}",
-        json={
+        data={
             "title": "new title",
             "content": "new content",
-            "image_urls": ["http://example.com/image.png"],
         },
+        files=[
+            ("files", ("test1.png", io.BytesIO(b"imagebytes"), "image/png")),
+            ("files", ("test2.png", io.BytesIO(b"imagebytes"), "image/png")),
+        ],
     )
 
     # then
@@ -228,10 +230,14 @@ def test_update_post_401(client, user):
     # when
     response = client.put(
         "/api/posts/abcd123",
-        json={
+        data={
             "title": "new title",
             "content": "new content",
         },
+        files=[
+            ("files", ("test1.png", io.BytesIO(b"imagebytes"), "image/png")),
+            ("files", ("test2.png", io.BytesIO(b"imagebytes"), "image/png")),
+        ],
     )
 
     # then
@@ -245,11 +251,14 @@ def test_update_post_404(client, authorized_user):
     # when
     response = client.put(
         f"/api/posts/{code}",
-        json={
+        data={
             "title": "new title",
             "content": "new content",
-            "image_urls": ["http://example.com/image.png"],
         },
+        files=[
+            ("files", ("test1.png", io.BytesIO(b"imagebytes"), "image/png")),
+            ("files", ("test2.png", io.BytesIO(b"imagebytes"), "image/png")),
+        ],
     )
 
     # then
