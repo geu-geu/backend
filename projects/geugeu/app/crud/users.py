@@ -67,9 +67,9 @@ def delete_user(session: Session, user: User):
 def update_profile_image(
     session: Session,
     current_user: User,
-    profile_image: UploadFile,
+    file: UploadFile,
 ):
-    url = upload_file(profile_image)
+    url = upload_file(file)
     current_user.profile_image_url = url
     session.commit()
     return current_user

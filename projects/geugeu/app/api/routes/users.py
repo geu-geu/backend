@@ -38,9 +38,9 @@ async def update_me(
 async def upload_profile_image(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
-    profile_image: UploadFile = File(...),
+    file: UploadFile = File(...),
 ):
-    return crud.update_profile_image(session, current_user, profile_image)
+    return crud.update_profile_image(session, current_user, file)
 
 
 @router.delete("/me", status_code=204)
