@@ -38,18 +38,6 @@ def create_user(session: Session, payload: SignupSchema):
     return user
 
 
-def get_user(session: Session, code: str):
-    user = session.execute(
-        select(User).where(
-            User.code == code,
-            User.deleted_at.is_(None),
-        )
-    ).scalar_one_or_none()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
-
-
 def update_user(session: Session, user: User, payload: UserUpdateSchema):
     user.nickname = payload.nickname
     session.add(user)
