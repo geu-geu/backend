@@ -22,7 +22,7 @@ async def login(
     user = crud.get_user_by_email(session, form_data.username)
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
-    if not verify_password(form_data.password, user.password):
+    if not verify_password(form_data.password, user.password or ""):
         raise HTTPException(status_code=401, detail="Incorrect username or password")
     return Token(
         access_token=create_access_token(user.code, expires_delta=timedelta(days=1)),
