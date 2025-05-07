@@ -22,6 +22,9 @@ class Settings(BaseSettings):
 
     TOKEN_URL: str = "/api/auth/login"
 
+    GOOGLE_CLIENT_ID: str
+    GOOGLE_CLIENT_SECRET: str
+
     @property
     def POSTGRES_DATABASE_URL(self) -> str:
         return MultiHostUrl.build(

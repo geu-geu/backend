@@ -31,6 +31,7 @@ def create_user(session: Session, payload: SignupSchema):
             password=get_password_hash(payload.password),
             is_admin=False,
             profile_image_url="",
+            auth_provider=User.AuthProvider.LOCAL,
         )
     session.add(user)
     session.commit()
