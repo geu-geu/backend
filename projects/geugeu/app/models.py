@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import StrEnum
 from typing import List, Optional
 
 from nanoid import generate
@@ -6,6 +7,7 @@ from sqlalchemy import (
     BigInteger,
     Boolean,
     DateTime,
+    Enum,
     ForeignKey,
     Identity,
     String,
@@ -25,6 +27,10 @@ def generate_code() -> str:
 class User(Base):
     __tablename__ = "user"
 
+    class AuthProvider(StrEnum):
+        LOCAL = "LOCAL"
+        GOOGLE = "GOOGLE"
+
     id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
     code: Mapped[str] = mapped_column(
         String(255),
@@ -33,13 +39,18 @@ class User(Base):
         default=generate_code,
     )
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    password: Mapped[str] = mapped_column(String(255), nullable=False)
+    password: Mapped[str | None] = mapped_column(String(255), nullable=True)
     nickname: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     is_admin: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
     profile_image_url: Mapped[str] = mapped_column(
         String(2083),
         nullable=False,
         default="",
+    )
+    auth_provider: Mapped[AuthProvider] = mapped_column(
+        Enum(AuthProvider, native_enum=False, length=30),
+        nullable=False,
+        server_default=AuthProvider.LOCAL,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
