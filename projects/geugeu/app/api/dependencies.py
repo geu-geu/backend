@@ -14,7 +14,7 @@ from app.crud.auth import get_user_by_code
 from app.models import User
 from app.schemas.auth import TokenPayload
 
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=settings.TOKEN_URL)
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
 def get_current_user(

@@ -20,8 +20,6 @@ class Settings(BaseSettings):
     AWS_DEFAULT_REGION: str = "ap-northeast-2"
     AWS_S3_BUCKET_NAME: str
 
-    TOKEN_URL: str = "/api/auth/login"
-
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
 
