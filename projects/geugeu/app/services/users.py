@@ -58,7 +58,8 @@ def update_profile_image(
     current_user: User,
     file: UploadFile,
 ):
-    url = upload_file(file)
-    current_user.profile_image_url = url
+    with session.begin_nested():
+        url = upload_file(file)
+        current_user.profile_image_url = url
     session.commit()
     return current_user

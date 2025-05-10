@@ -16,16 +16,18 @@ def create_post(
     content: str,
     files: list[UploadFile],
 ) -> PostSchema:
-    post = Post(author_id=user.id, title=title, content=content)
-    session.add(post)
-    session.flush()
+    with session.begin_nested():
+        post = Post(author_id=user.id, title=title, content=content)
+        session.add(post)
+        session.flush()
 
-    post_images = []
-    for file in files:
-        url = upload_file(file)
-        post_image = Image(post_id=post.id, url=url)
-        post_images.append(post_image)
-    session.add_all(post_images)
+        post_images = []
+        for file in files:
+            url = upload_file(file)
+            post_image = Image(post_id=post.id, url=url)
+            post_images.append(post_image)
+        session.add_all(post_images)
+
     session.commit()
     return PostSchema.from_model(post)
 
@@ -98,23 +100,25 @@ def update_post(
     else:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    # post 수정
-    post.title = title
-    post.content = content
-    session.add(post)
+    with session.begin_nested():
+        # post 수정
+        post.title = title
+        post.content = content
+        session.add(post)
 
-    # 기존 post images 전부 삭제
-    for image in post.images:
-        image.deleted_at = datetime.now(UTC)
-        session.add(image)
+        # 기존 post images 전부 삭제
+        for image in post.images:
+            image.deleted_at = datetime.now(UTC)
+            session.add(image)
 
-    # 새로운 post images 생성
-    images = []
-    for file in files:
-        url = upload_file(file)
-        image = Image(post_id=post.id, url=url)
-        images.append(image)
-    session.add_all(images)
+        # 새로운 post images 생성
+        images = []
+        for file in files:
+            url = upload_file(file)
+            image = Image(post_id=post.id, url=url)
+            images.append(image)
+        session.add_all(images)
+
     session.commit()
     session.refresh(post)
     return PostSchema.from_model(post)

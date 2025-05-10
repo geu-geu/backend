@@ -26,18 +26,19 @@ def create_drawing(
     ).scalar():
         raise HTTPException(status_code=400, detail="Drawing already exists")
 
-    drawing = Drawing(post_id=post.id, author_id=user.id, content=content)
-    session.add(drawing)
-    session.commit()
+    with session.begin_nested():
+        drawing = Drawing(post_id=post.id, author_id=user.id, content=content)
+        session.add(drawing)
+        session.flush()
 
-    images = []
-    for file in files:
-        image_url = upload_file(file)
-        image = Image(drawing_id=drawing.id, url=image_url)
-        images.append(image)
-    session.add_all(images)
-    session.commit()
+        images = []
+        for file in files:
+            image_url = upload_file(file)
+            image = Image(drawing_id=drawing.id, url=image_url)
+            images.append(image)
+        session.add_all(images)
 
+    session.commit()
     return DrawingSchema.from_model(drawing)
 
 
@@ -111,22 +112,24 @@ def update_drawing(
     else:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    # drawing 수정
-    drawing.content = content
-    session.add(drawing)
+    with session.begin_nested():
+        # drawing 수정
+        drawing.content = content
+        session.add(drawing)
 
-    # 기존 drawing images 전부 삭제
-    for image in drawing.images:
-        image.deleted_at = datetime.now(UTC)
-        session.add(image)
+        # 기존 drawing images 전부 삭제
+        for image in drawing.images:
+            image.deleted_at = datetime.now(UTC)
+            session.add(image)
 
-    # 새로운 drawing images 생성
-    images = []
-    for file in files:
-        image_url = upload_file(file)
-        image = Image(drawing_id=drawing.id, url=image_url)
-        images.append(image)
-    session.add_all(images)
+        # 새로운 drawing images 생성
+        images = []
+        for file in files:
+            image_url = upload_file(file)
+            image = Image(drawing_id=drawing.id, url=image_url)
+            images.append(image)
+        session.add_all(images)
+
     session.commit()
     session.refresh(drawing)
     return DrawingSchema.from_model(drawing)
