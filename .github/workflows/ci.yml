@@ -18,6 +18,9 @@ env:
   AWS_SECRET_ACCESS_KEY: geugeutest
   AWS_S3_BUCKET_NAME: geugeutest
 
+  GOOGLE_CLIENT_ID: geugeutest
+  GOOGLE_CLIENT_SECRET: geugeutest
+
 jobs:
   build:
     runs-on: ubuntu-latest

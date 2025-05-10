@@ -27,5 +27,7 @@ locals {
     "POSTGRES_HOST",
     "POSTGRES_PORT",
     "AWS_S3_BUCKET_NAME",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
   ]
 }
