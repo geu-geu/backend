@@ -10,9 +10,9 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.db import get_db
 from app.core.security import ALGORITHM
-from app.crud.auth import get_user_by_code
 from app.models import User
 from app.schemas.auth import TokenPayload
+from app.services.auth import get_user_by_code
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 

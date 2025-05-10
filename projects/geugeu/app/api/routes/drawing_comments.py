@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user, get_db
-from app.crud import drawing_comments as crud
 from app.models import User
 from app.schemas.drawing_comments import (
     CommentListSchema,
@@ -12,6 +11,7 @@ from app.schemas.drawing_comments import (
     CreateCommentSchema,
     UpdateCommentSchema,
 )
+from app.services import drawing_comments as service
 
 router = APIRouter()
 
@@ -27,7 +27,7 @@ async def create_comment(
     drawing_code: str,
     payload: CreateCommentSchema,
 ):
-    return crud.create_comment(
+    return service.create_comment(
         session=session,
         user=current_user,
         drawing_code=drawing_code,
@@ -41,7 +41,7 @@ async def get_comments(
     current_user: Annotated[User, Depends(get_current_user)],
     drawing_code: str,
 ):
-    return crud.get_comments(
+    return service.get_comments(
         session=session,
         user=current_user,
         drawing_code=drawing_code,
@@ -58,7 +58,7 @@ async def get_comment(
     drawing_code: str,
     comment_code: str,
 ):
-    return crud.get_comment(
+    return service.get_comment(
         session=session,
         user=current_user,
         drawing_code=drawing_code,
@@ -74,7 +74,7 @@ async def update_comment(
     comment_code: str,
     payload: UpdateCommentSchema,
 ):
-    return crud.update_comment(
+    return service.update_comment(
         session=session,
         user=current_user,
         drawing_code=drawing_code,
@@ -90,7 +90,7 @@ async def delete_comment(
     drawing_code: str,
     comment_code: str,
 ):
-    crud.delete_comment(
+    service.delete_comment(
         session=session,
         user=current_user,
         drawing_code=drawing_code,

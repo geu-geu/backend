@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
 from app.core.db import get_db
-from app.crud import drawings as crud
 from app.models import User
 from app.schemas.drawings import DrawingListSchema, DrawingSchema
+from app.services import drawings as service
 
 router = APIRouter()
 
@@ -20,7 +20,7 @@ async def create_drawing(
     content: str = Form(...),
     files: list[UploadFile] = File(...),
 ):
-    return crud.create_drawing(session, current_user, post_code, content, files)
+    return service.create_drawing(session, current_user, post_code, content, files)
 
 
 @router.get("", response_model=DrawingListSchema)
@@ -28,7 +28,7 @@ async def get_drawings(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return crud.get_drawings(session)
+    return service.get_drawings(session)
 
 
 @router.get("/{drawing_code}", response_model=DrawingSchema)
@@ -37,7 +37,7 @@ async def get_drawing(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return crud.get_drawing(session, drawing_code)
+    return service.get_drawing(session, drawing_code)
 
 
 @router.put("/{drawing_code}", response_model=DrawingSchema)
@@ -48,7 +48,7 @@ async def update_drawing(
     content: str = Form(...),
     files: list[UploadFile] = File(...),
 ):
-    return crud.update_drawing(
+    return service.update_drawing(
         session=session,
         user=current_user,
         code=drawing_code,
@@ -63,4 +63,4 @@ async def delete_drawing(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    crud.delete_drawing(session=session, code=drawing_code, user=current_user)
+    service.delete_drawing(session=session, code=drawing_code, user=current_user)

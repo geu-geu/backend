@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
 from app.core.db import get_db
-from app.crud import users as crud
 from app.models import User
 from app.schemas.users import SignupSchema, UserSchema, UserUpdateSchema
+from app.services import users as service
 
 router = APIRouter()
 
@@ -17,7 +17,7 @@ async def sign_up(
     payload: SignupSchema,
     session: Annotated[Session, Depends(get_db)],
 ):
-    return crud.create_user(session, payload)
+    return service.create_user(session, payload)
 
 
 @router.get("/me", response_model=UserSchema)
@@ -31,7 +31,7 @@ async def update_me(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return crud.update_user(session, current_user, payload)
+    return service.update_user(session, current_user, payload)
 
 
 @router.put("/me/profile-image", response_model=UserSchema)
@@ -40,7 +40,7 @@ async def upload_profile_image(
     current_user: Annotated[User, Depends(get_current_user)],
     file: UploadFile = File(...),
 ):
-    return crud.update_profile_image(session, current_user, file)
+    return service.update_profile_image(session, current_user, file)
 
 
 @router.delete("/me", status_code=204)
@@ -48,4 +48,4 @@ async def delete_me(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    crud.delete_user(session, current_user)
+    service.delete_user(session, current_user)

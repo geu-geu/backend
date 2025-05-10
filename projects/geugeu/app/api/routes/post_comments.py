@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
 from app.core.db import get_db
-from app.crud import post_comments as crud
 from app.models import User
 from app.schemas.post_comments import (
     CommentListSchema,
@@ -13,6 +12,7 @@ from app.schemas.post_comments import (
     CreateCommentSchema,
     UpdateCommentSchema,
 )
+from app.services import post_comments as service
 
 router = APIRouter()
 
@@ -24,7 +24,7 @@ async def create_comment(
     post_code: str,
     payload: CreateCommentSchema,
 ):
-    return crud.create_comment(
+    return service.create_comment(
         session=session,
         user=current_user,
         post_code=post_code,
@@ -38,7 +38,7 @@ async def get_comments(
     current_user: Annotated[User, Depends(get_current_user)],
     post_code: str,
 ):
-    return crud.get_comments(
+    return service.get_comments(
         session=session,
         user=current_user,
         post_code=post_code,
@@ -52,7 +52,7 @@ async def get_comment(
     post_code: str,
     comment_code: str,
 ):
-    return crud.get_comment(
+    return service.get_comment(
         session=session,
         user=current_user,
         post_code=post_code,
@@ -68,7 +68,7 @@ async def update_comment(
     comment_code: str,
     payload: UpdateCommentSchema,
 ):
-    return crud.update_comment(
+    return service.update_comment(
         session=session,
         user=current_user,
         post_code=post_code,
@@ -84,7 +84,7 @@ async def delete_comment(
     post_code: str,
     comment_code: str,
 ):
-    crud.delete_comment(
+    service.delete_comment(
         session=session,
         user=current_user,
         post_code=post_code,

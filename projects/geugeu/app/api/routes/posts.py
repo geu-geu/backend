@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
 from app.core.db import get_db
-from app.crud import posts as crud
 from app.models import User
 from app.schemas.posts import PostListSchema, PostSchema
+from app.services import posts as service
 
 router = APIRouter()
 
@@ -20,7 +20,7 @@ async def create_post(
     content: str = Form(...),
     files: list[UploadFile] = File(...),
 ):
-    return crud.create_post(session, current_user, title, content, files)
+    return service.create_post(session, current_user, title, content, files)
 
 
 @router.get("", response_model=PostListSchema)
@@ -28,7 +28,7 @@ async def get_posts(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return crud.get_posts(session)
+    return service.get_posts(session)
 
 
 @router.get("/{post_code}", response_model=PostSchema)
@@ -37,7 +37,7 @@ async def get_post(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return crud.get_post(session, post_code)
+    return service.get_post(session, post_code)
 
 
 @router.put("/{post_code}", response_model=PostSchema)
@@ -49,7 +49,7 @@ async def update_post(
     content: str = Form(...),
     files: list[UploadFile] = File(...),
 ):
-    return crud.update_post(
+    return service.update_post(
         session=session,
         code=post_code,
         user=current_user,
@@ -65,4 +65,4 @@ async def delete_post(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    crud.delete_post(session=session, code=post_code, user=current_user)
+    service.delete_post(session=session, code=post_code, user=current_user)

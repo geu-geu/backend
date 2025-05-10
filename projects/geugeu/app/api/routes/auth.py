@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.core.security import create_access_token, verify_password
-from app.crud import auth as crud
 from app.schemas.auth import Token
+from app.services import auth as service
 
 router = APIRouter()
 
@@ -19,7 +19,7 @@ async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[Session, Depends(get_db)],
 ):
-    user = crud.get_user_by_email(session, form_data.username)
+    user = service.get_user_by_email(session, form_data.username)
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
     if not verify_password(form_data.password, user.password or ""):
@@ -53,4 +53,4 @@ async def google_oauth_callback(
 ):
     # TODO: state 검증 (CSRF 공격 방지)
     redirect_uri = urljoin(str(request.base_url), "/api/auth/google")
-    return crud.google_login(session, code, redirect_uri)
+    return service.google_login(session, code, redirect_uri)
