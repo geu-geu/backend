@@ -26,4 +26,8 @@ resource "aws_db_instance" "postgres" {
   auto_minor_version_upgrade      = false
   deletion_protection             = false
   publicly_accessible             = true
+
+  lifecycle {
+    ignore_changes = [password]
+  }
 }
