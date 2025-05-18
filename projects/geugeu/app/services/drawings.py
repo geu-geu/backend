@@ -10,41 +10,41 @@ from app.utils import upload_file
 
 
 def create_drawing(
-    session: Session, user: User, post_code: str, content: str, files: list[UploadFile]
+    db: Session, user: User, post_code: str, content: str, files: list[UploadFile]
 ) -> DrawingSchema:
-    post = session.execute(
+    post = db.execute(
         select(Post).where(
             Post.code == post_code,
             Post.deleted_at.is_(None),
         )
     ).scalar_one()
 
-    if session.execute(
+    if db.execute(
         exists(Drawing.id)
         .where(Drawing.post_id == post.id, Drawing.deleted_at.is_(None))
         .select()
     ).scalar():
         raise HTTPException(status_code=400, detail="Drawing already exists")
 
-    with session.begin_nested():
+    with db.begin_nested():
         drawing = Drawing(post_id=post.id, author_id=user.id, content=content)
-        session.add(drawing)
-        session.flush()
+        db.add(drawing)
+        db.flush()
 
         images = []
         for file in files:
             image_url = upload_file(file)
             image = Image(drawing_id=drawing.id, url=image_url)
             images.append(image)
-        session.add_all(images)
+        db.add_all(images)
 
-    session.commit()
+    db.commit()
     return DrawingSchema.from_model(drawing)
 
 
-def get_drawings(session: Session) -> DrawingListSchema:
+def get_drawings(db: Session) -> DrawingListSchema:
     drawings = (
-        session.execute(
+        db.execute(
             select(Drawing)
             .options(
                 joinedload(Drawing.post),
@@ -65,8 +65,8 @@ def get_drawings(session: Session) -> DrawingListSchema:
     )
 
 
-def get_drawing(session: Session, code: str) -> DrawingSchema:
-    drawing = session.execute(
+def get_drawing(db: Session, code: str) -> DrawingSchema:
+    drawing = db.execute(
         select(Drawing)
         .options(
             joinedload(Drawing.post),
@@ -86,13 +86,13 @@ def get_drawing(session: Session, code: str) -> DrawingSchema:
 
 def update_drawing(
     *,
-    session: Session,
+    db: Session,
     user: User,
     code: str,
     content: str,
     files: list[UploadFile],
 ) -> DrawingSchema:
-    drawing = session.execute(
+    drawing = db.execute(
         select(Drawing)
         .options(
             joinedload(Drawing.post),
@@ -112,15 +112,15 @@ def update_drawing(
     else:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    with session.begin_nested():
+    with db.begin_nested():
         # drawing 수정
         drawing.content = content
-        session.add(drawing)
+        db.add(drawing)
 
         # 기존 drawing images 전부 삭제
         for image in drawing.images:
             image.deleted_at = datetime.now(UTC)
-            session.add(image)
+            db.add(image)
 
         # 새로운 drawing images 생성
         images = []
@@ -128,15 +128,15 @@ def update_drawing(
             image_url = upload_file(file)
             image = Image(drawing_id=drawing.id, url=image_url)
             images.append(image)
-        session.add_all(images)
+        db.add_all(images)
 
-    session.commit()
-    session.refresh(drawing)
+    db.commit()
+    db.refresh(drawing)
     return DrawingSchema.from_model(drawing)
 
 
-def delete_drawing(*, session: Session, code: str, user: User) -> None:
-    drawing = session.execute(
+def delete_drawing(*, db: Session, code: str, user: User) -> None:
+    drawing = db.execute(
         select(Drawing).where(
             Drawing.code == code,
             Drawing.deleted_at.is_(None),
@@ -149,4 +149,4 @@ def delete_drawing(*, session: Session, code: str, user: User) -> None:
     else:
         raise HTTPException(status_code=403, detail="Forbidden")
     drawing.deleted_at = datetime.now(UTC)
-    session.commit()
+    db.commit()

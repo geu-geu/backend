@@ -13,8 +13,8 @@ from app.models import User
 from app.schemas.auth import AppleToken, GoogleToken, GoogleUser, Token
 
 
-def get_user_by_code(session: Session, code: str) -> User | None:
-    return session.execute(
+def get_user_by_code(db: Session, code: str) -> User | None:
+    return db.execute(
         select(User).where(
             User.code == code,
             User.deleted_at.is_(None),
@@ -22,8 +22,8 @@ def get_user_by_code(session: Session, code: str) -> User | None:
     ).scalar_one_or_none()
 
 
-def get_user_by_email(session: Session, email: str) -> User | None:
-    return session.execute(
+def get_user_by_email(db: Session, email: str) -> User | None:
+    return db.execute(
         select(User).where(
             User.email == email,
             User.deleted_at.is_(None),
@@ -31,7 +31,7 @@ def get_user_by_email(session: Session, email: str) -> User | None:
     ).scalar_one_or_none()
 
 
-def google_login(session: Session, code: str, redirect_uri: str) -> Token:
+def google_login(db: Session, code: str, redirect_uri: str) -> Token:
     # 구글 액세스 토큰 요청
     response = httpx.post(
         "https://oauth2.googleapis.com/token",
@@ -59,7 +59,7 @@ def google_login(session: Session, code: str, redirect_uri: str) -> Token:
         raise HTTPException(status_code=401, detail="Google account is not verified")
 
     # 이메일로 유저 조회
-    user = session.execute(
+    user = db.execute(
         select(User).where(User.email == google_user.email)
     ).scalar_one_or_none()
 
@@ -77,9 +77,9 @@ def google_login(session: Session, code: str, redirect_uri: str) -> Token:
             profile_image_url=google_user.picture,
             auth_provider=User.AuthProvider.GOOGLE,
         )
-        session.add(user)
-        session.commit()
-        session.refresh(user)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
     # 해당 유저의 토큰 발행
     return Token(
@@ -88,7 +88,7 @@ def google_login(session: Session, code: str, redirect_uri: str) -> Token:
     )
 
 
-def apple_login(session: Session, code: str, redirect_uri: str) -> Token:
+def apple_login(db: Session, code: str, redirect_uri: str) -> Token:
     client_secret = _generate_apple_client_secret()
     response = httpx.post(
         "https://appleid.apple.com/auth/oauth2/v2/token",
@@ -108,7 +108,7 @@ def apple_login(session: Session, code: str, redirect_uri: str) -> Token:
         raise HTTPException(status_code=401, detail="Apple account is not verified")
 
     # 이메일로 유저 조회
-    user = session.execute(select(User).where(User.email == email)).scalar_one_or_none()
+    user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
 
     # 유저가 삭제된 경우 예외 처리
     if user and user.deleted_at:
@@ -122,9 +122,9 @@ def apple_login(session: Session, code: str, redirect_uri: str) -> Token:
             is_admin=False,
             auth_provider=User.AuthProvider.APPLE,
         )
-        session.add(user)
-        session.commit()
-        session.refresh(user)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
     return Token(
         access_token=create_access_token(user.code, expires_delta=timedelta(days=1)),

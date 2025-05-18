@@ -4,15 +4,15 @@ from datetime import UTC, datetime
 from app.models import Drawing, Image, Post, User
 
 
-def test_create_drawing(client, session, authorized_user):
+def test_create_drawing(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     # when
     response = client.post(
@@ -52,23 +52,23 @@ def test_create_drawing_401(client, user):
     assert response.status_code == 401
 
 
-def test_create_drawing_twice_fails(client, session, authorized_user):
+def test_create_drawing_twice_fails(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     drawing = Drawing(
         post_id=post.id,
         author_id=authorized_user.id,
         content="test content",
     )
-    session.add(drawing)
-    session.flush()
+    db.add(drawing)
+    db.flush()
 
     # when
     response = client.post(
@@ -87,15 +87,15 @@ def test_create_drawing_twice_fails(client, session, authorized_user):
     assert response.json()["detail"] == "Drawing already exists"
 
 
-def test_get_drawings(client, session, authorized_user):
+def test_get_drawings(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     drawings = [
         Drawing(
@@ -105,8 +105,8 @@ def test_get_drawings(client, session, authorized_user):
         )
         for _ in range(3)
     ]
-    session.add_all(drawings)
-    session.flush()
+    db.add_all(drawings)
+    db.flush()
 
     _deleted_drawings = [
         Drawing(
@@ -117,8 +117,8 @@ def test_get_drawings(client, session, authorized_user):
         )
         for _ in range(2)
     ]
-    session.add_all(_deleted_drawings)
-    session.flush()
+    db.add_all(_deleted_drawings)
+    db.flush()
 
     # when
     response = client.get("/api/drawings")
@@ -137,23 +137,23 @@ def test_get_drawings_401(client, user):
     assert response.status_code == 401
 
 
-def test_get_drawing(client, session, authorized_user):
+def test_get_drawing(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     drawing = Drawing(
         post_id=post.id,
         author_id=authorized_user.id,
         content="test content",
     )
-    session.add(drawing)
-    session.flush()
+    db.add(drawing)
+    db.flush()
 
     images = [
         Image(
@@ -162,8 +162,8 @@ def test_get_drawing(client, session, authorized_user):
         )
         for _ in range(3)
     ]
-    session.add_all(images)
-    session.flush()
+    db.add_all(images)
+    db.flush()
 
     _deleted_images = [
         Image(
@@ -173,8 +173,8 @@ def test_get_drawing(client, session, authorized_user):
         )
         for _ in range(2)
     ]
-    session.add_all(_deleted_images)
-    session.flush()
+    db.add_all(_deleted_images)
+    db.flush()
 
     # when
     response = client.get(f"/api/drawings/{drawing.code}")
@@ -207,23 +207,23 @@ def test_get_drawing_404(client, authorized_user):
     assert response.status_code == 404
 
 
-def test_update_drawing(client, session, authorized_user):
+def test_update_drawing(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     drawing = Drawing(
         post_id=post.id,
         author_id=authorized_user.id,
         content="test content",
     )
-    session.add(drawing)
-    session.flush()
+    db.add(drawing)
+    db.flush()
 
     images = [
         Image(
@@ -232,8 +232,8 @@ def test_update_drawing(client, session, authorized_user):
         )
         for _ in range(3)
     ]
-    session.add_all(images)
-    session.flush()
+    db.add_all(images)
+    db.flush()
 
     # when
     response = client.put(
@@ -272,30 +272,30 @@ def test_update_drawing_401(client, user):
     assert response.status_code == 401
 
 
-def test_update_drawing_403(client, session, authorized_user, hashed_password):
+def test_update_drawing_403(client, db, authorized_user, hashed_password):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     author = User(
         email="test@example.com",
         password=hashed_password,
     )
-    session.add(author)
-    session.flush()
+    db.add(author)
+    db.flush()
 
     drawing = Drawing(
         post_id=post.id,
         author_id=author.id,
         content="test content",
     )
-    session.add(drawing)
-    session.flush()
+    db.add(drawing)
+    db.flush()
 
     # when
     response = client.put(
@@ -312,30 +312,30 @@ def test_update_drawing_403(client, session, authorized_user, hashed_password):
     assert response.status_code == 403
 
 
-def test_update_drawing_by_admin(client, session, authorized_user, hashed_password):
+def test_update_drawing_by_admin(client, db, authorized_user, hashed_password):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     author = User(
         email="test@example.com",
         password=hashed_password,
     )
-    session.add(author)
-    session.flush()
+    db.add(author)
+    db.flush()
 
     drawing = Drawing(
         post_id=post.id,
         author_id=author.id,
         content="test content",
     )
-    session.add(drawing)
-    session.flush()
+    db.add(drawing)
+    db.flush()
 
     authorized_user.is_admin = True
 
@@ -373,23 +373,23 @@ def test_update_drawing_404(client, authorized_user):
     assert response.status_code == 404
 
 
-def test_delete_drawing(client, session, authorized_user):
+def test_delete_drawing(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     drawing = Drawing(
         post_id=post.id,
         author_id=authorized_user.id,
         content="test content",
     )
-    session.add(drawing)
-    session.flush()
+    db.add(drawing)
+    db.flush()
 
     images = [
         Image(
@@ -398,8 +398,8 @@ def test_delete_drawing(client, session, authorized_user):
         )
         for _ in range(3)
     ]
-    session.add_all(images)
-    session.flush()
+    db.add_all(images)
+    db.flush()
 
     assert drawing.deleted_at is None
 
@@ -408,7 +408,7 @@ def test_delete_drawing(client, session, authorized_user):
 
     # then
     assert response.status_code == 204
-    session.refresh(drawing)
+    db.refresh(drawing)
     assert drawing.deleted_at is not None
 
 
@@ -420,30 +420,30 @@ def test_delete_drawing_401(client, user):
     assert response.status_code == 401
 
 
-def test_delete_drawing_403(client, session, authorized_user, hashed_password):
+def test_delete_drawing_403(client, db, authorized_user, hashed_password):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     author = User(
         email="test@example.com",
         password=hashed_password,
     )
-    session.add(author)
-    session.flush()
+    db.add(author)
+    db.flush()
 
     drawing = Drawing(
         post_id=post.id,
         author_id=author.id,
         content="test content",
     )
-    session.add(drawing)
-    session.flush()
+    db.add(drawing)
+    db.flush()
 
     # when
     response = client.delete(f"/api/drawings/{drawing.code}")
@@ -452,30 +452,30 @@ def test_delete_drawing_403(client, session, authorized_user, hashed_password):
     assert response.status_code == 403
 
 
-def test_delete_drawing_by_admin(client, session, authorized_user, hashed_password):
+def test_delete_drawing_by_admin(client, db, authorized_user, hashed_password):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     author = User(
         email="test@example.com",
         password=hashed_password,
     )
-    session.add(author)
-    session.flush()
+    db.add(author)
+    db.flush()
 
     drawing = Drawing(
         post_id=post.id,
         author_id=author.id,
         content="test content",
     )
-    session.add(drawing)
-    session.flush()
+    db.add(drawing)
+    db.flush()
 
     authorized_user.is_admin = True
 

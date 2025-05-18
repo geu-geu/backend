@@ -15,9 +15,9 @@ router = APIRouter()
 @router.post("", status_code=201, response_model=UserSchema)
 async def sign_up(
     payload: SignupSchema,
-    session: Annotated[Session, Depends(get_db)],
+    db: Annotated[Session, Depends(get_db)],
 ):
-    return service.create_user(session, payload)
+    return service.create_user(db, payload)
 
 
 @router.get("/me", response_model=UserSchema)
@@ -28,24 +28,24 @@ async def get_me(current_user: Annotated[User, Depends(get_current_user)]):
 @router.put("/me", response_model=UserSchema)
 async def update_me(
     payload: UserUpdateSchema,
-    session: Annotated[Session, Depends(get_db)],
+    db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return service.update_user(session, current_user, payload)
+    return service.update_user(db, current_user, payload)
 
 
 @router.put("/me/profile-image", response_model=UserSchema)
 async def upload_profile_image(
-    session: Annotated[Session, Depends(get_db)],
+    db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
     file: UploadFile = File(...),
 ):
-    return service.update_profile_image(session, current_user, file)
+    return service.update_profile_image(db, current_user, file)
 
 
 @router.delete("/me", status_code=204)
 async def delete_me(
-    session: Annotated[Session, Depends(get_db)],
+    db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    service.delete_user(session, current_user)
+    service.delete_user(db, current_user)

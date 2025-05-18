@@ -18,7 +18,7 @@ def test_create_user(client):
     assert response.json()["email"] == email
 
 
-def test_create_user_with_existing_email(client, session):
+def test_create_user_with_existing_email(client, db):
     # given
     email = "user@example.com"
     password = "P@ssw0rd1234"
@@ -27,8 +27,8 @@ def test_create_user_with_existing_email(client, session):
         email=email,
         password="$2b$12$g6AeAJXUJmaOcyYwUFVqgeeDL4UOnPVPuAXjSgqmgw/ZuTztFwAe.",
     )
-    session.add(user)
-    session.flush()
+    db.add(user)
+    db.flush()
 
     # when
     response = client.post("/api/users", json={"email": email, "password": password})
@@ -38,7 +38,7 @@ def test_create_user_with_existing_email(client, session):
     assert response.json()["detail"] == "User already exists"
 
 
-def test_create_user_with_deleted_email(client, session):
+def test_create_user_with_deleted_email(client, db):
     # given
     email = "user@example.com"
     password = "P@ssw0rd1234"
@@ -48,8 +48,8 @@ def test_create_user_with_deleted_email(client, session):
         password="$2b$12$g6AeAJXUJmaOcyYwUFVqgeeDL4UOnPVPuAXjSgqmgw/ZuTztFwAe.",
         deleted_at=datetime.now(UTC),
     )
-    session.add(user)
-    session.flush()
+    db.add(user)
+    db.flush()
 
     # when
     response = client.post("/api/users", json={"email": email, "password": password})
@@ -140,7 +140,7 @@ def test_update_me_401(client, user):
     assert response.status_code == 401
 
 
-def test_delete_me(client, session, authorized_user):
+def test_delete_me(client, db, authorized_user):
     assert authorized_user.deleted_at is None
 
     # when
@@ -148,7 +148,7 @@ def test_delete_me(client, session, authorized_user):
 
     # then
     assert response.status_code == 204
-    session.refresh(authorized_user)
+    db.refresh(authorized_user)
     assert authorized_user.deleted_at is not None
 
 

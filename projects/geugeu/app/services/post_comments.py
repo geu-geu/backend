@@ -15,12 +15,12 @@ from app.schemas.post_comments import (
 
 def create_comment(
     *,
-    session: Session,
+    db: Session,
     user: User,
     post_code: str,
     payload: CreateCommentSchema,
 ) -> CommentSchema:
-    post = session.execute(
+    post = db.execute(
         select(Post).where(
             Post.code == post_code,
             Post.deleted_at.is_(None),
@@ -29,7 +29,7 @@ def create_comment(
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     if payload.parent_code:
-        parent = session.execute(
+        parent = db.execute(
             select(Comment).where(
                 Comment.code == payload.parent_code,
                 Comment.deleted_at.is_(None),
@@ -46,18 +46,18 @@ def create_comment(
         parent_id=parent_id,
         content=payload.content,
     )
-    session.add(comment)
-    session.commit()
+    db.add(comment)
+    db.commit()
     return CommentSchema.from_model(comment)
 
 
 def get_comments(
     *,
-    session: Session,
+    db: Session,
     user: User,
     post_code: str,
 ) -> CommentListSchema:
-    post = session.execute(
+    post = db.execute(
         select(Post).where(
             Post.code == post_code,
             Post.deleted_at.is_(None),
@@ -66,7 +66,7 @@ def get_comments(
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     comments = (
-        session.execute(
+        db.execute(
             select(Comment)
             .options(joinedload(Comment.author))
             .where(
@@ -86,12 +86,12 @@ def get_comments(
 
 def get_comment(
     *,
-    session: Session,
+    db: Session,
     user: User,
     post_code: str,
     comment_code: str,
 ) -> CommentSchema:
-    post = session.execute(
+    post = db.execute(
         select(Post).where(
             Post.code == post_code,
             Post.deleted_at.is_(None),
@@ -99,7 +99,7 @@ def get_comment(
     ).scalar_one_or_none()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
-    comment = session.execute(
+    comment = db.execute(
         select(Comment)
         .options(joinedload(Comment.author))
         .where(
@@ -114,13 +114,13 @@ def get_comment(
 
 def update_comment(
     *,
-    session: Session,
+    db: Session,
     user: User,
     post_code: str,
     comment_code: str,
     payload: UpdateCommentSchema,
 ) -> CommentSchema:
-    post = session.execute(
+    post = db.execute(
         select(Post).where(
             Post.code == post_code,
             Post.deleted_at.is_(None),
@@ -128,7 +128,7 @@ def update_comment(
     ).scalar_one_or_none()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
-    comment = session.execute(
+    comment = db.execute(
         select(Comment)
         .options(joinedload(Comment.author))
         .where(
@@ -143,18 +143,18 @@ def update_comment(
     else:
         raise HTTPException(status_code=403, detail="Forbiden")
     comment.content = payload.content
-    session.commit()
+    db.commit()
     return CommentSchema.from_model(comment)
 
 
 def delete_comment(
     *,
-    session: Session,
+    db: Session,
     user: User,
     post_code: str,
     comment_code: str,
 ) -> None:
-    post = session.execute(
+    post = db.execute(
         select(Post).where(
             Post.code == post_code,
             Post.deleted_at.is_(None),
@@ -162,7 +162,7 @@ def delete_comment(
     ).scalar_one_or_none()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
-    comment = session.execute(
+    comment = db.execute(
         select(Comment).where(
             Comment.code == comment_code,
             Comment.deleted_at.is_(None),
@@ -175,4 +175,4 @@ def delete_comment(
     else:
         raise HTTPException(status_code=403, detail="Forbiden")
     comment.deleted_at = datetime.now(UTC)
-    session.commit()
+    db.commit()

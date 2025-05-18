@@ -18,7 +18,7 @@ reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
 def get_current_user(
-    session: Annotated[Session, Depends(get_db)],
+    db: Annotated[Session, Depends(get_db)],
     token: Annotated[str, Depends(reusable_oauth2)],
 ) -> User:
     try:
@@ -31,7 +31,7 @@ def get_current_user(
         )
     if token_data.sub is None:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    user = get_user_by_code(session, token_data.sub)
+    user = get_user_by_code(db, token_data.sub)
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     return user

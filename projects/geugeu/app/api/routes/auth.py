@@ -74,9 +74,9 @@ Query Parameters:
 """,
 )
 async def apple_oauth_callback(
-    session: Annotated[Session, Depends(get_db)],
+    db: Annotated[Session, Depends(get_db)],
     request: Request,
     code: str = Form(...),
 ):
     redirect_uri = urljoin(str(request.base_url), "/api/auth/apple")
-    return service.apple_login(session, code, redirect_uri)
+    return service.apple_login(db, code, redirect_uri)

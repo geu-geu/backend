@@ -50,7 +50,7 @@ async def update_post(
     files: list[UploadFile] = File(...),
 ):
     return service.update_post(
-        session=session,
+        db=session,
         code=post_code,
         user=current_user,
         title=title,
@@ -65,4 +65,4 @@ async def delete_post(
     session: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    service.delete_post(session=session, code=post_code, user=current_user)
+    service.delete_post(db=session, code=post_code, user=current_user)

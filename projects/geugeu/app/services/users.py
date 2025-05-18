@@ -13,8 +13,8 @@ from app.utils import upload_file
 logger = logging.getLogger(__name__)
 
 
-def create_user(session: Session, payload: SignupSchema):
-    user = session.execute(
+def create_user(db: Session, payload: SignupSchema):
+    user = db.execute(
         select(User).where(User.email == payload.email)
     ).scalar_one_or_none()
     if user:
@@ -33,33 +33,33 @@ def create_user(session: Session, payload: SignupSchema):
             profile_image_url="",
             auth_provider=User.AuthProvider.LOCAL,
         )
-    session.add(user)
-    session.commit()
-    session.refresh(user)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
     return user
 
 
-def update_user(session: Session, user: User, payload: UserUpdateSchema):
+def update_user(db: Session, user: User, payload: UserUpdateSchema):
     user.nickname = payload.nickname
-    session.add(user)
-    session.commit()
-    session.refresh(user)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
     return user
 
 
-def delete_user(session: Session, user: User):
+def delete_user(db: Session, user: User):
     user.deleted_at = datetime.now(UTC)
-    session.add(user)
-    session.commit()
+    db.add(user)
+    db.commit()
 
 
 def update_profile_image(
-    session: Session,
+    db: Session,
     current_user: User,
     file: UploadFile,
 ):
-    with session.begin_nested():
+    with db.begin_nested():
         url = upload_file(file)
         current_user.profile_image_url = url
-    session.commit()
+    db.commit()
     return current_user

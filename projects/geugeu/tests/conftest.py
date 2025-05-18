@@ -18,7 +18,7 @@ from app.models import User
 
 
 @pytest.fixture(scope="session")
-def test_db():
+def engine():
     with PostgresContainer("postgres:16") as postgres_container:
         engine = create_engine(postgres_container.get_connection_url())
         Base.metadata.create_all(engine)
@@ -27,8 +27,8 @@ def test_db():
 
 
 @pytest.fixture()
-def session(test_db) -> Generator[Session, None, None]:
-    connection = test_db.connect()
+def db(engine) -> Generator[Session, None, None]:
+    connection = engine.connect()
     transaction = connection.begin()
     session = Session(bind=connection)
     yield session
@@ -38,9 +38,9 @@ def session(test_db) -> Generator[Session, None, None]:
 
 
 @pytest.fixture(autouse=True)
-def override_get_db(session: Session):
+def override_get_db(db: Session):
     def get_test_db():
-        yield session
+        yield db
 
     app.dependency_overrides[get_db] = get_test_db
     yield
@@ -63,7 +63,7 @@ def hashed_password(raw_password):
 
 
 @pytest.fixture()
-def user(session, hashed_password):
+def user(db, hashed_password):
     user = User(
         email="user@example.com",
         password=hashed_password,
@@ -71,8 +71,8 @@ def user(session, hashed_password):
         is_admin=False,
         profile_image_url="",
     )
-    session.add(user)
-    session.flush()
+    db.add(user)
+    db.flush()
     return user
 
 

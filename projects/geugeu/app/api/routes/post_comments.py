@@ -25,7 +25,7 @@ async def create_comment(
     payload: CreateCommentSchema,
 ):
     return service.create_comment(
-        session=session,
+        db=session,
         user=current_user,
         post_code=post_code,
         payload=payload,
@@ -39,7 +39,7 @@ async def get_comments(
     post_code: str,
 ):
     return service.get_comments(
-        session=session,
+        db=session,
         user=current_user,
         post_code=post_code,
     )
@@ -53,7 +53,7 @@ async def get_comment(
     comment_code: str,
 ):
     return service.get_comment(
-        session=session,
+        db=session,
         user=current_user,
         post_code=post_code,
         comment_code=comment_code,
@@ -69,7 +69,7 @@ async def update_comment(
     payload: UpdateCommentSchema,
 ):
     return service.update_comment(
-        session=session,
+        db=session,
         user=current_user,
         post_code=post_code,
         comment_code=comment_code,
@@ -85,7 +85,7 @@ async def delete_comment(
     comment_code: str,
 ):
     service.delete_comment(
-        session=session,
+        db=session,
         user=current_user,
         post_code=post_code,
         comment_code=comment_code,

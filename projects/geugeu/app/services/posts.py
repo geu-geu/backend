@@ -10,31 +10,31 @@ from app.utils import upload_file
 
 
 def create_post(
-    session: Session,
+    db: Session,
     user: User,
     title: str,
     content: str,
     files: list[UploadFile],
 ) -> PostSchema:
-    with session.begin_nested():
+    with db.begin_nested():
         post = Post(author_id=user.id, title=title, content=content)
-        session.add(post)
-        session.flush()
+        db.add(post)
+        db.flush()
 
         post_images = []
         for file in files:
             url = upload_file(file)
             post_image = Image(post_id=post.id, url=url)
             post_images.append(post_image)
-        session.add_all(post_images)
+        db.add_all(post_images)
 
-    session.commit()
+    db.commit()
     return PostSchema.from_model(post)
 
 
-def get_posts(session: Session) -> PostListSchema:
+def get_posts(db: Session) -> PostListSchema:
     posts = (
-        session.execute(
+        db.execute(
             select(Post)
             .options(
                 joinedload(Post.author),
@@ -54,8 +54,8 @@ def get_posts(session: Session) -> PostListSchema:
     )
 
 
-def get_post(session: Session, code: str) -> PostSchema:
-    post = session.execute(
+def get_post(db: Session, code: str) -> PostSchema:
+    post = db.execute(
         select(Post)
         .options(
             joinedload(Post.author),
@@ -74,14 +74,14 @@ def get_post(session: Session, code: str) -> PostSchema:
 
 def update_post(
     *,
-    session: Session,
+    db: Session,
     code: str,
     user: User,
     title: str,
     content: str,
     files: list[UploadFile],
 ) -> PostSchema:
-    post = session.execute(
+    post = db.execute(
         select(Post)
         .options(
             joinedload(Post.author),
@@ -100,16 +100,16 @@ def update_post(
     else:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    with session.begin_nested():
+    with db.begin_nested():
         # post 수정
         post.title = title
         post.content = content
-        session.add(post)
+        db.add(post)
 
         # 기존 post images 전부 삭제
         for image in post.images:
             image.deleted_at = datetime.now(UTC)
-            session.add(image)
+            db.add(image)
 
         # 새로운 post images 생성
         images = []
@@ -117,15 +117,15 @@ def update_post(
             url = upload_file(file)
             image = Image(post_id=post.id, url=url)
             images.append(image)
-        session.add_all(images)
+        db.add_all(images)
 
-    session.commit()
-    session.refresh(post)
+    db.commit()
+    db.refresh(post)
     return PostSchema.from_model(post)
 
 
-def delete_post(*, session: Session, code: str, user: User) -> None:
-    post = session.execute(
+def delete_post(*, db: Session, code: str, user: User) -> None:
+    post = db.execute(
         select(Post).where(
             Post.code == code,
             Post.deleted_at.is_(None),
@@ -138,4 +138,4 @@ def delete_post(*, session: Session, code: str, user: User) -> None:
     else:
         raise HTTPException(status_code=403, detail="Forbidden")
     post.deleted_at = datetime.now(UTC)
-    session.commit()
+    db.commit()

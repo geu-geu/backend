@@ -29,10 +29,10 @@ def test_login_with_invalid_email(client, user, raw_password):
     assert response.json()["detail"] == "Incorrect username or password"
 
 
-def test_login_with_deleted_email(client, session, user, raw_password):
+def test_login_with_deleted_email(client, db, user, raw_password):
     # given
     user.deleted_at = datetime.now(UTC)
-    session.flush()
+    db.flush()
 
     # when
     response = client.post(

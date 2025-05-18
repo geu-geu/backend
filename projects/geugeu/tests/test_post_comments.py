@@ -3,15 +3,15 @@ from datetime import UTC, datetime
 from app.models import Comment, Post, User
 
 
-def test_create_comment(client, session, authorized_user):
+def test_create_comment(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     # when
     response = client.post(
@@ -46,15 +46,15 @@ def test_create_comment_404(client, authorized_user):
     assert response.status_code == 404
 
 
-def test_get_comments(client, session, authorized_user):
+def test_get_comments(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     comments = [
         Comment(
@@ -64,8 +64,8 @@ def test_get_comments(client, session, authorized_user):
         )
         for _ in range(3)
     ]
-    session.add_all(comments)
-    session.flush()
+    db.add_all(comments)
+    db.flush()
 
     _deleted_comments = [
         Comment(
@@ -76,8 +76,8 @@ def test_get_comments(client, session, authorized_user):
         )
         for _ in range(2)
     ]
-    session.add_all(_deleted_comments)
-    session.flush()
+    db.add_all(_deleted_comments)
+    db.flush()
 
     # when
     response = client.get(f"/api/posts/{post.code}/comments")
@@ -104,23 +104,23 @@ def test_get_comments_404(client, authorized_user):
     assert response.status_code == 404
 
 
-def test_get_comment(client, session, authorized_user):
+def test_get_comment(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     comment = Comment(
         post_id=post.id,
         author_id=authorized_user.id,
         content="test comment",
     )
-    session.add(comment)
-    session.flush()
+    db.add(comment)
+    db.flush()
 
     # when
     response = client.get(f"/api/posts/{post.code}/comments/{comment.code}")
@@ -147,23 +147,23 @@ def test_get_comment_404(client, authorized_user):
     assert response.status_code == 404
 
 
-def test_update_comment(client, session, authorized_user):
+def test_update_comment(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     comment = Comment(
         post_id=post.id,
         author_id=authorized_user.id,
         content="test comment",
     )
-    session.add(comment)
-    session.flush()
+    db.add(comment)
+    db.flush()
 
     # when
     response = client.put(
@@ -187,30 +187,30 @@ def test_update_comment_401(client, user):
     assert response.status_code == 401
 
 
-def test_update_comment_403(client, session, authorized_user):
+def test_update_comment_403(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     other_user = User(
         email="other@example.com",
         password="password",
     )
-    session.add(other_user)
-    session.flush()
+    db.add(other_user)
+    db.flush()
 
     comment = Comment(
         post_id=post.id,
         author_id=other_user.id,  # other user
         content="test comment",
     )
-    session.add(comment)
-    session.flush()
+    db.add(comment)
+    db.flush()
 
     # when
     response = client.put(
@@ -233,23 +233,23 @@ def test_update_comment_404(client, authorized_user):
     assert response.status_code == 404
 
 
-def test_delete_comment(client, session, authorized_user):
+def test_delete_comment(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     comment = Comment(
         post_id=post.id,
         author_id=authorized_user.id,
         content="test comment",
     )
-    session.add(comment)
-    session.flush()
+    db.add(comment)
+    db.flush()
 
     assert comment.deleted_at is None
 
@@ -269,30 +269,30 @@ def test_delete_comment_401(client, user):
     assert response.status_code == 401
 
 
-def test_delete_comment_403(client, session, authorized_user):
+def test_delete_comment_403(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     other_user = User(
         email="other@example.com",
         password="password",
     )
-    session.add(other_user)
-    session.flush()
+    db.add(other_user)
+    db.flush()
 
     comment = Comment(
         post_id=post.id,
         author_id=other_user.id,  # other user
         content="test comment",
     )
-    session.add(comment)
-    session.flush()
+    db.add(comment)
+    db.flush()
 
     assert comment.deleted_at is None
 
@@ -312,23 +312,23 @@ def test_delete_comment_404(client, authorized_user):
     assert response.status_code == 404
 
 
-def test_create_reply_comment(client, session, authorized_user):
+def test_create_reply_comment(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     comment = Comment(
         post_id=post.id,
         author_id=authorized_user.id,
         content="test comment",
     )
-    session.add(comment)
-    session.flush()
+    db.add(comment)
+    db.flush()
 
     # when
     response = client.post(

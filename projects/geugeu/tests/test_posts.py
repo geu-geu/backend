@@ -38,7 +38,7 @@ def test_create_post_401(client, user):
     assert response.status_code == 401
 
 
-def test_get_posts(client, session, authorized_user):
+def test_get_posts(client, db, authorized_user):
     # given
     posts = [
         Post(
@@ -48,8 +48,8 @@ def test_get_posts(client, session, authorized_user):
         )
         for _ in range(3)
     ]
-    session.add_all(posts)
-    session.flush()
+    db.add_all(posts)
+    db.flush()
 
     # when
     response = client.get("/api/posts")
@@ -68,15 +68,15 @@ def test_get_posts_401(client, user):
     assert response.status_code == 401
 
 
-def test_get_post(client, session, authorized_user):
+def test_get_post(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     images = [
         Image(
@@ -85,8 +85,8 @@ def test_get_post(client, session, authorized_user):
         )
         for _ in range(3)
     ]
-    session.add_all(images)
-    session.flush()
+    db.add_all(images)
+    db.flush()
 
     # when
     response = client.get(f"/api/posts/{post.code}")
@@ -117,15 +117,15 @@ def test_get_post_404(client, authorized_user):
     assert response.status_code == 404
 
 
-def test_update_post(client, session, authorized_user):
+def test_update_post(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     post_images = [
         Image(
@@ -134,7 +134,7 @@ def test_update_post(client, session, authorized_user):
         )
         for i in range(1, 4)
     ]
-    session.add_all(post_images)
+    db.add_all(post_images)
 
     # when
     response = client.put(
@@ -156,22 +156,22 @@ def test_update_post(client, session, authorized_user):
     assert len(response.json()["images"]) == 2
 
 
-def test_update_post_403(client, session, authorized_user, hashed_password):
+def test_update_post_403(client, db, authorized_user, hashed_password):
     # given
     author = User(
         email="test@example.com",
         password=hashed_password,
     )
-    session.add(author)
-    session.flush()
+    db.add(author)
+    db.flush()
 
     post = Post(
         author_id=author.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     # when
     response = client.put(
@@ -190,22 +190,22 @@ def test_update_post_403(client, session, authorized_user, hashed_password):
     assert response.status_code == 403
 
 
-def test_update_post_by_admin(client, session, authorized_user, hashed_password):
+def test_update_post_by_admin(client, db, authorized_user, hashed_password):
     # given
     author = User(
         email="test@example.com",
         password=hashed_password,
     )
-    session.add(author)
-    session.flush()
+    db.add(author)
+    db.flush()
 
     post = Post(
         author_id=author.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     authorized_user.is_admin = True
 
@@ -265,15 +265,15 @@ def test_update_post_404(client, authorized_user):
     assert response.status_code == 404
 
 
-def test_delete_post(client, session, authorized_user):
+def test_delete_post(client, db, authorized_user):
     # given
     post = Post(
         author_id=authorized_user.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     assert post.deleted_at is None
 
@@ -282,7 +282,7 @@ def test_delete_post(client, session, authorized_user):
 
     # then
     assert response.status_code == 204
-    session.refresh(post)
+    db.refresh(post)
     assert post.deleted_at is not None
 
 
@@ -294,22 +294,22 @@ def test_delete_post_401(client, user):
     assert response.status_code == 401
 
 
-def test_delete_post_403(client, session, authorized_user, hashed_password):
+def test_delete_post_403(client, db, authorized_user, hashed_password):
     # given
     author = User(
         email="test@example.com",
         password=hashed_password,
     )
-    session.add(author)
-    session.flush()
+    db.add(author)
+    db.flush()
 
     post = Post(
         author_id=author.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     # when
     response = client.delete(f"/api/posts/{post.code}")
@@ -318,22 +318,22 @@ def test_delete_post_403(client, session, authorized_user, hashed_password):
     assert response.status_code == 403
 
 
-def test_delete_post_by_admin(client, session, authorized_user, hashed_password):
+def test_delete_post_by_admin(client, db, authorized_user, hashed_password):
     # given
     author = User(
         email="test@example.com",
         password=hashed_password,
     )
-    session.add(author)
-    session.flush()
+    db.add(author)
+    db.flush()
 
     post = Post(
         author_id=author.id,
         title="test title",
         content="test content",
     )
-    session.add(post)
-    session.flush()
+    db.add(post)
+    db.flush()
 
     authorized_user.is_admin = True
 
