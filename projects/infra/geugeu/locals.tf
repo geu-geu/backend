@@ -29,5 +29,9 @@ locals {
     "AWS_S3_BUCKET_NAME",
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
+    "APPLE_CLIENT_ID",
+    "APPLE_TEAM_ID",
+    "APPLE_KEY_ID",
+    "APPLE_PRIVATE_KEY",
   ]
 }

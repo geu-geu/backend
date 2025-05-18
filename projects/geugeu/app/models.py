@@ -30,6 +30,7 @@ class User(Base):
     class AuthProvider(StrEnum):
         LOCAL = "LOCAL"
         GOOGLE = "GOOGLE"
+        APPLE = "APPLE"
 
     id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
     code: Mapped[str] = mapped_column(

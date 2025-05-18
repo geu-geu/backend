@@ -26,3 +26,9 @@ class GoogleUser(BaseModel):
     given_name: str = ""
     family_name: str = ""
     picture: str = ""
+
+
+class AppleToken(BaseModel):
+    access_token: str
+    refresh_token: str
+    id_token: str

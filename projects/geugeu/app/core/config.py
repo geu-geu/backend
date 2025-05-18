@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
 
+    APPLE_CLIENT_ID: str
+    APPLE_TEAM_ID: str
+    APPLE_KEY_ID: str
+    APPLE_PRIVATE_KEY: str
+
     @property
     def POSTGRES_DATABASE_URL(self) -> str:
         return MultiHostUrl.build(
