@@ -2,7 +2,7 @@ from typing import Annotated
 
 import jwt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import APIKeyHeader
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
@@ -14,17 +14,22 @@ from app.models import User
 from app.schemas.auth import TokenPayload
 from app.services.auth import get_user_by_code
 
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
 
 
 def get_current_user(
     db: Annotated[Session, Depends(get_db)],
-    token: Annotated[str, Depends(reusable_oauth2)],
+    token: Annotated[str | None, Depends(api_key_header)],
 ) -> User:
+    if not token:
+        raise HTTPException(status_code=401, detail="Unauthorized")
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
+        token_type, token_value = token.split(" ")
+        if token_type != "Bearer":
+            raise HTTPException(status_code=401, detail="Unauthorized")
+        payload = jwt.decode(token_value, settings.SECRET_KEY, algorithms=[ALGORITHM])
         token_data = TokenPayload(**payload)
-    except (InvalidTokenError, ValidationError):
+    except (InvalidTokenError, ValidationError, AttributeError, ValueError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
