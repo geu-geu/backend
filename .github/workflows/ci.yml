@@ -21,6 +21,11 @@ env:
   GOOGLE_CLIENT_ID: geugeutest
   GOOGLE_CLIENT_SECRET: geugeutest
 
+  APPLE_CLIENT_ID: geugeutest
+  APPLE_TEAM_ID: geugeutest
+  APPLE_KEY_ID: geugeutest
+  APPLE_PRIVATE_KEY: geugeutest
+
 jobs:
   build:
     runs-on: ubuntu-latest
