@@ -16,9 +16,11 @@ from app.services.auth import get_user_by_code
 
 api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
 
+DatabaseDep = Annotated[Session, Depends(get_db)]
+
 
 def get_current_user(
-    db: Annotated[Session, Depends(get_db)],
+    db: DatabaseDep,
     token: Annotated[str | None, Depends(api_key_header)],
 ) -> User:
     if not token:

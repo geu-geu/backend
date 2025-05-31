@@ -1,9 +1,8 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user, get_db
+from app.api.dependencies import DatabaseDep, get_current_user
 from app.models import User
 from app.schemas.drawing_comments import (
     CommentListSchema,
@@ -22,7 +21,7 @@ router = APIRouter()
     response_model=CommentSchema,
 )
 async def create_comment(
-    db: Annotated[Session, Depends(get_db)],
+    db: DatabaseDep,
     current_user: Annotated[User, Depends(get_current_user)],
     drawing_code: str,
     payload: CreateCommentSchema,
@@ -37,7 +36,7 @@ async def create_comment(
 
 @router.get("/{drawing_code}/comments", response_model=CommentListSchema)
 async def get_comments(
-    db: Annotated[Session, Depends(get_db)],
+    db: DatabaseDep,
     current_user: Annotated[User, Depends(get_current_user)],
     drawing_code: str,
 ):
@@ -53,7 +52,7 @@ async def get_comments(
     response_model=CommentSchema,
 )
 async def get_comment(
-    db: Annotated[Session, Depends(get_db)],
+    db: DatabaseDep,
     current_user: Annotated[User, Depends(get_current_user)],
     drawing_code: str,
     comment_code: str,
@@ -68,7 +67,7 @@ async def get_comment(
 
 @router.put("/{drawing_code}/comments/{comment_code}", response_model=CommentSchema)
 async def update_comment(
-    db: Annotated[Session, Depends(get_db)],
+    db: DatabaseDep,
     current_user: Annotated[User, Depends(get_current_user)],
     drawing_code: str,
     comment_code: str,
@@ -85,7 +84,7 @@ async def update_comment(
 
 @router.delete("/{drawing_code}/comments/{comment_code}", status_code=204)
 async def delete_comment(
-    db: Annotated[Session, Depends(get_db)],
+    db: DatabaseDep,
     current_user: Annotated[User, Depends(get_current_user)],
     drawing_code: str,
     comment_code: str,

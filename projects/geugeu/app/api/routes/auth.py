@@ -4,9 +4,8 @@ from urllib.parse import urljoin
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
 
-from app.core.db import get_db
+from app.api.dependencies import DatabaseDep
 from app.core.security import create_access_token, verify_password
 from app.schemas.auth import Token
 from app.services import auth as service
@@ -17,9 +16,9 @@ router = APIRouter()
 @router.post("/login", response_model=Token)
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    session: Annotated[Session, Depends(get_db)],
+    db: DatabaseDep,
 ):
-    user = service.get_user_by_email(session, form_data.username)
+    user = service.get_user_by_email(db, form_data.username)
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
     if not verify_password(form_data.password, user.password or ""):
@@ -47,13 +46,13 @@ Query Parameters:
 """,
 )
 async def google_oauth_callback(
-    session: Annotated[Session, Depends(get_db)],
+    db: DatabaseDep,
     request: Request,
     code: str = Query(...),
 ):
     # TODO: state 검증 (CSRF 공격 방지)
     redirect_uri = urljoin(str(request.base_url), "/api/auth/google")
-    return service.google_login(session, code, redirect_uri)
+    return service.google_login(db, code, redirect_uri)
 
 
 @router.post(
@@ -74,7 +73,7 @@ Query Parameters:
 """,
 )
 async def apple_oauth_callback(
-    db: Annotated[Session, Depends(get_db)],
+    db: DatabaseDep,
     request: Request,
     code: str = Form(...),
 ):
