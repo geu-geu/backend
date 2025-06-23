@@ -27,6 +27,7 @@ data "aws_iam_policy_document" "allow_s3_access" {
     }
     actions = [
       "s3:GetObject",
+      "s3:PutObject",
     ]
     resources = [
       "${aws_s3_bucket.geugeu.arn}/images/*",
