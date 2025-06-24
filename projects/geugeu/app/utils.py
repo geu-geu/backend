@@ -19,7 +19,7 @@ def upload_file(f: UploadFile):
     _, ext = os.path.splitext(f.filename)
     key = f"images/{uuid4()}{ext}"
     presigned_url = _generate_presigned_url(key)
-    response = httpx.put(presigned_url, files={"file": f.file})
+    response = httpx.put(presigned_url, content=f.file.read())
     if response.status_code != 200:
         logger.error(response.text)
         raise HTTPException(status_code=500, detail="Failed to upload profile image")
