@@ -1,11 +1,11 @@
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, UploadFile
-from sqlalchemy import exists, select
+from sqlalchemy import exists, func, select
 from sqlalchemy.orm import Session, joinedload, selectinload, with_loader_criteria
 
 from app.models import Drawing, Image, Post, User
-from app.schemas.drawings import DrawingListSchema, DrawingSchema
+from app.schemas.drawings import DrawingListFilter, DrawingListSchema, DrawingSchema
 from app.utils import upload_file
 
 
@@ -42,26 +42,35 @@ def create_drawing(
     return DrawingSchema.from_model(drawing)
 
 
-def get_drawings(db: Session) -> DrawingListSchema:
-    drawings = (
-        db.execute(
-            select(Drawing)
-            .options(
-                joinedload(Drawing.post),
-                joinedload(Drawing.author),
-                selectinload(Drawing.images),
-                with_loader_criteria(Image, Image.deleted_at.is_(None)),
-            )
-            .where(Drawing.deleted_at.is_(None))
-            .order_by(Drawing.id.desc())
+def get_drawings(db: Session, filters: DrawingListFilter) -> DrawingListSchema:
+    stmt = (
+        select(Drawing)
+        .options(
+            joinedload(Drawing.post),
+            joinedload(Drawing.author),
+            selectinload(Drawing.images),
+            with_loader_criteria(Image, Image.deleted_at.is_(None)),
         )
-        .scalars()
-        .unique()
-        .all()
+        .where(Drawing.deleted_at.is_(None))
+        .order_by(Drawing.id.desc())
     )
+
+    if filters.post_code:
+        stmt = stmt.join(Post, Drawing.post_id == Post.id).where(
+            Post.code == filters.post_code
+        )
+
+    if filters.author_code:
+        stmt = stmt.join(User, Drawing.author_id == User.id).where(
+            User.code == filters.author_code
+        )
+
+    offset = (filters.page - 1) * filters.page_size
+    count = db.execute(select(func.count()).select_from(stmt.subquery())).scalar_one()
+    rows = db.execute(stmt.offset(offset).limit(filters.page_size)).scalars().all()
     return DrawingListSchema(
-        count=len(drawings),
-        items=[DrawingSchema.from_model(drawing) for drawing in drawings],
+        count=count,
+        items=[DrawingSchema.from_model(row) for row in rows],
     )
 
 

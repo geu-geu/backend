@@ -59,3 +59,11 @@ class DrawingSchema(BaseModel):
 class DrawingListSchema(BaseModel):
     count: int
     items: list[DrawingSchema]
+
+
+class DrawingListFilter(BaseModel):
+    post_code: str | None = None
+    author_code: str | None = None
+
+    page: int = 1
+    page_size: int = 10

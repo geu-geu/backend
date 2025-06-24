@@ -1,6 +1,7 @@
 import io
 from datetime import UTC, datetime
 
+from app.core.security import get_password_hash
 from app.models import Drawing, Image, Post, User
 
 
@@ -135,6 +136,102 @@ def test_get_drawings_401(client, user):
 
     # then
     assert response.status_code == 401
+
+
+def test_get_drawings_with_post_code(client, db, authorized_user):
+    # given
+    post1 = Post(
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+    )
+    db.add(post1)
+    db.flush()
+
+    post2 = Post(
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+    )
+    db.add(post2)
+    db.flush()
+
+    drawing = Drawing(
+        post_id=post1.id,
+        author_id=authorized_user.id,
+        content="test content",
+    )
+    db.add(drawing)
+    db.flush()
+
+    drawing2 = Drawing(
+        post_id=post1.id,
+        author_id=authorized_user.id,
+        content="test content",
+    )
+    db.add(drawing2)
+    db.flush()
+
+    drawing3 = Drawing(
+        post_id=post2.id,
+        author_id=authorized_user.id,
+        content="test content",
+    )
+    db.add(drawing3)
+    db.flush()
+
+    # when
+    response = client.get(f"/api/drawings?post_code={post1.code}")
+
+    # then
+    assert response.status_code == 200
+    assert response.json()["count"] == 2
+    assert len(response.json()["items"]) == 2
+
+
+def test_get_drawings_with_author_code(client, db, authorized_user):
+    # given
+    other_user = User(
+        email="other@example.com",
+        password=get_password_hash("P@ssw0rd1234"),
+        nickname="other",
+        is_admin=False,
+        profile_image_url="",
+    )
+    db.add(other_user)
+    db.flush()
+
+    post = Post(
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+    )
+    db.add(post)
+    db.flush()
+
+    drawing1 = Drawing(
+        post_id=post.id,
+        author_id=authorized_user.id,
+        content="test content",
+    )
+    db.add(drawing1)
+    db.flush()
+
+    drawing2 = Drawing(
+        post_id=post.id,
+        author_id=other_user.id,
+        content="test content",
+    )
+    db.add(drawing2)
+    db.flush()
+
+    # when
+    response = client.get(f"/api/drawings?author_code={authorized_user.code}")
+
+    # then
+    assert response.status_code == 200
+    assert response.json()["count"] == 1
+    assert len(response.json()["items"]) == 1
 
 
 def test_get_drawing(client, db, authorized_user):

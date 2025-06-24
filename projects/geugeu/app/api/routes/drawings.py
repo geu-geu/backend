@@ -1,7 +1,9 @@
-from fastapi import APIRouter, File, Form, UploadFile
+from typing import Annotated
+
+from fastapi import APIRouter, File, Form, Query, UploadFile
 
 from app.api.dependencies import CurrentUserDep, DatabaseDep
-from app.schemas.drawings import DrawingListSchema, DrawingSchema
+from app.schemas.drawings import DrawingListFilter, DrawingListSchema, DrawingSchema
 from app.services import drawings as service
 
 router = APIRouter()
@@ -22,8 +24,9 @@ async def create_drawing(
 async def get_drawings(
     db: DatabaseDep,
     current_user: CurrentUserDep,
+    filters: Annotated[DrawingListFilter, Query()],
 ):
-    return service.get_drawings(db)
+    return service.get_drawings(db, filters)
 
 
 @router.get("/{drawing_code}", response_model=DrawingSchema)
