@@ -55,3 +55,10 @@ class PostSchema(BaseModel):
 class PostListSchema(BaseModel):
     count: int
     items: list[PostSchema]
+
+
+class PostListFilter(BaseModel):
+    author_code: str | None = None
+
+    page: int = 1
+    page_size: int = 10

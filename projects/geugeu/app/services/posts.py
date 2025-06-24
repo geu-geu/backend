@@ -1,11 +1,11 @@
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, UploadFile
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload, selectinload, with_loader_criteria
 
 from app.models import Image, Post, User
-from app.schemas.posts import PostListSchema, PostSchema
+from app.schemas.posts import PostListFilter, PostListSchema, PostSchema
 from app.utils import upload_file
 
 
@@ -32,25 +32,29 @@ def create_post(
     return PostSchema.from_model(post)
 
 
-def get_posts(db: Session) -> PostListSchema:
-    posts = (
-        db.execute(
-            select(Post)
-            .options(
-                joinedload(Post.author),
-                selectinload(Post.images),
-                with_loader_criteria(Image, Image.deleted_at.is_(None)),
-            )
-            .where(Post.deleted_at.is_(None))
-            .order_by(Post.id.desc())
+def get_posts(db: Session, filters: PostListFilter) -> PostListSchema:
+    stmt = (
+        select(Post)
+        .options(
+            joinedload(Post.author),
+            selectinload(Post.images),
+            with_loader_criteria(Image, Image.deleted_at.is_(None)),
         )
-        .scalars()
-        .unique()
-        .all()
+        .where(Post.deleted_at.is_(None))
+        .order_by(Post.id.desc())
     )
+
+    if filters.author_code:
+        stmt = stmt.join(User, Post.author_id == User.id).where(
+            User.code == filters.author_code
+        )
+
+    offset = (filters.page - 1) * filters.page_size
+    count = db.execute(select(func.count()).select_from(stmt.subquery())).scalar_one()
+    rows = db.execute(stmt.offset(offset).limit(filters.page_size)).scalars().all()
     return PostListSchema(
-        count=len(posts),
-        items=[PostSchema.from_model(post) for post in posts],
+        count=count,
+        items=[PostSchema.from_model(row) for row in rows],
     )
 
 

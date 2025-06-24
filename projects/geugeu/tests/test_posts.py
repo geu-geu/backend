@@ -1,5 +1,6 @@
 import io
 
+from app.core.security import get_password_hash
 from app.models import Image, Post, User
 
 
@@ -58,6 +59,44 @@ def test_get_posts(client, db, authorized_user):
     assert response.status_code == 200
     assert response.json()["count"] == 3
     assert len(response.json()["items"]) == 3
+
+
+def test_get_posts_with_author_code(client, db, authorized_user):
+    # given
+    other_user = User(
+        email="other@example.com",
+        password=get_password_hash("P@ssw0rd1234"),
+        nickname="other",
+        is_admin=False,
+        profile_image_url="",
+    )
+    db.add(other_user)
+    db.flush()
+
+    post1 = Post(
+        author_id=authorized_user.id,
+        title="test title",
+        content="test content",
+    )
+    db.add(post1)
+    db.flush()
+
+    post2 = Post(
+        author_id=other_user.id,
+        title="test title",
+        content="test content",
+    )
+    db.add(post2)
+    db.flush()
+
+    # when
+    response = client.get(f"/api/posts?author_code={authorized_user.code}")
+
+    # then
+    assert response.status_code == 200
+    assert response.json()["count"] == 1
+    assert len(response.json()["items"]) == 1
+    assert response.json()["items"][0]["author"]["code"] == authorized_user.code
 
 
 def test_get_posts_401(client, user):

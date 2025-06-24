@@ -1,7 +1,9 @@
-from fastapi import APIRouter, File, Form, UploadFile
+from typing import Annotated
+
+from fastapi import APIRouter, File, Form, Query, UploadFile
 
 from app.api.dependencies import CurrentUserDep, DatabaseDep
-from app.schemas.posts import PostListSchema, PostSchema
+from app.schemas.posts import PostListFilter, PostListSchema, PostSchema
 from app.services import posts as service
 
 router = APIRouter()
@@ -22,8 +24,9 @@ async def create_post(
 async def get_posts(
     db: DatabaseDep,
     current_user: CurrentUserDep,
+    filters: Annotated[PostListFilter, Query()],
 ):
-    return service.get_posts(db)
+    return service.get_posts(db, filters)
 
 
 @router.get("/{post_code}", response_model=PostSchema)
