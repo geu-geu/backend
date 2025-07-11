@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Important Development Workflow
+
+**ALWAYS commit your changes after completing each job or task.** When you finish implementing a feature, fixing a bug, or completing any development task, create a git commit with a clear, descriptive message. This ensures:
+- Progress is saved incrementally
+- Changes can be reviewed individually
+- Easy rollback if needed
+- Clear development history
+
 ## Development Commands
 
 ### Running the Application
@@ -60,6 +68,15 @@ This is a FastAPI-based web application with the following architecture:
 - Alembic for migrations
 - Soft deletion pattern (deleted_at field)
 - Foreign key relationships with proper cascading
+
+#### Soft Delete Pattern
+All models implement soft deletion using a `deleted_at` timestamp field:
+- Records are never physically deleted from the database
+- Deletion sets `deleted_at` to the current timestamp
+- All queries automatically filter out soft-deleted records using `deleted_at IS NULL`
+- Relationships use `primaryjoin` conditions to exclude soft-deleted related records
+- This pattern preserves data integrity and allows for audit trails
+- Example: `primaryjoin=lambda: and_(Post.id == Drawing.post_id, Drawing.deleted_at.is_(None))`
 
 ### Testing Strategy
 - pytest with testcontainers for isolated testing
