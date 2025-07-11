@@ -1,8 +1,8 @@
 from fastapi import APIRouter, File, UploadFile
 
-from app.api.dependencies import CurrentUserDep, DatabaseDep
+from app.api.dependencies import CurrentUserDep
+from app.core.dependencies import UserServiceDep
 from app.schemas.users import SignupSchema, UserSchema, UserUpdateSchema
-from app.services.users import UserService
 
 router = APIRouter()
 
@@ -10,9 +10,8 @@ router = APIRouter()
 @router.post("", status_code=201, response_model=UserSchema)
 async def sign_up(
     payload: SignupSchema,
-    db: DatabaseDep,
+    service: UserServiceDep,
 ):
-    service = UserService(db)
     return service.create_user(payload)
 
 
@@ -24,27 +23,24 @@ async def get_me(current_user: CurrentUserDep):
 @router.put("/me", response_model=UserSchema)
 async def update_me(
     payload: UserUpdateSchema,
-    db: DatabaseDep,
     current_user: CurrentUserDep,
+    service: UserServiceDep,
 ):
-    service = UserService(db)
     return service.update_user(current_user, payload)
 
 
 @router.put("/me/profile-image", response_model=UserSchema)
 async def upload_profile_image(
-    db: DatabaseDep,
     current_user: CurrentUserDep,
+    service: UserServiceDep,
     file: UploadFile = File(...),
 ):
-    service = UserService(db)
     return service.update_profile_image(current_user, file)
 
 
 @router.delete("/me", status_code=204)
 async def delete_me(
-    db: DatabaseDep,
     current_user: CurrentUserDep,
+    service: UserServiceDep,
 ):
-    service = UserService(db)
     service.delete_user(current_user)

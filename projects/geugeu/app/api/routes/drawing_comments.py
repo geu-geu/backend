@@ -1,13 +1,13 @@
 from fastapi import APIRouter
 
-from app.api.dependencies import CurrentUserDep, DatabaseDep
+from app.api.dependencies import CurrentUserDep
+from app.core.dependencies import DrawingCommentServiceDep
 from app.schemas.drawing_comments import (
     CommentListSchema,
     CommentSchema,
     CreateCommentSchema,
     UpdateCommentSchema,
 )
-from app.services.drawing_comments import DrawingCommentService
 
 router = APIRouter()
 
@@ -18,12 +18,11 @@ router = APIRouter()
     response_model=CommentSchema,
 )
 async def create_comment(
-    db: DatabaseDep,
-    current_user: CurrentUserDep,
     drawing_code: str,
     payload: CreateCommentSchema,
+    current_user: CurrentUserDep,
+    service: DrawingCommentServiceDep,
 ):
-    service = DrawingCommentService(db)
     return service.create_comment(
         user=current_user,
         drawing_code=drawing_code,
@@ -33,11 +32,10 @@ async def create_comment(
 
 @router.get("/{drawing_code}/comments", response_model=CommentListSchema)
 async def get_comments(
-    db: DatabaseDep,
-    current_user: CurrentUserDep,
     drawing_code: str,
+    current_user: CurrentUserDep,
+    service: DrawingCommentServiceDep,
 ):
-    service = DrawingCommentService(db)
     return service.get_comments(
         user=current_user,
         drawing_code=drawing_code,
@@ -49,12 +47,11 @@ async def get_comments(
     response_model=CommentSchema,
 )
 async def get_comment(
-    db: DatabaseDep,
-    current_user: CurrentUserDep,
     drawing_code: str,
     comment_code: str,
+    current_user: CurrentUserDep,
+    service: DrawingCommentServiceDep,
 ):
-    service = DrawingCommentService(db)
     return service.get_comment(
         user=current_user,
         drawing_code=drawing_code,
@@ -64,13 +61,12 @@ async def get_comment(
 
 @router.put("/{drawing_code}/comments/{comment_code}", response_model=CommentSchema)
 async def update_comment(
-    db: DatabaseDep,
-    current_user: CurrentUserDep,
     drawing_code: str,
     comment_code: str,
     payload: UpdateCommentSchema,
+    current_user: CurrentUserDep,
+    service: DrawingCommentServiceDep,
 ):
-    service = DrawingCommentService(db)
     return service.update_comment(
         user=current_user,
         drawing_code=drawing_code,
@@ -81,12 +77,11 @@ async def update_comment(
 
 @router.delete("/{drawing_code}/comments/{comment_code}", status_code=204)
 async def delete_comment(
-    db: DatabaseDep,
-    current_user: CurrentUserDep,
     drawing_code: str,
     comment_code: str,
+    current_user: CurrentUserDep,
+    service: DrawingCommentServiceDep,
 ):
-    service = DrawingCommentService(db)
     service.delete_comment(
         user=current_user,
         drawing_code=drawing_code,

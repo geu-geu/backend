@@ -5,10 +5,9 @@ from urllib.parse import urljoin
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.api.dependencies import DatabaseDep
+from app.core.dependencies import AuthServiceDep
 from app.core.security import create_access_token, verify_password
 from app.schemas.auth import Token
-from app.services.auth import AuthService
 
 router = APIRouter()
 
@@ -16,9 +15,8 @@ router = APIRouter()
 @router.post("/login", response_model=Token)
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db: DatabaseDep,
+    service: AuthServiceDep,
 ):
-    service = AuthService(db)
     user = service.get_user_by_email(form_data.username)
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
@@ -47,13 +45,12 @@ Query Parameters:
 """,
 )
 async def google_oauth_callback(
-    db: DatabaseDep,
     request: Request,
+    service: AuthServiceDep,
     code: str = Query(...),
 ):
     # TODO: state 검증 (CSRF 공격 방지)
     redirect_uri = urljoin(str(request.base_url), "/api/auth/google")
-    service = AuthService(db)
     return service.google_login(code, redirect_uri)
 
 
@@ -75,10 +72,9 @@ Query Parameters:
 """,
 )
 async def apple_oauth_callback(
-    db: DatabaseDep,
     request: Request,
+    service: AuthServiceDep,
     code: str = Form(...),
 ):
     redirect_uri = urljoin(str(request.base_url), "/api/auth/apple")
-    service = AuthService(db)
     return service.apple_login(code, redirect_uri)
