@@ -91,6 +91,14 @@ class User(Base):
         ),
         back_populates="author",
     )
+    interests: Mapped[List["Interest"]] = relationship(
+        "Interest",
+        primaryjoin=lambda: and_(
+            Interest.user_id == User.id,
+            Interest.deleted_at.is_(None),
+        ),
+        back_populates="user",
+    )
 
 
 class Post(Base):
@@ -146,6 +154,14 @@ class Post(Base):
         primaryjoin=lambda: and_(
             Comment.post_id == Post.id,
             Comment.deleted_at.is_(None),
+        ),
+        back_populates="post",
+    )
+    interests: Mapped[List["Interest"]] = relationship(
+        "Interest",
+        primaryjoin=lambda: and_(
+            Interest.post_id == Post.id,
+            Interest.deleted_at.is_(None),
         ),
         back_populates="post",
     )
@@ -297,3 +313,35 @@ class Comment(Base):
     replies: Mapped[List["Comment"]] = relationship(
         back_populates="parent", cascade="all, delete-orphan"
     )
+
+
+class Interest(Base):
+    __tablename__ = "interest"
+
+    id: Mapped[int] = mapped_column(BigInteger(), Identity(), primary_key=True)
+    code: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        nullable=False,
+        default=generate_code,
+    )
+    user_id: Mapped[int] = mapped_column(
+        BigInteger(),
+        ForeignKey("user.id"),
+        nullable=False,
+    )
+    post_id: Mapped[int] = mapped_column(
+        BigInteger(),
+        ForeignKey("post.id"),
+        nullable=False,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    # Relationships
+    user: Mapped["User"] = relationship(back_populates="interests")
+    post: Mapped["Post"] = relationship(back_populates="interests")
