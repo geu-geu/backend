@@ -4,7 +4,7 @@ from fastapi import APIRouter, File, Form, Query, UploadFile
 
 from app.api.dependencies import CurrentUserDep, DatabaseDep
 from app.schemas.posts import PostListFilter, PostListSchema, PostSchema
-from app.services import posts as service
+from app.services.posts import PostService
 
 router = APIRouter()
 
@@ -17,7 +17,8 @@ async def create_post(
     content: str = Form(...),
     files: list[UploadFile] = File(...),
 ):
-    return service.create_post(db, current_user, title, content, files)
+    service = PostService(db)
+    return service.create_post(current_user, title, content, files)
 
 
 @router.get("", response_model=PostListSchema)
@@ -26,7 +27,8 @@ async def get_posts(
     current_user: CurrentUserDep,
     filters: Annotated[PostListFilter, Query()],
 ):
-    return service.get_posts(db, filters)
+    service = PostService(db)
+    return service.get_posts(filters)
 
 
 @router.get("/{post_code}", response_model=PostSchema)
@@ -35,7 +37,8 @@ async def get_post(
     db: DatabaseDep,
     current_user: CurrentUserDep,
 ):
-    return service.get_post(db, post_code)
+    service = PostService(db)
+    return service.get_post(post_code)
 
 
 @router.put("/{post_code}", response_model=PostSchema)
@@ -47,8 +50,8 @@ async def update_post(
     content: str = Form(...),
     files: list[UploadFile] = File(...),
 ):
+    service = PostService(db)
     return service.update_post(
-        db=db,
         code=post_code,
         user=current_user,
         title=title,
@@ -63,4 +66,5 @@ async def delete_post(
     db: DatabaseDep,
     current_user: CurrentUserDep,
 ):
-    service.delete_post(db=db, code=post_code, user=current_user)
+    service = PostService(db)
+    service.delete_post(code=post_code, user=current_user)

@@ -24,11 +24,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `uv run pytest --cov=app` - Run tests with coverage report
 - `uv run pytest tests/test_specific.py::test_function_name` - Run specific test
 
-### Code Quality
-- `uv run ruff check` - Run linter
-- `uv run ruff format` - Format code
-- `uv run ruff check --fix` - Auto-fix linting issues
-
 ### Database Operations
 - `uv run alembic upgrade head` - Apply database migrations
 - `uv run alembic revision --autogenerate -m "description"` - Generate new migration

@@ -4,7 +4,7 @@ from fastapi import APIRouter, File, Form, Query, UploadFile
 
 from app.api.dependencies import CurrentUserDep, DatabaseDep
 from app.schemas.drawings import DrawingListFilter, DrawingListSchema, DrawingSchema
-from app.services import drawings as service
+from app.services.drawings import DrawingService
 
 router = APIRouter()
 
@@ -17,7 +17,8 @@ async def create_drawing(
     content: str = Form(...),
     files: list[UploadFile] = File(...),
 ):
-    return service.create_drawing(db, current_user, post_code, content, files)
+    service = DrawingService(db)
+    return service.create_drawing(current_user, post_code, content, files)
 
 
 @router.get("", response_model=DrawingListSchema)
@@ -26,7 +27,8 @@ async def get_drawings(
     current_user: CurrentUserDep,
     filters: Annotated[DrawingListFilter, Query()],
 ):
-    return service.get_drawings(db, filters)
+    service = DrawingService(db)
+    return service.get_drawings(filters)
 
 
 @router.get("/{drawing_code}", response_model=DrawingSchema)
@@ -35,7 +37,8 @@ async def get_drawing(
     db: DatabaseDep,
     current_user: CurrentUserDep,
 ):
-    return service.get_drawing(db, drawing_code)
+    service = DrawingService(db)
+    return service.get_drawing(drawing_code)
 
 
 @router.put("/{drawing_code}", response_model=DrawingSchema)
@@ -46,8 +49,8 @@ async def update_drawing(
     content: str = Form(...),
     files: list[UploadFile] = File(...),
 ):
+    service = DrawingService(db)
     return service.update_drawing(
-        db=db,
         user=current_user,
         code=drawing_code,
         content=content,
@@ -61,4 +64,5 @@ async def delete_drawing(
     db: DatabaseDep,
     current_user: CurrentUserDep,
 ):
-    service.delete_drawing(db=db, code=drawing_code, user=current_user)
+    service = DrawingService(db)
+    service.delete_drawing(code=drawing_code, user=current_user)

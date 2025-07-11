@@ -12,7 +12,7 @@ from app.core.db import get_db
 from app.core.security import ALGORITHM
 from app.models import User
 from app.schemas.auth import TokenPayload
-from app.services.auth import get_user_by_code
+from app.services.auth import AuthService
 
 api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
 
@@ -38,7 +38,8 @@ def get_current_user(
         )
     if token_data.sub is None:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    user = get_user_by_code(db, token_data.sub)
+    service = AuthService(db)
+    user = service.get_user_by_code(token_data.sub)
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     return user

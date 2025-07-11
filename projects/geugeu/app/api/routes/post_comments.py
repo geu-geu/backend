@@ -7,7 +7,7 @@ from app.schemas.post_comments import (
     CreateCommentSchema,
     UpdateCommentSchema,
 )
-from app.services import post_comments as service
+from app.services.post_comments import PostCommentService
 
 router = APIRouter()
 
@@ -19,8 +19,8 @@ async def create_comment(
     post_code: str,
     payload: CreateCommentSchema,
 ):
+    service = PostCommentService(db)
     return service.create_comment(
-        db=db,
         user=current_user,
         post_code=post_code,
         payload=payload,
@@ -33,8 +33,8 @@ async def get_comments(
     current_user: CurrentUserDep,
     post_code: str,
 ):
+    service = PostCommentService(db)
     return service.get_comments(
-        db=db,
         user=current_user,
         post_code=post_code,
     )
@@ -47,8 +47,8 @@ async def get_comment(
     post_code: str,
     comment_code: str,
 ):
+    service = PostCommentService(db)
     return service.get_comment(
-        db=db,
         user=current_user,
         post_code=post_code,
         comment_code=comment_code,
@@ -63,8 +63,8 @@ async def update_comment(
     comment_code: str,
     payload: UpdateCommentSchema,
 ):
+    service = PostCommentService(db)
     return service.update_comment(
-        db=db,
         user=current_user,
         post_code=post_code,
         comment_code=comment_code,
@@ -79,8 +79,8 @@ async def delete_comment(
     post_code: str,
     comment_code: str,
 ):
+    service = PostCommentService(db)
     service.delete_comment(
-        db=db,
         user=current_user,
         post_code=post_code,
         comment_code=comment_code,

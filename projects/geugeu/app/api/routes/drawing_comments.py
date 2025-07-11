@@ -7,7 +7,7 @@ from app.schemas.drawing_comments import (
     CreateCommentSchema,
     UpdateCommentSchema,
 )
-from app.services import drawing_comments as service
+from app.services.drawing_comments import DrawingCommentService
 
 router = APIRouter()
 
@@ -23,8 +23,8 @@ async def create_comment(
     drawing_code: str,
     payload: CreateCommentSchema,
 ):
+    service = DrawingCommentService(db)
     return service.create_comment(
-        db=db,
         user=current_user,
         drawing_code=drawing_code,
         payload=payload,
@@ -37,8 +37,8 @@ async def get_comments(
     current_user: CurrentUserDep,
     drawing_code: str,
 ):
+    service = DrawingCommentService(db)
     return service.get_comments(
-        db=db,
         user=current_user,
         drawing_code=drawing_code,
     )
@@ -54,8 +54,8 @@ async def get_comment(
     drawing_code: str,
     comment_code: str,
 ):
+    service = DrawingCommentService(db)
     return service.get_comment(
-        db=db,
         user=current_user,
         drawing_code=drawing_code,
         comment_code=comment_code,
@@ -70,8 +70,8 @@ async def update_comment(
     comment_code: str,
     payload: UpdateCommentSchema,
 ):
+    service = DrawingCommentService(db)
     return service.update_comment(
-        db=db,
         user=current_user,
         drawing_code=drawing_code,
         comment_code=comment_code,
@@ -86,8 +86,8 @@ async def delete_comment(
     drawing_code: str,
     comment_code: str,
 ):
+    service = DrawingCommentService(db)
     service.delete_comment(
-        db=db,
         user=current_user,
         drawing_code=drawing_code,
         comment_code=comment_code,
