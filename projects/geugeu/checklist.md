@@ -51,6 +51,13 @@ A mobile platform connecting people who want drawings with artists who can creat
 - [x] File validation
 - [x] Secure presigned URLs
 
+### Interest/Hand Raise System ("관심있어요")
+- [x] Create Interest model
+- [x] Add interest endpoints (add/remove interest)
+- [x] Count interests on posts
+- [x] List users who expressed interest
+- [x] Check if current user has expressed interest
+
 ### Testing Infrastructure
 - [x] pytest setup with testcontainers
 - [x] Test fixtures for users and authentication
@@ -59,12 +66,7 @@ A mobile platform connecting people who want drawings with artists who can creat
 
 ## 🚧 In Progress Features
 
-### Interest/Hand Raise System ("관심있어요")
-- [ ] Create Interest model
-- [ ] Add interest endpoints (add/remove interest)
-- [ ] Count interests on posts
-- [ ] List users who expressed interest
-- [ ] Check if current user has expressed interest
+None currently in progress.
 
 ## 📋 TODO Features
 
