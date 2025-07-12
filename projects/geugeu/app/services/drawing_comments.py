@@ -74,7 +74,6 @@ class DrawingCommentService:
                 .options(joinedload(Comment.author))
                 .where(
                     Comment.drawing_id == drawing.id,
-                    Comment.parent_id.is_(None),
                     Comment.deleted_at.is_(None),
                 )
             )
