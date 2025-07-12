@@ -7,6 +7,7 @@ from app.core.db import get_db
 from app.services.auth import AuthService
 from app.services.drawing_comments import DrawingCommentService
 from app.services.drawings import DrawingService
+from app.services.interests import InterestService
 from app.services.post_comments import PostCommentService
 from app.services.posts import PostService
 from app.services.users import UserService
@@ -41,6 +42,10 @@ def get_drawing_comment_service(db: DatabaseDep) -> DrawingCommentService:
     return DrawingCommentService(db)
 
 
+def get_interest_service(db: DatabaseDep) -> InterestService:
+    return InterestService(db)
+
+
 # Service dependency annotations
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
@@ -50,3 +55,4 @@ PostCommentServiceDep = Annotated[PostCommentService, Depends(get_post_comment_s
 DrawingCommentServiceDep = Annotated[
     DrawingCommentService, Depends(get_drawing_comment_service)
 ]
+InterestServiceDep = Annotated[InterestService, Depends(get_interest_service)]

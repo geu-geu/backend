@@ -1,6 +1,14 @@
 from fastapi import APIRouter
 
-from app.api.routes import auth, drawing_comments, drawings, post_comments, posts, users
+from app.api.routes import (
+    auth,
+    drawing_comments,
+    drawings,
+    interests,
+    post_comments,
+    posts,
+    users,
+)
 
 api_router = APIRouter()
 
@@ -33,4 +41,8 @@ api_router.include_router(
     drawing_comments.router,
     prefix="/drawings",
     tags=["drawing-comments"],
+)
+api_router.include_router(
+    interests.router,
+    tags=["interests"],
 )

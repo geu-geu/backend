@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from testcontainers.localstack import LocalStackContainer
 from testcontainers.postgres import PostgresContainer
 
-from app.api.dependencies import get_current_user
+from app.api.dependencies import get_current_user, get_current_user_optional
 from app.core.config import settings
 from app.core.db import Base, get_db
 from app.core.security import get_password_hash
@@ -79,6 +79,7 @@ def user(db, hashed_password):
 @pytest.fixture()
 def authorized_user(user):
     app.dependency_overrides[get_current_user] = lambda: user
+    app.dependency_overrides[get_current_user_optional] = lambda: user
     yield user
     app.dependency_overrides.clear()
 
